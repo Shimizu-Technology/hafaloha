@@ -1,32 +1,99 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import FeaturedProducts from '../components/FeaturedProducts';
+import { homepageApi, type HomepageSection } from '../services/api';
+
+// Default fallback content
+const defaultHero = {
+  title: "Island Living Apparel for All 🌺",
+  subtitle: "Premium Chamorro pride merchandise celebrating island culture and heritage",
+  button_text: "Shop Now",
+  button_link: "/products",
+  background_image_url: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1920"
+};
+
+const defaultCategoryCards: Array<{
+  id?: number;
+  title: string;
+  subtitle: string;
+  button_text: string;
+  button_link: string;
+  image_url: string;
+}> = [
+  {
+    title: "Shop Womens",
+    subtitle: "Vibrant styles for island living",
+    button_text: "Shop Now",
+    button_link: "/products?category=womens",
+    image_url: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800"
+  },
+  {
+    title: "Shop Mens",
+    subtitle: "Bold designs with island pride",
+    button_text: "Shop Now",
+    button_link: "/products?category=mens",
+    image_url: "https://images.unsplash.com/photo-1564557287817-3785e38ec1f5?w=800"
+  }
+];
 
 export default function HomePage() {
+  const [hero, setHero] = useState<HomepageSection | null>(null);
+  const [categoryCards, setCategoryCards] = useState<HomepageSection[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchSections = async () => {
+      try {
+        const data = await homepageApi.getSections();
+        
+        // Get hero section
+        if (data.grouped.hero && data.grouped.hero.length > 0) {
+          setHero(data.grouped.hero[0]);
+        }
+        
+        // Get category cards
+        if (data.grouped.category_card && data.grouped.category_card.length > 0) {
+          setCategoryCards(data.grouped.category_card);
+        }
+      } catch (error) {
+        console.error('Failed to load homepage sections:', error);
+        // Will use default fallbacks
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSections();
+  }, []);
+
+  // Use dynamic or fallback content
+  const heroContent = hero || defaultHero;
+  const cardsContent = categoryCards.length > 0 ? categoryCards : defaultCategoryCards;
+
   return (
     <div className="min-h-screen">
       {/* Hero Section with Island Living theme */}
       <div 
         className="relative bg-cover bg-center text-white"
         style={{ 
-          backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=1920')" 
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('${heroContent.background_image_url || defaultHero.background_image_url}')` 
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-32 text-center">
           <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 sm:p-12 inline-block max-w-3xl">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 text-gray-900">
-              Island Living Apparel for All 🌺
+              {heroContent.title || defaultHero.title}
             </h1>
-            <p className="text-xl sm:text-2xl mb-3 text-hafalohaRed font-semibold">
-              Håfa Adai Spirit + Essence of Aloha
-            </p>
-            <p className="text-lg mb-6 sm:mb-8 text-gray-700">
-              Premium Chamorro pride merchandise celebrating island culture and heritage
-            </p>
+            {heroContent.subtitle && (
+              <p className="text-lg mb-6 sm:mb-8 text-gray-700">
+                {heroContent.subtitle}
+              </p>
+            )}
             <Link
-              to="/products"
+              to={heroContent.button_link || "/products"}
               className="inline-block bg-hafalohaRed text-white font-bold px-10 py-4 rounded-lg hover:bg-red-700 transition text-lg shadow-lg hover:shadow-xl"
             >
-              Shop Now →
+              {heroContent.button_text || "Shop Now"} →
             </Link>
           </div>
         </div>
@@ -60,60 +127,41 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Shop by Gender - matching their old site */}
-      <div className="bg-gradient-to-b from-gray-50 to-white py-12 sm:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl sm:text-4xl font-bold text-center mb-10 sm:mb-12 text-gray-900">
-            Shop by Category
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-            {/* Shop Womens */}
-            <Link 
-              to="/products?category=womens"
-              className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition"
-            >
-              <div 
-                className="aspect-[4/3] bg-cover bg-center"
-                style={{ 
-                  backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800')" 
-                }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-                  <h3 className="text-3xl font-bold mb-2">Shop Womens</h3>
-                  <p className="text-lg mb-4">Vibrant styles for island living</p>
-                  <span className="inline-block bg-hafalohaRed px-6 py-2 rounded-lg group-hover:bg-red-700 transition font-semibold">
-                    Shop Now →
-                  </span>
-                </div>
-              </div>
-            </Link>
-
-            {/* Shop Mens */}
-            <Link 
-              to="/products?category=mens"
-              className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition"
-            >
-              <div 
-                className="aspect-[4/3] bg-cover bg-center"
-                style={{ 
-                  backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('https://images.unsplash.com/photo-1564557287817-3785e38ec1f5?w=800')" 
-                }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-                  <h3 className="text-3xl font-bold mb-2">Shop Mens</h3>
-                  <p className="text-lg mb-4">Bold designs with island pride</p>
-                  <span className="inline-block bg-hafalohaRed px-6 py-2 rounded-lg group-hover:bg-red-700 transition font-semibold">
-                    Shop Now →
-                  </span>
-                </div>
-              </div>
-            </Link>
+      {/* Shop by Category - Dynamic Cards */}
+      {!loading && cardsContent.length > 0 && (
+        <div className="bg-gradient-to-b from-gray-50 to-white py-12 sm:py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl sm:text-4xl font-bold text-center mb-10 sm:mb-12 text-gray-900">
+              Shop by Category
+            </h2>
+            <div className={`grid grid-cols-1 ${cardsContent.length >= 2 ? 'md:grid-cols-2' : ''} ${cardsContent.length >= 3 ? 'lg:grid-cols-3' : ''} gap-6 sm:gap-8`}>
+              {cardsContent.map((card, index) => (
+                <Link 
+                  key={card.id || index}
+                  to={card.button_link || "/products"}
+                  className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition"
+                >
+                  <div 
+                    className="aspect-[4/3] bg-cover bg-center"
+                    style={{ 
+                      backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('${card.image_url || "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800"}')` 
+                    }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                    <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                      <h3 className="text-3xl font-bold mb-2">{card.title}</h3>
+                      {card.subtitle && <p className="text-lg mb-4">{card.subtitle}</p>}
+                      <span className="inline-block bg-hafalohaRed px-6 py-2 rounded-lg group-hover:bg-red-700 transition font-semibold">
+                        {card.button_text || "Shop Now"} →
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
-

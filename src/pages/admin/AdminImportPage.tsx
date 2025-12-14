@@ -98,11 +98,13 @@ export default function AdminImportPage() {
     }
   };
 
-  const handleInventoryFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Currently unused - will be enabled when inventory import is ready
+  const _handleInventoryFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setInventoryFile(e.target.files[0]);
     }
   };
+  void _handleInventoryFileChange;
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();

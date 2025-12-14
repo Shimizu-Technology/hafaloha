@@ -159,6 +159,42 @@ export const collectionsApi = {
   },
 };
 
+// Homepage Sections types
+export interface HomepageSection {
+  id: number;
+  section_type: 'hero' | 'category_card' | 'featured_products' | 'promo_banner' | 'text_block' | 'image_gallery';
+  position: number;
+  title: string | null;
+  subtitle: string | null;
+  button_text: string | null;
+  button_link: string | null;
+  image_url: string | null;
+  background_image_url: string | null;
+  settings: Record<string, unknown>;
+  active: boolean;
+}
+
+export interface HomepageSectionsResponse {
+  sections: HomepageSection[];
+  grouped: {
+    hero?: HomepageSection[];
+    category_card?: HomepageSection[];
+    featured_products?: HomepageSection[];
+    promo_banner?: HomepageSection[];
+    text_block?: HomepageSection[];
+    image_gallery?: HomepageSection[];
+  };
+}
+
+// Homepage API
+export const homepageApi = {
+  // Get all active homepage sections
+  getSections: async (): Promise<HomepageSectionsResponse> => {
+    const response = await api.get('/homepage_sections');
+    return response.data;
+  },
+};
+
 // Config API
 export const configApi = {
   // Get app configuration

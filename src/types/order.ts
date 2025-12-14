@@ -15,6 +15,8 @@ export interface ShippingMethod {
   service: string;
   rate_cents: number;
   rate_id?: string;
+  delivery_days?: number;
+  delivery_date?: string;
 }
 
 export interface PaymentMethod {

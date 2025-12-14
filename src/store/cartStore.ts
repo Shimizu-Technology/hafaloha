@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import api from '../services/api';
-import type { Cart, CartItem, CartValidation } from '../types/cart';
+import type { Cart, CartValidation } from '../types/cart';
 
 interface CartStore {
   // State

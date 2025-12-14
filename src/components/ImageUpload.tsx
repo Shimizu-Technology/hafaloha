@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { Upload, X, Star, GripVertical, Loader } from 'lucide-react';
+import { Upload, X, Star, Loader } from 'lucide-react';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
@@ -240,7 +240,7 @@ export default function ImageUpload({ productId, images, onImagesChange }: Image
                       console.error('❌ Image failed to load:', image.url);
                       e.currentTarget.style.border = '2px solid red';
                     }}
-                    onLoad={(e) => {
+                    onLoad={() => {
                       // Image loaded successfully
                     }}
                   />

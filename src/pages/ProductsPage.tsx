@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { Product } from '../services/api';
-import { productsApi } from '../services/api';
+import { productsApi, collectionsApi } from '../services/api';
 import ProductCard from '../components/ProductCard';
 
 interface Collection {
@@ -34,9 +34,9 @@ export default function ProductsPage() {
 
   const fetchCollections = async () => {
     try {
-      const response = await productsApi.getCollections();
+      const response = await collectionsApi.getCollections();
       // Only show collections with 5+ products
-      const mainCollections = response.filter(c => c.product_count >= 5);
+      const mainCollections = response.collections.filter((c: { product_count: number }) => c.product_count >= 5);
       setCollections(mainCollections);
     } catch (err) {
       console.error('Failed to load collections:', err);
