@@ -1,0 +1,72 @@
+// Order-related types
+
+export interface ShippingAddress {
+  name: string;
+  street1: string;
+  street2?: string;
+  city: string;
+  state: string;
+  zip: string;
+  country?: string;
+}
+
+export interface ShippingMethod {
+  carrier: string;
+  service: string;
+  rate_cents: number;
+  rate_id?: string;
+}
+
+export interface PaymentMethod {
+  token?: string;
+  type: string;
+}
+
+export interface CreateOrderRequest {
+  email: string;
+  phone: string;
+  shipping_address: ShippingAddress;
+  shipping_method: ShippingMethod;
+  payment_method: PaymentMethod;
+}
+
+export interface OrderItem {
+  id: number;
+  product_variant_id: number;
+  quantity: number;
+  price_cents: number;
+  product_name: string;
+  variant_details: {
+    size?: string;
+    color?: string;
+    sku: string;
+  };
+}
+
+export interface Order {
+  id: number;
+  order_number: string;
+  status: string;
+  payment_status: string;
+  total_cents: number;
+  total_formatted: string;
+  items_count: number;
+  created_at: string;
+}
+
+export interface CreateOrderResponse {
+  success: boolean;
+  order: Order;
+  message: string;
+}
+
+export interface AppConfig {
+  app_mode: 'test' | 'production';
+  stripe_enabled: boolean;
+  stripe_publishable_key?: string;
+  features: {
+    payments: boolean;
+    shipping: boolean;
+  };
+}
+

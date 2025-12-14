@@ -1,0 +1,227 @@
+import axios from 'axios';
+import type { CreateOrderRequest, CreateOrderResponse, AppConfig } from '../types/order';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+
+const api = axios.create({
+  baseURL: `${API_BASE_URL}/api/v1`,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Types
+export interface Product {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  base_price_cents: number;
+  sale_price_cents?: number | null; // Sale price if on sale
+  new_product?: boolean; // Whether to show "NEW" badge
+  published?: boolean;
+  featured: boolean;
+  product_type: string;
+  track_inventory?: boolean;
+  inventory_level?: 'none' | 'product' | 'variant';
+  product_stock_quantity?: number;
+  product_low_stock_threshold?: number;
+  product_stock_status?: 'in_stock' | 'low_stock' | 'out_of_stock' | 'not_tracked';
+  product_low_stock?: boolean;
+  in_stock: boolean;
+  actually_available?: boolean; // Computed: respects published + inventory
+  primary_image_url: string | null;  // Changed from image_url to match backend
+  collections: Collection[];
+  variant_count: number;
+  total_stock?: number;
+  created_at: string;
+}
+
+export interface ProductFull extends Product {
+  vendor: string;
+  weight_oz: number;
+  variants: ProductVariant[];
+  images: ProductImage[];
+  meta_title: string;
+  meta_description: string;
+  updated_at: string;
+}
+
+export interface ProductVariant {
+  id: number;
+  size: string;
+  color: string;
+  display_name: string;
+  sku: string;
+  price_cents: number;
+  in_stock: boolean;
+  actually_available?: boolean; // Computed: respects available + stock
+  stock_quantity: number;
+  weight_oz: number;
+}
+
+export interface ProductImage {
+  id: number;
+  url: string;
+  alt_text: string;
+  position: number;
+  primary: boolean;
+}
+
+export interface Collection {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  image_url: string | null;
+  thumbnail_url: string | null; // Added for collections landing page
+  featured: boolean;
+  product_count: number;
+}
+
+export interface ProductsResponse {
+  products: Product[];
+  meta: {
+    page: number;
+    per_page: number;
+    total: number;
+  };
+}
+
+export interface CollectionsResponse {
+  collections: Collection[];
+  meta: {
+    page: number;
+    per_page: number;
+    total: number;
+  };
+}
+
+export interface CollectionDetailResponse {
+  collection: Collection;
+  products: Product[];
+  meta: {
+    page: number;
+    per_page: number;
+    total: number;
+  };
+}
+
+// API Functions
+export const productsApi = {
+  // Get all products
+  getProducts: async (params?: {
+    page?: number;
+    per_page?: number;
+    product_type?: string;
+    collection?: string; // Changed to support slug
+    featured?: boolean;
+    search?: string;
+    min_price?: number;
+    max_price?: number;
+    sort?: string; // Added sort parameter
+  }): Promise<ProductsResponse> => {
+    const response = await api.get('/products', { params });
+    return response.data;
+  },
+
+  // Get single product
+  getProduct: async (idOrSlug: string | number): Promise<ProductFull> => {
+    const response = await api.get(`/products/${idOrSlug}`);
+    return response.data;
+  },
+};
+
+// Collections API
+export const collectionsApi = {
+  // Get all collections with pagination and search
+  getCollections: async (params?: {
+    page?: number;
+    per_page?: number;
+    search?: string;
+  }): Promise<CollectionsResponse> => {
+    const response = await api.get('/collections', { params });
+    return response.data;
+  },
+
+  // Get collection by slug with products
+  getCollectionBySlug: async (
+    slug: string,
+    params?: {
+      page?: number;
+      per_page?: number;
+      product_type?: string;
+      search?: string;
+    }
+  ): Promise<CollectionDetailResponse> => {
+    const response = await api.get(`/collections/${slug}`, { params });
+    return response.data;
+  },
+};
+
+// Config API
+export const configApi = {
+  // Get app configuration
+  getConfig: async (): Promise<AppConfig> => {
+    const response = await api.get('/config');
+    return response.data;
+  },
+};
+
+// Orders API
+export const ordersApi = {
+  // Create order
+  createOrder: async (orderData: CreateOrderRequest, token?: string | null, sessionId?: string | null): Promise<CreateOrderResponse> => {
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    } else if (sessionId) {
+      headers['X-Session-ID'] = sessionId;
+    }
+    
+    const response = await api.post('/orders', { order: orderData }, { headers });
+    return response.data;
+  },
+};
+
+// Shipping API
+export const shippingApi = {
+  // Calculate shipping rates
+  calculateRates: async (address: {
+    name: string;
+    street1: string;
+    street2?: string;
+    city: string;
+    state: string;
+    zip: string;
+    country: string;
+  }, sessionId?: string | null, token?: string | null): Promise<{
+    rates: Array<{
+      carrier: string;
+      service: string;
+      rate_cents: number;
+      rate_id?: string;
+      delivery_days?: number;
+      delivery_date?: string;
+    }>;
+    total_weight_oz: number;
+  }> => {
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    } else if (sessionId) {
+      headers['X-Session-ID'] = sessionId;
+    }
+    
+    const response = await api.post('/shipping/rates', { address }, { headers });
+    return response.data;
+  },
+};
+
+// Helper to format price
+export const formatPrice = (cents: number): string => {
+  return `$${(cents / 100).toFixed(2)}`;
+};
+
+export default api;
+

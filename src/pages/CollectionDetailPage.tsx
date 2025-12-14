@@ -1,0 +1,233 @@
+import { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { collectionsApi } from '../services/api';
+import ProductCard from '../components/ProductCard';
+import type { Product } from '../services/api';
+
+interface Collection {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  product_count: number;
+}
+
+interface Meta {
+  page: number;
+  per_page: number;
+  total: number;
+}
+
+export default function CollectionDetailPage() {
+  const { slug } = useParams<{ slug: string }>();
+  const [collection, setCollection] = useState<Collection | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [meta, setMeta] = useState<Meta | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Filters
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [productType, setProductType] = useState('');
+
+  useEffect(() => {
+    if (slug) {
+      fetchCollectionData();
+    }
+  }, [slug, currentPage, searchQuery, productType]);
+
+  const fetchCollectionData = async () => {
+    if (!slug) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await collectionsApi.getCollectionBySlug(slug, {
+        page: currentPage,
+        per_page: 12,
+        search: searchQuery || undefined,
+        product_type: productType || undefined,
+      });
+      setCollection(data.collection);
+      setProducts(data.products);
+      setMeta(data.meta);
+    } catch (err: any) {
+      console.error('Failed to fetch collection:', err);
+      setError(err.response?.data?.error || 'Failed to load collection');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCurrentPage(1);
+    fetchCollectionData();
+  };
+
+  const handleClearFilters = () => {
+    setSearchQuery('');
+    setProductType('');
+    setCurrentPage(1);
+  };
+
+  if (loading && !collection) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-hafalohaRed mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading collection...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !collection) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error || 'Collection not found'}</p>
+          <Link
+            to="/collections"
+            className="px-6 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition inline-block"
+          >
+            Back to Collections
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const totalPages = meta ? Math.ceil(meta.total / meta.per_page) : 1;
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Breadcrumbs */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <nav className="flex text-sm text-gray-500">
+            <Link to="/" className="hover:text-hafalohaRed transition">
+              Home
+            </Link>
+            <span className="mx-2">/</span>
+            <Link to="/collections" className="hover:text-hafalohaRed transition">
+              Collections
+            </Link>
+            <span className="mx-2">/</span>
+            <span className="text-gray-900 font-medium">{collection.name}</span>
+          </nav>
+        </div>
+      </div>
+
+      {/* Header */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">{collection.name}</h1>
+          {collection.description && (
+            <p className="text-lg text-gray-600 mb-4">{collection.description}</p>
+          )}
+          <p className="text-sm text-gray-500">
+            {meta?.total || 0} {meta?.total === 1 ? 'product' : 'products'}
+          </p>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Search */}
+            <form onSubmit={handleSearch} className="flex-1">
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+              />
+            </form>
+
+            {/* Product Type Filter */}
+            <select
+              value={productType}
+              onChange={(e) => {
+                setProductType(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+            >
+              <option value="">All Types</option>
+              <option value="Apparel">Apparel</option>
+              <option value="Hats">Hats</option>
+              <option value="Bags">Bags</option>
+              <option value="Accessories">Accessories</option>
+            </select>
+
+            {/* Clear Filters */}
+            {(searchQuery || productType) && (
+              <button
+                onClick={handleClearFilters}
+                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Products Grid */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {loading ? (
+          <div className="flex justify-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hafalohaRed"></div>
+          </div>
+        ) : products.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600 mb-4">No products found in this collection.</p>
+            <button
+              onClick={handleClearFilters}
+              className="px-6 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition"
+            >
+              Clear Filters
+            </button>
+          </div>
+        ) : (
+          <>
+            {/* Product Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 bg-white border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+                >
+                  Previous
+                </button>
+                <span className="px-4 py-2 text-gray-700">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  onClick={() => setCurrentPage(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 bg-white border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+

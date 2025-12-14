@@ -1,0 +1,399 @@
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import type { Product } from '../services/api';
+import { productsApi } from '../services/api';
+import ProductCard from '../components/ProductCard';
+
+interface Collection {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export default function ProductsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [meta, setMeta] = useState({ page: 1, per_page: 12, total: 0 });
+
+  const page = parseInt(searchParams.get('page') || '1');
+  const search = searchParams.get('search') || '';
+  const collection = searchParams.get('collection') || '';
+  const productType = searchParams.get('type') || '';
+  const sort = searchParams.get('sort') || '';
+
+  useEffect(() => {
+    fetchCollections();
+  }, []);
+
+  useEffect(() => {
+    fetchProducts();
+  }, [page, search, collection, productType, sort]);
+
+  const fetchCollections = async () => {
+    try {
+      const response = await productsApi.getCollections();
+      // Only show collections with 5+ products
+      const mainCollections = response.filter(c => c.product_count >= 5);
+      setCollections(mainCollections);
+    } catch (err) {
+      console.error('Failed to load collections:', err);
+    }
+  };
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await productsApi.getProducts({
+        page,
+        per_page: 12,
+        search: search || undefined,
+        collection: collection || undefined,
+        product_type: productType || undefined,
+        sort: sort || undefined,
+      });
+      setProducts(response.products);
+      setMeta(response.meta);
+      setError(null);
+    } catch (err) {
+      setError('Failed to load products');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSearch = (value: string) => {
+    const params: Record<string, string> = {};
+    if (value) params.search = value;
+    if (collection) params.collection = collection;
+    if (productType) params.type = productType;
+    if (sort) params.sort = sort;
+    setSearchParams(params);
+  };
+
+  const handleFilterChange = (filterType: 'collection' | 'type' | 'sort', value: string) => {
+    const params: Record<string, string> = {};
+    if (search) params.search = search;
+    if (filterType === 'collection') {
+      if (value) params.collection = value;
+      if (productType) params.type = productType;
+      if (sort) params.sort = sort;
+    } else if (filterType === 'type') {
+      if (collection) params.collection = collection;
+      if (value) params.type = value;
+      if (sort) params.sort = sort;
+    } else if (filterType === 'sort') {
+      if (collection) params.collection = collection;
+      if (productType) params.type = productType;
+      if (value) params.sort = value;
+    }
+    setSearchParams(params);
+  };
+
+  const clearFilters = () => {
+    setSearchParams({});
+  };
+
+  const handlePageChange = (newPage: number) => {
+    const params: Record<string, string> = { page: newPage.toString() };
+    if (search) params.search = search;
+    if (collection) params.collection = collection;
+    if (productType) params.type = productType;
+    if (sort) params.sort = sort;
+    setSearchParams(params);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  if (loading && products.length === 0) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hafalohaRed mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading products...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <button
+            onClick={fetchProducts}
+            className="bg-hafalohaRed text-white px-6 py-2 rounded-lg hover:bg-red-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const totalPages = Math.ceil(meta.total / meta.per_page);
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+            Shop <span className="text-hafalohaRed">Hafaloha</span>
+          </h1>
+          <p className="text-gray-600 text-sm sm:text-base">
+            Chamorro pride. Island style. Premium quality.
+          </p>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/* Search Bar */}
+        <div className="mb-4 sm:mb-6">
+          <div className="relative max-w-lg">
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={search}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="w-full px-4 py-3 pl-11 sm:pl-12 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+            />
+            <svg
+              className="absolute left-3 sm:left-4 top-3 sm:top-3.5 h-5 w-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div className="mb-6 sm:mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            {/* Collection Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Collection</label>
+              <select
+                value={collection}
+                onChange={(e) => handleFilterChange('collection', e.target.value)}
+                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+              >
+                <option value="">All Collections</option>
+                {collections.map((c) => (
+                  <option key={c.id} value={c.slug}>
+                    {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Product Type Filter */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Product Type</label>
+              <select
+                value={productType}
+                onChange={(e) => handleFilterChange('type', e.target.value)}
+                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+              >
+                <option value="">All Types</option>
+                <option value="T-Shirt">T-Shirt</option>
+                <option value="Long Sleeve">Long Sleeve</option>
+                <option value="Polo">Polo</option>
+                <option value="Button Up">Button Up</option>
+                <option value="Shorts">Shorts</option>
+                <option value="Tank Top">Tank Top</option>
+                <option value="Baseball Cap">Baseball Cap</option>
+                <option value="Snapback">Snapback</option>
+                <option value="Sticker">Sticker</option>
+              </select>
+            </div>
+
+            {/* Sort Options */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">Sort By</label>
+              <select
+                value={sort}
+                onChange={(e) => handleFilterChange('sort', e.target.value)}
+                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+              >
+                <option value="">Featured</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+                <option value="newest">Newest First</option>
+                <option value="name_asc">Name: A-Z</option>
+                <option value="name_desc">Name: Z-A</option>
+              </select>
+            </div>
+
+            {/* Clear Filters Button */}
+            <div className="flex items-end">
+              <button
+                onClick={clearFilters}
+                disabled={!search && !collection && !productType && !sort}
+                className="w-full px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                Clear Filters
+              </button>
+            </div>
+          </div>
+
+          {/* Active Filters Display */}
+          {(search || collection || productType || sort) && (
+            <div className="mt-4 flex flex-wrap gap-2">
+              <span className="text-sm text-gray-600 font-medium">Active filters:</span>
+              {search && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-hafalohaRed text-white text-sm rounded-full">
+                  Search: "{search}"
+                  <button
+                    onClick={() => handleSearch('')}
+                    className="hover:bg-red-700 rounded-full p-0.5"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              )}
+              {collection && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-hafalohaRed text-white text-sm rounded-full">
+                  {collections.find(c => c.slug === collection)?.name}
+                  <button
+                    onClick={() => handleFilterChange('collection', '')}
+                    className="hover:bg-red-700 rounded-full p-0.5"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              )}
+              {productType && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-hafalohaRed text-white text-sm rounded-full">
+                  {productType}
+                  <button
+                    onClick={() => handleFilterChange('type', '')}
+                    className="hover:bg-red-700 rounded-full p-0.5"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              )}
+              {sort && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-hafalohaRed text-white text-sm rounded-full">
+                  Sort: {sort === 'price_asc' ? 'Price ↑' : sort === 'price_desc' ? 'Price ↓' : sort === 'newest' ? 'Newest' : sort === 'name_asc' ? 'A-Z' : 'Z-A'}
+                  <button
+                    onClick={() => handleFilterChange('sort', '')}
+                    className="hover:bg-red-700 rounded-full p-0.5"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Results Count */}
+        <div className="mb-4 sm:mb-6">
+          <p className="text-gray-600 text-sm sm:text-base">
+            Showing {products.length} of {meta.total} products
+            {(search || collection || productType) && (
+              <span className="ml-2 text-gray-500">
+                (filtered)
+              </span>
+            )}
+          </p>
+        </div>
+
+        {/* Products Grid */}
+        {products.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No products found</p>
+            {search && (
+              <button
+                onClick={() => handleSearch('')}
+                className="mt-4 text-hafalohaRed hover:underline"
+              >
+                Clear search
+              </button>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+              {products.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-1 sm:gap-2 flex-wrap">
+                <button
+                  onClick={() => handlePageChange(page - 1)}
+                  disabled={page === 1}
+                  className="px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                >
+                  <span className="hidden sm:inline">Previous</span>
+                  <span className="sm:hidden">Prev</span>
+                </button>
+                
+                <div className="flex gap-1 sm:gap-2">
+                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (page <= 3) {
+                      pageNum = i + 1;
+                    } else if (page >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = page - 2 + i;
+                    }
+                    
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => handlePageChange(pageNum)}
+                        className={`px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg ${
+                          page === pageNum
+                            ? 'bg-hafalohaRed text-white'
+                            : 'border border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  onClick={() => handlePageChange(page + 1)}
+                  disabled={page === totalPages}
+                  className="px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+

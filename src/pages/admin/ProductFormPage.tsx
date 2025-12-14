@@ -1,0 +1,833 @@
+import { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { useAuth } from '@clerk/clerk-react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+import { ArrowLeft, Save, X, Archive, AlertTriangle } from 'lucide-react';
+import ImageUpload from '../../components/ImageUpload';
+import VariantManager from '../../components/VariantManager';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+
+interface ProductImage {
+  id: number;
+  url: string;
+  alt_text?: string;
+  position: number;
+  primary: boolean;
+}
+
+interface Collection {
+  id: number;
+  name: string;
+  slug: string;
+  product_count?: number;
+}
+
+interface ProductFormData {
+  name: string;
+  description: string;
+  product_type: string;
+  vendor: string;
+  base_price_cents: number;
+  weight_oz: number;
+  published: boolean;
+  featured: boolean;
+  meta_title: string;
+  meta_description: string;
+  inventory_level: 'none' | 'product' | 'variant';
+  product_stock_quantity?: number;
+  product_low_stock_threshold?: number;
+  collection_ids: number[];
+}
+
+export default function ProductFormPage() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const { getToken } = useAuth();
+  const isEditMode = !!id;
+
+  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isArchived, setIsArchived] = useState(false);
+  const [images, setImages] = useState<ProductImage[]>([]);
+  const [allCollections, setAllCollections] = useState<Collection[]>([]);
+  const [formData, setFormData] = useState<ProductFormData>({
+    name: '',
+    description: '',
+    product_type: 'apparel',
+    vendor: 'Hafaloha',
+    base_price_cents: 0,
+    weight_oz: 0,
+    published: false,
+    featured: false,
+    meta_title: '',
+    meta_description: '',
+    inventory_level: 'none',
+    product_stock_quantity: undefined,
+    product_low_stock_threshold: 5,
+    collection_ids: [],
+  });
+
+  useEffect(() => {
+    fetchCollections();
+    if (isEditMode) {
+      fetchProduct();
+    }
+  }, [id]);
+
+  const fetchCollections = async () => {
+    try {
+      // Fetch ALL collections (including unpublished) for admin use
+      const token = await getToken();
+      const response = await axios.get(`${API_BASE_URL}/api/v1/admin/collections`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setAllCollections(response.data.data || []);
+    } catch (err) {
+      console.error('Failed to fetch collections:', err);
+    }
+  };
+
+  const fetchProduct = async () => {
+    try {
+      setLoading(true);
+      const token = await getToken();
+      const response = await axios.get(`${API_BASE_URL}/api/v1/admin/products/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      // Backend wraps response in { success: true, data: {...} }
+      const product = response.data.data || response.data;
+      
+      setIsArchived(product.archived || false);
+      
+      setFormData({
+        name: product.name || '',
+        description: product.description || '',
+        product_type: product.product_type || 'apparel',
+        vendor: product.vendor || 'Hafaloha',
+        base_price_cents: product.base_price_cents || 0,
+        weight_oz: product.weight_oz || 0,
+        published: product.published || false,
+        featured: product.featured || false,
+        meta_title: product.meta_title || '',
+        meta_description: product.meta_description || '',
+        inventory_level: product.inventory_level || 'none',
+        product_stock_quantity: product.product_stock_quantity,
+        product_low_stock_threshold: product.product_low_stock_threshold || 5,
+        collection_ids: product.collection_ids || [],
+      });
+      
+      // Load images
+      setImages(product.images || []);
+    } catch (err) {
+      console.error('Failed to fetch product:', err);
+      toast.error('Failed to load product');
+      navigate('/admin/products');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    
+    if (type === 'checkbox') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: (e.target as HTMLInputElement).checked,
+      }));
+    } else if (name === 'base_price_cents' || name === 'weight_oz') {
+      // Convert dollars to cents for price
+      const numValue = name === 'base_price_cents' 
+        ? Math.round(parseFloat(value || '0') * 100)
+        : parseFloat(value || '0');
+      setFormData(prev => ({
+        ...prev,
+        [name]: numValue,
+      }));
+    } else if (name === 'product_stock_quantity' || name === 'product_low_stock_threshold') {
+      // Handle inventory numbers
+      const numValue = parseInt(value || '0');
+      setFormData(prev => ({
+        ...prev,
+        [name]: isNaN(numValue) ? undefined : numValue,
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+  };
+
+  const handleCollectionToggle = (collectionId: number) => {
+    setFormData(prev => {
+      const currentIds = prev.collection_ids || [];
+      const newIds = currentIds.includes(collectionId)
+        ? currentIds.filter(id => id !== collectionId)
+        : [...currentIds, collectionId];
+      return { ...prev, collection_ids: newIds };
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validation
+    if (!formData.name.trim()) {
+      toast.error('Product name is required');
+      return;
+    }
+    if (formData.base_price_cents <= 0) {
+      toast.error('Price must be greater than 0');
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const token = await getToken();
+      
+      const payload = {
+        product: formData,
+      };
+
+      if (isEditMode) {
+        const response = await axios.put(
+          `${API_BASE_URL}/api/v1/admin/products/${id}`,
+          payload,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        
+        // Update form data with latest from server (in case anything changed)
+        const updatedProduct = response.data.data || response.data;
+        setFormData({
+          name: updatedProduct.name || '',
+          description: updatedProduct.description || '',
+          product_type: updatedProduct.product_type || 'apparel',
+          vendor: updatedProduct.vendor || 'Hafaloha',
+          base_price_cents: updatedProduct.base_price_cents || 0,
+          weight_oz: updatedProduct.weight_oz || 0,
+          published: updatedProduct.published || false,
+          featured: updatedProduct.featured || false,
+          meta_title: updatedProduct.meta_title || '',
+          meta_description: updatedProduct.meta_description || '',
+          inventory_level: updatedProduct.inventory_level || 'none',
+          product_stock_quantity: updatedProduct.product_stock_quantity,
+          product_low_stock_threshold: updatedProduct.product_low_stock_threshold || 5,
+          collection_ids: updatedProduct.collection_ids || [], // Added this line!
+        });
+        
+        toast.success('Product updated successfully!', {
+          duration: 3000,
+          position: 'top-right',
+        });
+      } else {
+        const response = await axios.post(
+          `${API_BASE_URL}/api/v1/admin/products`,
+          payload,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        
+        toast.success('Product created successfully!', {
+          duration: 3000,
+          position: 'top-right',
+        });
+        
+        // For new products, redirect to edit page so they can continue adding images/variants
+        const newProduct = response.data.data || response.data;
+        navigate(`/admin/products/${newProduct.id}/edit`);
+      }
+    } catch (err: any) {
+      console.error('Failed to save product:', err);
+      const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Failed to save product';
+      toast.error(errorMessage, {
+        duration: 4000,
+        position: 'top-right',
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!id) return;
+    
+    try {
+      setDeleting(true);
+      const token = await getToken();
+      
+      await axios.delete(
+        `${API_BASE_URL}/api/v1/admin/products/${id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      toast.success('Product archived successfully!', {
+        duration: 3000,
+        position: 'top-right',
+      });
+      
+      // Redirect to products list
+      navigate('/admin/products');
+    } catch (err: any) {
+      console.error('Failed to archive product:', err);
+      const errorMessage = err.response?.data?.error || 
+                          err.response?.data?.message || 
+                          'Failed to archive product.';
+      toast.error(errorMessage, {
+        duration: 5000,
+        position: 'top-right',
+      });
+      setShowDeleteModal(false);
+    } finally {
+      setDeleting(false);
+    }
+  };
+  
+  const handleUnarchive = async () => {
+    if (!id) return;
+    
+    try {
+      setDeleting(true);
+      const token = await getToken();
+      
+      await axios.post(
+        `${API_BASE_URL}/api/v1/admin/products/${id}/unarchive`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      toast.success('Product unarchived successfully!', {
+        duration: 3000,
+        position: 'top-right',
+      });
+      
+      // Refresh product data
+      setIsArchived(false);
+      await fetchProduct();
+    } catch (err: any) {
+      console.error('Failed to unarchive product:', err);
+      const errorMessage = err.response?.data?.error || 
+                          err.response?.data?.message || 
+                          'Failed to unarchive product.';
+      toast.error(errorMessage, {
+        duration: 5000,
+        position: 'top-right',
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hafalohaRed"></div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="mb-6">
+        <button
+          onClick={() => navigate('/admin/products')}
+          className="flex items-center text-gray-600 hover:text-gray-900 mb-4"
+        >
+          <ArrowLeft className="w-5 h-5 mr-2" />
+          Back to Products
+        </button>
+        <h1 className="text-3xl font-bold text-gray-900">
+          {isEditMode ? 'Edit Product' : 'Add New Product'}
+        </h1>
+      </div>
+
+      {/* Archived Banner */}
+      {isArchived && (
+        <div className="mb-6 bg-orange-50 border-l-4 border-orange-400 p-4 rounded-lg">
+          <div className="flex items-start justify-between">
+            <div className="flex items-start">
+              <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5 mr-3 flex-shrink-0" />
+              <div>
+                <h3 className="text-lg font-semibold text-orange-800">This Product is Archived</h3>
+                <p className="text-sm text-orange-700 mt-1">
+                  This product is hidden from customers and won't appear in the store. You can unarchive it to make it available again.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleUnarchive}
+              disabled={deleting}
+              className="ml-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {deleting ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Unarchiving...
+                </>
+              ) : (
+                <>
+                  <Archive className="w-4 h-4 mr-2" />
+                  Unarchive Product
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6 pb-24">
+        {/* Basic Information */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Basic Information</h2>
+          
+          <div className="space-y-4">
+            {/* Product Name */}
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                Product Name *
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                placeholder="e.g., Hafaloha Championship T-Shirt"
+              />
+            </div>
+
+            {/* Description */}
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                Description
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                rows={4}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                placeholder="Describe your product..."
+              />
+            </div>
+
+            {/* Product Type */}
+            <div>
+              <label htmlFor="product_type" className="block text-sm font-medium text-gray-700 mb-1">
+                Product Type
+              </label>
+              <select
+                id="product_type"
+                name="product_type"
+                value={formData.product_type}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+              >
+                <option value="apparel">Apparel</option>
+                <option value="accessories">Accessories</option>
+                <option value="hats">Hats</option>
+                <option value="bags">Bags</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            {/* Price & Weight */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="base_price_cents" className="block text-sm font-medium text-gray-700 mb-1">
+                  Base Price * ($)
+                </label>
+                <input
+                  type="number"
+                  id="base_price_cents"
+                  name="base_price_cents"
+                  value={(formData.base_price_cents / 100).toFixed(2)}
+                  onChange={handleChange}
+                  step="0.01"
+                  min="0"
+                  required
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                  placeholder="29.99"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="weight_oz" className="block text-sm font-medium text-gray-700 mb-1">
+                  Weight (oz)
+                </label>
+                <input
+                  type="number"
+                  id="weight_oz"
+                  name="weight_oz"
+                  value={formData.weight_oz}
+                  onChange={handleChange}
+                  step="0.1"
+                  min="0"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                  placeholder="8.0"
+                />
+              </div>
+            </div>
+
+            {/* Visibility Settings */}
+            <div className="space-y-3 pt-2">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="published"
+                  name="published"
+                  checked={formData.published}
+                  onChange={handleChange}
+                  className="w-4 h-4 text-hafalohaRed border-gray-300 rounded focus:ring-hafalohaRed"
+                />
+                <label htmlFor="published" className="ml-2 text-sm font-medium text-gray-700">
+                  Published (visible in store)
+                </label>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="featured"
+                  name="featured"
+                  checked={formData.featured}
+                  onChange={handleChange}
+                  className="w-4 h-4 text-hafalohaRed border-gray-300 rounded focus:ring-hafalohaRed"
+                />
+                <label htmlFor="featured" className="ml-2 text-sm font-medium text-gray-700">
+                  Featured (show on homepage)
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Inventory Tracking */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">📦 Inventory Tracking</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Choose how to track inventory for this product
+          </p>
+          
+          <div className="space-y-4">
+            {/* Inventory Level Radio Buttons */}
+            <div className="space-y-3">
+              <div className="flex items-start">
+                <input
+                  type="radio"
+                  id="inventory_none"
+                  name="inventory_level"
+                  value="none"
+                  checked={formData.inventory_level === 'none'}
+                  onChange={handleChange}
+                  className="mt-1 w-4 h-4 text-hafalohaRed border-gray-300 focus:ring-hafalohaRed"
+                />
+                <label htmlFor="inventory_none" className="ml-3">
+                  <span className="block text-sm font-medium text-gray-900">
+                    No Tracking
+                  </span>
+                  <span className="block text-xs text-gray-600">
+                    Product is always available (digital products, services, unlimited items)
+                  </span>
+                </label>
+              </div>
+
+              <div className="flex items-start">
+                <input
+                  type="radio"
+                  id="inventory_product"
+                  name="inventory_level"
+                  value="product"
+                  checked={formData.inventory_level === 'product'}
+                  onChange={handleChange}
+                  className="mt-1 w-4 h-4 text-hafalohaRed border-gray-300 focus:ring-hafalohaRed"
+                />
+                <label htmlFor="inventory_product" className="ml-3">
+                  <span className="block text-sm font-medium text-gray-900">
+                    Product Level
+                  </span>
+                  <span className="block text-xs text-gray-600">
+                    Track one total quantity (e.g., "50 hats total" - variants optional for selection)
+                  </span>
+                </label>
+              </div>
+
+              <div className="flex items-start">
+                <input
+                  type="radio"
+                  id="inventory_variant"
+                  name="inventory_level"
+                  value="variant"
+                  checked={formData.inventory_level === 'variant'}
+                  onChange={handleChange}
+                  className="mt-1 w-4 h-4 text-hafalohaRed border-gray-300 focus:ring-hafalohaRed"
+                />
+                <label htmlFor="inventory_variant" className="ml-3">
+                  <span className="block text-sm font-medium text-gray-900">
+                    Variant Level
+                  </span>
+                  <span className="block text-xs text-gray-600">
+                    Track stock per size/color combination (e.g., "10 Red/Small, 5 Blue/Large")
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            {/* Product-Level Inventory Fields */}
+            {formData.inventory_level === 'product' && (
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="product_stock_quantity" className="block text-sm font-medium text-gray-700 mb-1">
+                      Stock Quantity
+                    </label>
+                    <input
+                      type="number"
+                      id="product_stock_quantity"
+                      name="product_stock_quantity"
+                      value={formData.product_stock_quantity || ''}
+                      onChange={handleChange}
+                      min="0"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      placeholder="0"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="product_low_stock_threshold" className="block text-sm font-medium text-gray-700 mb-1">
+                      Low Stock Threshold
+                    </label>
+                    <input
+                      type="number"
+                      id="product_low_stock_threshold"
+                      name="product_low_stock_threshold"
+                      value={formData.product_low_stock_threshold || 5}
+                      onChange={handleChange}
+                      min="0"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      placeholder="5"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Get a warning when stock falls to or below this number
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Variant-Level Helper Text */}
+            {formData.inventory_level === 'variant' && (
+              <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <p className="text-sm text-blue-800">
+                  💡 <strong>Variant-level tracking:</strong> After saving this product, you can configure variants and set stock quantity for each size/color combination in the Variants section below.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Collections */}
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">🏷️ Collections</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Assign this product to one or more collections (categories)
+          </p>
+          
+          {allCollections.length === 0 ? (
+            <p className="text-gray-500 italic">No collections available. Create collections first.</p>
+          ) : (
+            <div>
+              <div 
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 border border-gray-300 rounded-lg p-4 bg-gray-50"
+                style={{ 
+                  maxHeight: '240px',  // Show ~6 rows (60 collections = 20 rows, so plenty to scroll)
+                  overflowY: 'scroll',
+                  WebkitOverflowScrolling: 'touch' 
+                }}
+              >
+                {allCollections.map((collection) => (
+                  <div key={collection.id} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      id={`collection_${collection.id}`}
+                      checked={(formData.collection_ids || []).includes(collection.id)}
+                      onChange={() => handleCollectionToggle(collection.id)}
+                      className="w-4 h-4 text-hafalohaRed border-gray-300 rounded focus:ring-hafalohaRed"
+                    />
+                    <label htmlFor={`collection_${collection.id}`} className="ml-2 text-sm text-gray-700 cursor-pointer select-none">
+                      {collection.name}
+                      {collection.product_count !== undefined && (
+                        <span className="text-xs text-gray-500 ml-1">({collection.product_count})</span>
+                      )}
+                    </label>
+                  </div>
+                ))}
+              </div>
+              {allCollections.length > 18 && (
+                <p className="text-xs text-gray-500 mt-2 italic flex items-center gap-1">
+                  <span>↕️</span>
+                  <span>Scroll to see more collections</span>
+                </p>
+              )}
+              <p className="text-xs text-gray-600 mt-3 font-medium">
+                {(formData.collection_ids || []).length} collection{(formData.collection_ids || []).length !== 1 ? 's' : ''} selected
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Images & Variants - Only available after product creation */}
+        {!isEditMode && (
+          <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 text-center">
+            <p className="text-blue-800 font-medium mb-2">
+              💡 Images & Variants
+            </p>
+            <p className="text-blue-700 text-sm">
+              Save this product first, then you can add images and configure variants on the edit page.
+            </p>
+          </div>
+        )}
+
+        {/* Image Upload - Only show in edit mode */}
+        {isEditMode && id && (
+          <ImageUpload
+            productId={parseInt(id)}
+            images={images}
+            onImagesChange={setImages}
+          />
+        )}
+
+        {/* Variant Manager - Only show in edit mode */}
+        {isEditMode && id && (
+          <VariantManager
+            productId={parseInt(id)}
+            basePriceCents={formData.base_price_cents}
+            inventoryLevel={formData.inventory_level}
+          />
+        )}
+
+        {/* Form Actions - Sticky Footer */}
+        <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-[5] mt-6">
+          <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 px-4 sm:px-6 py-3 sm:py-4">
+            {/* Archive Button - Full width on mobile, left side on desktop */}
+            {isEditMode && (
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(true)}
+                className={`w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 rounded-lg transition flex items-center justify-center ${
+                  isArchived
+                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                    : 'bg-red-100 text-red-700 hover:bg-red-200'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                disabled={saving || deleting}
+              >
+                <Archive className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                <span className="text-sm sm:text-base">{isArchived ? 'Unarchive' : 'Archive'}</span>
+              </button>
+            )}
+            
+            {/* Right side buttons - Stack on mobile, row on desktop */}
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 sm:ml-auto w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={() => navigate('/admin/products')}
+                className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition flex items-center justify-center"
+                disabled={saving || deleting}
+              >
+                <X className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                <span className="text-sm sm:text-base">Cancel</span>
+              </button>
+              <button
+                type="submit"
+                className="w-full sm:w-auto px-4 sm:px-6 py-2 sm:py-3 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                disabled={saving || deleting}
+              >
+                {saving ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-b-2 border-white mr-2"></div>
+                    <span className="text-sm sm:text-base">Saving...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                    <span className="text-sm sm:text-base">{isEditMode ? 'Update Product' : 'Create Product'}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/30" onClick={() => !deleting && setShowDeleteModal(false)}>
+          <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center mb-4">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
+              </div>
+              <div className="ml-4">
+                <h3 className="text-lg font-semibold text-gray-900">Archive Product</h3>
+                <p className="text-sm text-gray-500">Product will be hidden from customers</p>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="mb-6">
+              <p className="text-gray-700 mb-2">
+                Are you sure you want to archive <strong>{formData.name}</strong>?
+              </p>
+              <p className="text-sm text-gray-600">
+                Archived products are:
+              </p>
+              <ul className="list-disc list-inside text-sm text-gray-600 mt-2 space-y-1">
+                <li>Hidden from customers and search</li>
+                <li>Preserved with all data intact</li>
+                <li>Can be unarchived anytime</li>
+                <li>Will still show in order history</li>
+              </ul>
+              <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  💡 <strong>Tip:</strong> Archiving is safer than deleting. You can restore archived products later.
+                </p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                disabled={deleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={deleting}
+              >
+                <Archive className="w-4 h-4 mr-2" />
+                {deleting ? 'Archiving...' : 'Archive Product'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+

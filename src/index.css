@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+:root {
+  --color-hafaloha-red: #C1191F;
+  --color-hafaloha-gold: #FFD700;
+}
+
+/* Custom Hafaloha brand colors */
+.bg-hafalohaRed {
+  background-color: var(--color-hafaloha-red);
+}
+
+.text-hafalohaRed {
+  color: var(--color-hafaloha-red);
+}
+
+.bg-hafalohaGold {
+  background-color: var(--color-hafaloha-gold);
+}
+
+.text-hafalohaGold {
+  color: var(--color-hafaloha-gold);
+}
+
+.border-hafalohaRed {
+  border-color: var(--color-hafaloha-red);
+}
+
+.hover\:bg-red-700:hover {
+  background-color: #b71c1c;
+}
+
+.hover\:text-hafalohaRed:hover {
+  color: var(--color-hafaloha-red);
+}
+
+.ring-hafalohaRed {
+  --tw-ring-color: var(--color-hafaloha-red);
+}
+
+.focus\:ring-hafalohaRed:focus {
+  --tw-ring-color: var(--color-hafaloha-red);
+}
