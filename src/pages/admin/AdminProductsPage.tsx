@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Eye, Edit, X } from 'lucide-react';
+import { Eye, Edit, X, Package } from 'lucide-react';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
@@ -12,7 +12,6 @@ interface Product {
   slug: string;
   description: string;
   base_price_cents: number;
-  product_type: string;
   published: boolean;
   featured: boolean;
   archived: boolean;
@@ -31,7 +30,6 @@ interface ProductVariant {
   size: string;
   color: string;
   variant_name: string;
-  display_name: string;
   sku: string;
   price_cents: number;
   stock_quantity: number;

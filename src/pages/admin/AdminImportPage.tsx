@@ -98,6 +98,12 @@ export default function AdminImportPage() {
     }
   };
 
+  const handleInventoryFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setInventoryFile(e.target.files[0]);
+    }
+  };
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);

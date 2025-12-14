@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { Product } from '../services/api';
-import { productsApi, collectionsApi } from '../services/api';
+import { productsApi } from '../services/api';
 import ProductCard from '../components/ProductCard';
 
 interface Collection {
@@ -33,10 +33,10 @@ export default function ProductsPage() {
   }, [page, search, collection, productType, sort]);
 
   const fetchCollections = async () => {
-    try{
-      const response = await collectionsApi.getCollections();
+    try {
+      const response = await productsApi.getCollections();
       // Only show collections with 5+ products
-      const mainCollections = response.collections.filter((c: { product_count: number }) => c.product_count >= 5);
+      const mainCollections = response.filter(c => c.product_count >= 5);
       setCollections(mainCollections);
     } catch (err) {
       console.error('Failed to load collections:', err);
@@ -118,17 +118,37 @@ export default function ProductsPage() {
     );
   }
 
-  if (error) {
+  // Show empty state instead of error when no products exist
+  if (error && products.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <button
-            onClick={fetchProducts}
-            className="bg-hafalohaRed text-white px-6 py-2 rounded-lg hover:bg-red-700"
-          >
-            Try Again
-          </button>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+              Shop <span className="text-hafalohaRed">Hafaloha</span>
+            </h1>
+            <p className="text-gray-600 text-sm sm:text-base">
+              Chamorro pride. Island style. Premium quality.
+            </p>
+          </div>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+          <div className="max-w-md mx-auto">
+            <div className="text-6xl mb-6">🌺</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Coming Soon!</h2>
+            <p className="text-gray-600 mb-8">
+              We're preparing our collection of premium Chamorro pride apparel. 
+              Check back soon for amazing island-inspired designs!
+            </p>
+            <button
+              onClick={fetchProducts}
+              className="bg-hafalohaRed text-white px-6 py-3 rounded-lg hover:bg-red-700 transition"
+            >
+              Refresh
+            </button>
+          </div>
         </div>
       </div>
     );

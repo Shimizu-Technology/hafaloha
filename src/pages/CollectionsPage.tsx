@@ -78,33 +78,43 @@ export default function CollectionsPage() {
     );
   }
 
-  if (error) {
+  // Show empty state for errors or no collections
+  if (error || (collections.length === 0 && !searchQuery)) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error}</p>
-          <button
-            onClick={fetchCollections}
-            className="px-6 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition"
-          >
-            Try Again
-          </button>
+      <div className="min-h-screen bg-gray-50">
+        {/* Header */}
+        <div className="bg-white border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">Collections</h1>
+            <p className="text-lg text-gray-600">
+              Shop our curated collections of Chamorro pride apparel and merchandise
+            </p>
+          </div>
         </div>
-      </div>
-    );
-  }
-
-  if (collections.length === 0 && !searchQuery) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">No collections available yet.</p>
-          <Link
-            to="/products"
-            className="px-6 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition inline-block"
-          >
-            Browse All Products
-          </Link>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
+          <div className="max-w-md mx-auto">
+            <div className="text-6xl mb-6">🏝️</div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">Collections Coming Soon!</h2>
+            <p className="text-gray-600 mb-8">
+              We're organizing our products into beautiful collections. 
+              Check back soon to browse by category!
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <button
+                onClick={fetchCollections}
+                className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+              >
+                Refresh
+              </button>
+              <Link
+                to="/products"
+                className="px-6 py-3 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition inline-block"
+              >
+                Browse All Products
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     );
