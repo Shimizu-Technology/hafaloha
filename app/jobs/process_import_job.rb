@@ -107,7 +107,9 @@ class ProcessImportJob < ApplicationJob
         collection = Collection.find_or_create_by!(
           name: tag_name,
           slug: tag_name.parameterize
-        )
+        ) do |c|
+          c.published = true  # Auto-publish imported collections
+        end
         archived_product.collections << collection unless archived_product.collections.include?(collection)
       end
       
@@ -155,7 +157,9 @@ class ProcessImportJob < ApplicationJob
         collection = Collection.find_or_create_by!(
           name: tag_name,
           slug: tag_name.parameterize
-        )
+        ) do |c|
+          c.published = true  # Auto-publish imported collections
+        end
         product.collections << collection unless product.collections.include?(collection)
       end
       stats[:collections_created] = Collection.count
