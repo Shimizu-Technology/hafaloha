@@ -5,7 +5,7 @@
 # - Admin user
 # - Site settings
 #
-# For real products, use the Admin > Import UI
+# For products, use the Admin > Import UI
 
 puts "=" * 80
 puts "🌺 SEEDING HAFALOHA WHOLESALE PLATFORM"
@@ -40,67 +40,15 @@ puts "   ✓ Site Settings: test_mode=#{settings.payment_test_mode?}, emails=#{s
 puts ""
 
 # ------------------------------------------------------------------------------
-# 3) SAMPLE DATA (Development Only)
+# 3) INSTRUCTIONS
 # ------------------------------------------------------------------------------
-if Rails.env.development? || Rails.env.test?
-  puts "3️⃣  Creating sample development data..."
-  
-  if Product.count == 0
-    # Create a simple collection
-    collection = Collection.find_or_create_by!(slug: "sample-collection") do |c|
-      c.name = "Sample Collection"
-      c.description = "Sample products for development"
-      c.active = true
-      c.published = true
-      c.position = 1
-    end
-    
-    # Create a simple product
-    product = Product.find_or_create_by!(slug: "sample-tshirt") do |p|
-      p.name = "Sample T-Shirt"
-      p.description = "A sample product for development and testing"
-      p.base_price_cents = 2999
-      p.sku_prefix = "SAMPLE"
-      p.published = true
-      p.featured = true
-      p.product_type = "apparel"
-      p.vendor = "Hafaloha"
-      p.inventory_level = "none"
-      p.weight_oz = 6.5
-    end
-    
-    product.collections << collection unless product.collections.include?(collection)
-    
-    # Create variants if none exist
-    if product.product_variants.count == 0
-      ["Small", "Medium", "Large"].each do |size|
-        ["Black", "White"].each do |color|
-          product.product_variants.create!(
-            option1: size,
-            option2: color,
-            price_cents: product.base_price_cents,
-            stock_quantity: 0,
-            weight_oz: 6.5,
-            available: true
-          )
-        end
-      end
-    end
-    
-    puts "   ✓ Created 1 sample product with #{product.product_variants.count} variants"
-  else
-    puts "   ⏭️  Products already exist, skipping sample data"
-  end
-  puts ""
-else
-  puts "3️⃣  Production environment - no sample data needed"
-  puts ""
-  puts "   💡 To import products, use the Admin dashboard:"
-  puts "      1. Sign in as admin"
-  puts "      2. Go to Admin > Import"
-  puts "      3. Upload products_export.csv"
-  puts ""
-end
+puts "3️⃣  Next steps:"
+puts ""
+puts "   💡 To import products, use the Admin dashboard:"
+puts "      1. Sign in as admin (#{admin.email})"
+puts "      2. Go to Admin > Import"
+puts "      3. Upload products_export.csv"
+puts ""
 
 # ------------------------------------------------------------------------------
 # SUMMARY
