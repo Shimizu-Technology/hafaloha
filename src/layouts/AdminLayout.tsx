@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useUser } from '@clerk/clerk-react';
+import { useUser, useAuth } from '@clerk/clerk-react';
+import axios from 'axios';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 interface NavItem {
   name: string;
@@ -10,22 +13,47 @@ interface NavItem {
 
 export default function AdminLayout() {
   const { user, isLoaded } = useUser();
+  const { getToken } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [checkingAdmin, setCheckingAdmin] = useState(true);
 
-  // Check if user is admin
-  const isAdmin = user?.emailAddresses[0]?.emailAddress === 'shimizutechnology@gmail.com';
-
-  // Redirect if not admin (in useEffect to avoid render-time navigation)
+  // Check admin status from API
   useEffect(() => {
-    if (isLoaded && !isAdmin) {
+    const checkAdminStatus = async () => {
+      if (!isLoaded || !user) {
+        setCheckingAdmin(false);
+        return;
+      }
+
+      try {
+        const token = await getToken();
+        const response = await axios.get(`${API_BASE_URL}/api/v1/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setIsAdmin(response.data.admin || false);
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      } finally {
+        setCheckingAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [isLoaded, user, getToken]);
+
+  // Redirect if not admin
+  useEffect(() => {
+    if (!checkingAdmin && isAdmin === false) {
       navigate('/');
     }
-  }, [isLoaded, isAdmin, navigate]);
+  }, [checkingAdmin, isAdmin, navigate]);
 
-  // Show loading while Clerk is initializing
-  if (!isLoaded) {
+  // Show loading while checking admin status
+  if (!isLoaded || checkingAdmin) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
