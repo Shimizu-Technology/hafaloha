@@ -4,7 +4,8 @@ module Api
   module V1
     module Admin
       class HomepageSectionsController < ApplicationController
-        before_action :authenticate_user!
+        include Authenticatable
+        before_action :authenticate_request
         before_action :require_admin!
         before_action :set_section, only: %i[show update destroy]
 

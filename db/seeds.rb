@@ -108,7 +108,7 @@ if HomepageSection.count == 0
       subtitle: "Vibrant styles for island living",
       button_text: "Shop Now",
       button_link: "/products?collection=womens",
-      image_url: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=800&q=80",
+      image_url: "/images/hafaloha-womens-img.webp",
       position: 0
     },
     {
@@ -116,7 +116,7 @@ if HomepageSection.count == 0
       subtitle: "Bold designs with island pride",
       button_text: "Shop Now",
       button_link: "/products?collection=mens",
-      image_url: "https://images.unsplash.com/photo-1617137968427-85924c800a22?w=800&q=80",
+      image_url: "/images/hafaloha-mens-img.webp",
       position: 1
     }
   ].each do |card|
