@@ -79,7 +79,8 @@ Rails.application.configure do
   # Enable DNS rebinding protection and other `Host` header attacks.
   # Allow Render.com hosts and any custom domains via environment variable
   config.hosts = [
-    /.*\.onrender\.com/  # Allow any Render subdomain
+    "hafaloha-api-ttx6.onrender.com",  # Explicit Render hostname
+    /.+\.onrender\.com/                 # Allow any Render subdomain
   ]
   
   # Add custom domain from environment variable (e.g., api.hafaloha.com)
