@@ -77,11 +77,15 @@ Rails.application.configure do
   config.active_record.attributes_for_inspect = [ :id ]
 
   # Enable DNS rebinding protection and other `Host` header attacks.
-  # Allow Render.com hosts and any custom domains
+  # Allow Render.com hosts and any custom domains via environment variable
   config.hosts = [
-    "hafaloha-api-ttx6.onrender.com",
     /.*\.onrender\.com/  # Allow any Render subdomain
   ]
+  
+  # Add custom domain from environment variable (e.g., api.hafaloha.com)
+  if ENV["API_HOST"].present?
+    config.hosts << ENV["API_HOST"]
+  end
   
   # Skip DNS rebinding protection for the default health check endpoint.
   config.host_authorization = { exclude: ->(request) { request.path == "/up" } }
