@@ -14,7 +14,6 @@ import AdminOrdersPage from './pages/admin/AdminOrdersPage';
 import AdminProductsPage from './pages/admin/AdminProductsPage';
 import AdminCollectionsPage from './pages/admin/AdminCollectionsPage';
 import AdminImportPage from './pages/admin/AdminImportPage';
-import AdminHomepagePage from './pages/admin/AdminHomepagePage';
 import ProductFormPage from './pages/admin/ProductFormPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
@@ -345,7 +344,6 @@ function AppContent() {
             <Route path="products/new" element={<ProductFormPage />} />
             <Route path="products/:id/edit" element={<ProductFormPage />} />
             <Route path="collections" element={<AdminCollectionsPage />} />
-            <Route path="homepage" element={<AdminHomepagePage />} />
             <Route path="import" element={<AdminImportPage />} />
             <Route path="settings" element={<AdminSettingsPage />} />
           </Route>

@@ -46,7 +46,6 @@ export default function AdminLayout() {
     { name: 'Orders', path: '/admin/orders', icon: '📦' },
     { name: 'Products', path: '/admin/products', icon: '🛍️' },
     { name: 'Collections', path: '/admin/collections', icon: '📂' },
-    { name: 'Homepage', path: '/admin/homepage', icon: '🏠' },
     { name: 'Import', path: '/admin/import', icon: '📤' },
     { name: 'Settings', path: '/admin/settings', icon: '⚙️' },
   ];

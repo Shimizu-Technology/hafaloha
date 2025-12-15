@@ -21,18 +21,18 @@ const defaultCategoryCards: Array<{
   image_url: string;
 }> = [
   {
-    title: "Shop Womens",
+    title: "Shop Women's",
     subtitle: "Vibrant styles for island living",
     button_text: "Shop Now",
-    button_link: "/products?category=womens",
-    image_url: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800"
+    button_link: "/products?collection=womens",
+    image_url: "/images/hafaloha-womens-img.webp"
   },
   {
-    title: "Shop Mens",
+    title: "Shop Men's",
     subtitle: "Bold designs with island pride",
     button_text: "Shop Now",
-    button_link: "/products?category=mens",
-    image_url: "https://images.unsplash.com/photo-1564557287817-3785e38ec1f5?w=800"
+    button_link: "/products?collection=mens",
+    image_url: "/images/hafaloha-mens-img.webp"
   }
 ];
 
