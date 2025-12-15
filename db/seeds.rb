@@ -13,21 +13,13 @@ puts "=" * 80
 puts ""
 
 # ------------------------------------------------------------------------------
-# 1) ADMIN USER
+# 1) ADMIN USER (Auto-created on first sign-in)
 # ------------------------------------------------------------------------------
-puts "1️⃣  Creating admin user..."
-
-admin = User.find_or_create_by!(email: "shimizutechnology@gmail.com") do |u|
-  u.clerk_id = "seed_admin_#{SecureRandom.hex(8)}"
-  u.name = "Leon Shimizu"
-  u.phone = "+16714830219"
-  u.role = "admin"
-end
-
-# Ensure the user is always an admin (in case they existed already)
-admin.update!(role: "admin") unless admin.admin?
-
-puts "   ✓ Admin: #{admin.email} (role: #{admin.role})"
+puts "1️⃣  Admin user setup..."
+puts "   ℹ️  Admin users are auto-created when signing in with Clerk."
+puts "   ℹ️  shimizutechnology@gmail.com is automatically set as admin."
+puts "   ℹ️  To manually grant admin access, run in Rails console:"
+puts "      User.find_by(email: 'user@example.com')&.update!(role: 'admin')"
 puts ""
 
 # ------------------------------------------------------------------------------

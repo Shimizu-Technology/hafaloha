@@ -22,7 +22,7 @@ begin
     user.email = email
     
     # Make shimizutechnology@gmail.com an admin
-    user.admin = true if email == 'shimizutechnology@gmail.com'
+    user.role = 'admin' if email == 'shimizutechnology@gmail.com'
     
     if user.new_record?
       user.save!

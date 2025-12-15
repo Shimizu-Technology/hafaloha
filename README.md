@@ -73,11 +73,10 @@ bin/rails db:seed
 
 **You should see:**
 ```
-✅ SEED COMPLETE
-   • Admin User: 1 (shimizutechnology@gmail.com)
-   • Collections: 5
-   • Products: 12
-   • Variants: 150+
+🌺 SEEDING HAFALOHA WHOLESALE PLATFORM
+   ℹ️  Admin users are auto-created when signing in with Clerk.
+   ✓ Site settings configured
+   ✓ Homepage sections created
 ```
 
 ---
@@ -138,21 +137,19 @@ RESEND_API_KEY=re_...
 
 ---
 
-## 📦 What You Get (Sample Data)
+## 📦 What You Get (Seed Data)
 
 `bin/rails db:seed` creates:
 
-- ✅ **Admin user:** `shimizutechnology@gmail.com`
-- ✅ **12 Products:** T-shirts, hoodies, hats, bags
-- ✅ **150+ Variants:** Different sizes and colors
-- ✅ **5 Collections:** Men's, Women's, Hats, Bags, Athletic
-- ✅ **Sample fundraiser:** JFK High School Athletics
+- ✅ **Site settings:** Store info, shipping origin, payment config
+- ✅ **Homepage sections:** Hero banner, category cards
 
-**Want real Hafaloha products (50 items)?**
+**Admin users** are auto-created when signing in with Clerk. `shimizutechnology@gmail.com` is automatically set as admin.
+
+**Want to import products?** Use the Admin > Import UI, or:
 ```bash
 bin/rails import:shopify[scripts/products_export.csv]
 ```
-See [`docs/IMPORT.md`](docs/IMPORT.md) for details.
 
 ---
 
@@ -210,7 +207,7 @@ bin/rails console
 # Try:
 Product.count
 Order.last
-User.where(admin: true)
+User.where(role: "admin")
 ```
 
 ### Reset Database
@@ -224,18 +221,23 @@ bin/rails import:shopify[scripts/products_export.csv]
 # See docs/IMPORT.md
 ```
 
-### Create Admin User
-```bash
-bin/rails console
+### Admin Users
 
-User.create!(
-  email: "your-email@example.com",
-  clerk_id: "seed_#{SecureRandom.hex}",
-  name: "Your Name",
-  role: "admin",
-  admin: true
-)
+**How admin access works:**
+1. User signs in via Clerk (Google, Facebook, or email)
+2. Rails automatically creates a user record with their Clerk ID
+3. `shimizutechnology@gmail.com` is automatically made admin
+
+**To make someone else an admin:**
+```bash
+# Step 1: Have them sign in to the site first (creates their user record)
+# Step 2: Then update their role:
+
+bin/rails console
+User.find_by(email: "their-email@example.com")&.update!(role: "admin")
 ```
+
+That's it! The user must sign in first so they have a real Clerk ID in the database.
 
 ---
 
