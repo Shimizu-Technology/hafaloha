@@ -15,8 +15,11 @@ import AdminProductsPage from './pages/admin/AdminProductsPage';
 import AdminCollectionsPage from './pages/admin/AdminCollectionsPage';
 import AdminImportPage from './pages/admin/AdminImportPage';
 import ProductFormPage from './pages/admin/ProductFormPage';
+import AdminAcaiPage from './pages/admin/AdminAcaiPage';
+import AdminUsersPage from './pages/admin/AdminUsersPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
+import AcaiCakesPage from './pages/AcaiCakesPage';
 import NotFoundPage from './pages/NotFoundPage';
 import axios from 'axios';
 import { Toaster } from 'react-hot-toast';
@@ -150,8 +153,8 @@ function AppContent() {
         {/* Cart Drawer */}
         <CartDrawer />
 
-        {/* Navigation */}
-        <nav className="bg-white shadow-md sticky top-0 z-50">
+        {/* Navigation - Hidden when printing */}
+        <nav className="bg-white shadow-md sticky top-0 z-50 print:hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               {/* Logo */}
@@ -178,6 +181,13 @@ function AppContent() {
                   onClick={handleNavClick}
                 >
                   Collections
+                </Link>
+                <Link
+                  to="/acai-cakes"
+                  className="text-gray-700 hover:text-hafalohaRed font-medium transition"
+                  onClick={handleNavClick}
+                >
+                  Acai Cakes
                 </Link>
                 <Link
                   to="/about"
@@ -299,6 +309,13 @@ function AppContent() {
                   Collections
                 </Link>
                 <Link
+                  to="/acai-cakes"
+                  className="block text-gray-700 hover:text-hafalohaRed font-medium py-2"
+                  onClick={handleNavClick}
+                >
+                  Acai Cakes
+                </Link>
+                <Link
                   to="/about"
                   className="block text-gray-700 hover:text-hafalohaRed font-medium py-2"
                   onClick={handleNavClick}
@@ -333,6 +350,7 @@ function AppContent() {
           <Route path="/collections" element={<CollectionsPage />} />
           <Route path="/collections/:slug" element={<CollectionDetailPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/acai-cakes" element={<AcaiCakesPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/orders/:id" element={<OrderConfirmationPage />} />
           
@@ -345,14 +363,16 @@ function AppContent() {
             <Route path="products/:id/edit" element={<ProductFormPage />} />
             <Route path="collections" element={<AdminCollectionsPage />} />
             <Route path="import" element={<AdminImportPage />} />
+            <Route path="acai" element={<AdminAcaiPage />} />
+            <Route path="users" element={<AdminUsersPage />} />
             <Route path="settings" element={<AdminSettingsPage />} />
           </Route>
           
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
 
-        {/* Footer */}
-        <footer className="bg-gray-900 text-white">
+        {/* Footer - Hidden when printing */}
+        <footer className="bg-gray-900 text-white print:hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
               {/* Brand */}

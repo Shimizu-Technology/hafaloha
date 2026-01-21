@@ -20,7 +20,7 @@ interface Order {
   order_number: string;
   status: string;
   payment_status: string;
-  order_type: string;
+  order_type: 'retail' | 'acai' | 'wholesale';
   customer_name: string;
   customer_email: string;
   customer_phone: string;
@@ -29,17 +29,26 @@ interface Order {
   tax_cents: number;
   total_cents: number;
   shipping_method: string;
-  shipping_address_line1: string;
+  // Shipping fields (for retail)
+  shipping_address_line1?: string;
   shipping_address_line2?: string;
-  shipping_city: string;
-  shipping_state: string;
-  shipping_zip: string;
-  shipping_country: string;
+  shipping_city?: string;
+  shipping_state?: string;
+  shipping_zip?: string;
+  shipping_country?: string;
   tracking_number?: string;
+  // Acai fields
+  acai_pickup_date?: string;
+  acai_pickup_time?: string;
+  acai_crust_type?: string;
+  acai_include_placard?: boolean;
+  acai_placard_text?: string;
+  pickup_location?: string;
+  // Common
   admin_notes?: string;
   notes?: string;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
   order_items: OrderItem[];
   item_count: number;
 }
@@ -54,6 +63,7 @@ export default function AdminOrdersPage() {
   
   // Filters
   const [statusFilter, setStatusFilter] = useState('all');
+  const [orderTypeFilter, setOrderTypeFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
@@ -64,6 +74,12 @@ export default function AdminOrdersPage() {
   const [editAdminNotes, setEditAdminNotes] = useState('');
   const [saving, setSaving] = useState(false);
 
+  // Ship Order modal state
+  const [showShipModal, setShowShipModal] = useState(false);
+  const [shipOrderId, setShipOrderId] = useState<number | null>(null);
+  const [shipTrackingNumber, setShipTrackingNumber] = useState('');
+  const [shipCarrier, setShipCarrier] = useState('');
+
   // Fetch orders
   const fetchOrders = async () => {
     try {
@@ -72,6 +88,7 @@ export default function AdminOrdersPage() {
       
       const params: any = { page, per_page: 25 };
       if (statusFilter !== 'all') params.status = statusFilter;
+      if (orderTypeFilter !== 'all') params.order_type = orderTypeFilter;
       if (searchQuery) params.search = searchQuery;
       
       const response = await axios.get(`${API_BASE_URL}/api/v1/orders`, {
@@ -91,7 +108,7 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     fetchOrders();
-  }, [page, statusFilter]);
+  }, [page, statusFilter, orderTypeFilter]);
 
   // Fetch single order with full details
   const fetchOrderDetails = async (orderId: number) => {
@@ -167,13 +184,163 @@ export default function AdminOrdersPage() {
   const getStatusBadge = (status: string) => {
     const badges: { [key: string]: string } = {
       pending: 'bg-yellow-100 text-yellow-800',
+      confirmed: 'bg-indigo-100 text-indigo-800',
       processing: 'bg-blue-100 text-blue-800',
+      ready: 'bg-emerald-100 text-emerald-800',
       shipped: 'bg-purple-100 text-purple-800',
+      picked_up: 'bg-green-100 text-green-800',
       delivered: 'bg-green-100 text-green-800',
       cancelled: 'bg-red-100 text-red-800',
     };
     
     return badges[status] || 'bg-gray-100 text-gray-800';
+  };
+
+  // Quick status update function
+  const quickUpdateStatus = async (orderId: number, newStatus: string) => {
+    // If marking as shipped, show the ship modal instead
+    if (newStatus === 'shipped') {
+      setShipOrderId(orderId);
+      setShipTrackingNumber('');
+      setShipCarrier('');
+      setShowShipModal(true);
+      return;
+    }
+
+    try {
+      const token = await getToken();
+      
+      const response = await axios.patch(
+        `${API_BASE_URL}/api/v1/admin/orders/${orderId}`,
+        { order: { status: newStatus } },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      // Update the order in the list
+      setOrders(orders.map(o => o.id === orderId ? response.data.order : o));
+      
+      // If modal is open for this order, update it too
+      if (selectedOrder?.id === orderId) {
+        setSelectedOrder(response.data.order);
+        setEditStatus(response.data.order.status);
+      }
+      
+      toast.success(`Order marked as ${formatStatus(newStatus)}!`);
+    } catch (err: any) {
+      console.error('Failed to update order status:', err);
+      toast.error(err.response?.data?.error || 'Failed to update status');
+    }
+  };
+
+  // Ship order with tracking number
+  const shipOrder = async () => {
+    if (!shipOrderId) return;
+    
+    try {
+      setSaving(true);
+      const token = await getToken();
+      
+      const trackingInfo = shipCarrier && shipTrackingNumber 
+        ? `${shipCarrier}: ${shipTrackingNumber}`
+        : shipTrackingNumber;
+      
+      const response = await axios.patch(
+        `${API_BASE_URL}/api/v1/admin/orders/${shipOrderId}`,
+        { 
+          order: { 
+            status: 'shipped',
+            tracking_number: trackingInfo || null
+          } 
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      // Update the order in the list
+      setOrders(orders.map(o => o.id === shipOrderId ? response.data.order : o));
+      
+      // If modal is open for this order, update it too
+      if (selectedOrder?.id === shipOrderId) {
+        setSelectedOrder(response.data.order);
+        setEditStatus(response.data.order.status);
+        setEditTracking(response.data.order.tracking_number || '');
+      }
+      
+      setShowShipModal(false);
+      setShipOrderId(null);
+      setShipTrackingNumber('');
+      setShipCarrier('');
+      
+      toast.success('Order shipped! Customer will receive a notification email.');
+    } catch (err: any) {
+      console.error('Failed to ship order:', err);
+      toast.error(err.response?.data?.error || 'Failed to ship order');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Get next status action based on order type and current status
+  const getNextStatusAction = (order: Order): { label: string; status: string; color: string } | null => {
+    if (order.order_type === 'retail') {
+      // Retail workflow: pending → processing → shipped → delivered
+      switch (order.status) {
+        case 'pending':
+          return { label: 'Process', status: 'processing', color: 'bg-blue-600 hover:bg-blue-700' };
+        case 'processing':
+          return { label: 'Ship', status: 'shipped', color: 'bg-purple-600 hover:bg-purple-700' };
+        case 'shipped':
+          return { label: 'Delivered', status: 'delivered', color: 'bg-green-600 hover:bg-green-700' };
+        default:
+          return null;
+      }
+    } else {
+      // Acai/Wholesale workflow: pending → confirmed → ready → picked_up
+      // Also handle legacy "processing" status for Acai orders
+      switch (order.status) {
+        case 'pending':
+          return { label: 'Confirm', status: 'confirmed', color: 'bg-indigo-600 hover:bg-indigo-700' };
+        case 'confirmed':
+        case 'processing': // Handle legacy status - treat as confirmed
+          return { label: 'Ready', status: 'ready', color: 'bg-emerald-600 hover:bg-emerald-700' };
+        case 'ready':
+          return { label: 'Picked Up', status: 'picked_up', color: 'bg-green-600 hover:bg-green-700' };
+        default:
+          return null;
+      }
+    }
+  };
+
+  // Resend notification email (for orders that are ready/shipped)
+  const resendNotification = async (orderId: number, orderType: string, status: string) => {
+    try {
+      const token = await getToken();
+      
+      await axios.post(
+        `${API_BASE_URL}/api/v1/admin/orders/${orderId}/notify`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      toast.success('Notification email sent to customer!');
+    } catch (err: any) {
+      console.error('Failed to send notification:', err);
+      toast.error(err.response?.data?.error || 'Failed to send notification');
+    }
+  };
+
+  // Format status for display
+  const formatStatus = (status: string) => {
+    const labels: { [key: string]: string } = {
+      pending: 'Pending',
+      confirmed: 'Confirmed',
+      processing: 'Processing',
+      ready: 'Ready',
+      shipped: 'Shipped',
+      picked_up: 'Picked Up',
+      delivered: 'Delivered',
+      cancelled: 'Cancelled',
+    };
+    return labels[status] || status;
   };
 
   return (
@@ -220,10 +387,30 @@ export default function AdminOrdersPage() {
           >
             <option value="all">All Status</option>
             <option value="pending">Pending</option>
-            <option value="processing">Processing</option>
-            <option value="shipped">Shipped</option>
+            <option value="confirmed">Confirmed (Pickup)</option>
+            <option value="processing">Processing (Retail)</option>
+            <option value="ready">Ready (Pickup)</option>
+            <option value="shipped">Shipped (Retail)</option>
+            <option value="picked_up">Picked Up</option>
             <option value="delivered">Delivered</option>
             <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+
+        {/* Order Type Filter */}
+        <div className="flex gap-2">
+          <select
+            value={orderTypeFilter}
+            onChange={(e) => {
+              setOrderTypeFilter(e.target.value);
+              setPage(1);
+            }}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+          >
+            <option value="all">All Types</option>
+            <option value="retail">🛍️ Retail</option>
+            <option value="acai">🍰 Acai Cakes</option>
+            <option value="wholesale">📦 Wholesale</option>
           </select>
         </div>
       </div>
@@ -241,8 +428,8 @@ export default function AdminOrdersPage() {
         </div>
       ) : (
         <>
-          {/* Desktop Table */}
-          <div className="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
+          {/* Desktop Table - Scrollable on medium screens */}
+          <div className="hidden md:block bg-white rounded-lg shadow overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -264,7 +451,7 @@ export default function AdminOrdersPage() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[180px]">
                     Actions
                   </th>
                 </tr>
@@ -274,7 +461,15 @@ export default function AdminOrdersPage() {
                   <tr key={order.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">{order.order_number}</div>
-                      <div className="text-xs text-gray-500">{order.order_type}</div>
+                      <div className="mt-1">
+                        {order.order_type === 'acai' ? (
+                          <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-800 rounded">🍰 Acai</span>
+                        ) : order.order_type === 'wholesale' ? (
+                          <span className="px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-800 rounded">📦 Wholesale</span>
+                        ) : (
+                          <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">🛍️ Retail</span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-gray-900">{order.customer_name}</div>
@@ -288,19 +483,40 @@ export default function AdminOrdersPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusBadge(order.status)}`}>
-                        {order.status}
+                        {formatStatus(order.status)}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(order.created_at)}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <button
-                        onClick={() => fetchOrderDetails(order.id)}
-                        className="text-hafalohaRed hover:text-red-700 font-medium"
-                      >
-                        View
-                      </button>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center gap-3">
+                        {/* Quick Action Button */}
+                        {(() => {
+                          const nextAction = getNextStatusAction(order);
+                          if (nextAction) {
+                            return (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  quickUpdateStatus(order.id, nextAction.status);
+                                }}
+                                className={`inline-flex items-center px-3 py-1.5 text-white text-xs font-semibold rounded-md shadow-sm transition-colors ${nextAction.color}`}
+                              >
+                                {nextAction.label}
+                              </button>
+                            );
+                          }
+                          return null;
+                        })()}
+                        {/* View Button */}
+                        <button
+                          onClick={() => fetchOrderDetails(order.id)}
+                          className="inline-flex items-center px-3 py-1.5 text-gray-700 text-xs font-semibold bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+                        >
+                          Details
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -309,42 +525,70 @@ export default function AdminOrdersPage() {
           </div>
 
           {/* Mobile Cards */}
-          <div className="lg:hidden space-y-4">
-            {orders.map((order) => (
-              <div key={order.id} className="bg-white rounded-lg shadow p-4">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <p className="font-semibold text-gray-900">{order.order_number}</p>
-                    <p className="text-sm text-gray-600">{order.customer_name}</p>
+          <div className="md:hidden space-y-4">
+            {orders.map((order) => {
+              const nextAction = getNextStatusAction(order);
+              return (
+                <div key={order.id} className="bg-white rounded-lg shadow p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <p className="font-semibold text-gray-900">{order.order_number}</p>
+                      <p className="text-sm text-gray-600">{order.customer_name}</p>
+                      <div className="mt-1">
+                        {order.order_type === 'acai' ? (
+                          <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-800 rounded">🍰 Acai</span>
+                        ) : order.order_type === 'wholesale' ? (
+                          <span className="px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-800 rounded">📦 Wholesale</span>
+                        ) : (
+                          <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">🛍️ Retail</span>
+                        )}
+                      </div>
+                    </div>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(order.status)}`}>
+                      {formatStatus(order.status)}
+                    </span>
                   </div>
-                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusBadge(order.status)}`}>
-                    {order.status}
-                  </span>
-                </div>
-                
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Items:</span>
-                    <span className="font-medium">{order.item_count}</span>
+                  
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Items:</span>
+                      <span className="font-medium">{order.item_count}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Total:</span>
+                      <span className="font-semibold">{formatCurrency(order.total_cents)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Date:</span>
+                      <span>{formatDate(order.created_at)}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Total:</span>
-                    <span className="font-semibold">{formatCurrency(order.total_cents)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Date:</span>
-                    <span>{formatDate(order.created_at)}</span>
-                  </div>
-                </div>
 
-                <button
-                  onClick={() => fetchOrderDetails(order.id)}
-                  className="mt-4 w-full px-4 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition"
-                >
-                  View Details
-                </button>
-              </div>
-            ))}
+                  <div className="mt-4 flex gap-3">
+                    {/* Quick Action Button */}
+                    {nextAction && (
+                      <button
+                        onClick={() => quickUpdateStatus(order.id, nextAction.status)}
+                        className={`flex-1 px-4 py-2.5 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors ${nextAction.color}`}
+                      >
+                        {nextAction.label}
+                      </button>
+                    )}
+                    {/* View Button */}
+                    <button
+                      onClick={() => fetchOrderDetails(order.id)}
+                      className={`${nextAction ? 'flex-1' : 'w-full'} px-4 py-2.5 text-sm font-semibold rounded-lg transition-colors ${
+                        nextAction 
+                          ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' 
+                          : 'bg-hafalohaRed text-white hover:bg-red-700'
+                      }`}
+                    >
+                      {nextAction ? 'Details' : 'View Details'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
           {/* Pagination */}
@@ -375,20 +619,34 @@ export default function AdminOrdersPage() {
       {/* Order Details Modal */}
       {selectedOrder && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-white/30" 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-white/30 print:bg-white print:p-0 print:block" 
           onClick={() => {
             setSelectedOrder(null);
             setIsEditing(false);
           }}
         >
+          {/* Print Styles */}
+          <style>{`
+            @media print {
+              body * { visibility: hidden; }
+              .print-content, .print-content * { visibility: visible; }
+              .print-content { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; }
+              .print-hide { display: none !important; }
+              @page { margin: 0.5in; }
+            }
+          `}</style>
           <div 
-            className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" 
+            className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl print:shadow-none print:max-h-none print:overflow-visible print-content" 
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10">
+            <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10 print:static print:border-b-2 print:border-gray-400">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">Order #{selectedOrder.order_number}</h2>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  <span className="print:hidden">Order #</span>
+                  <span className="hidden print:inline text-3xl">HAFALOHA - PACKING SLIP<br /></span>
+                  {selectedOrder.order_number}
+                </h2>
                 <p className="text-sm text-gray-500 mt-1">{formatDate(selectedOrder.created_at)}</p>
               </div>
               <button
@@ -396,31 +654,49 @@ export default function AdminOrdersPage() {
                   setSelectedOrder(null);
                   setIsEditing(false);
                 }}
-                className="text-gray-400 hover:text-gray-600 text-3xl leading-none"
+                className="text-gray-400 hover:text-gray-600 text-3xl leading-none print-hide"
               >
                 ×
               </button>
             </div>
 
             <div className="p-6 space-y-6">
-              {/* Order Management Section */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex justify-between items-center mb-4">
+              {/* Order Management Section - Hidden in print */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 print-hide">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                   <h3 className="font-semibold text-gray-900">Order Management</h3>
-                  {!isEditing && (
-                    <button
-                      type="button"
-                      onClick={() => setIsEditing(true)}
-                      className="px-4 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition text-sm font-medium"
-                    >
-                      Edit Order
-                    </button>
-                  )}
+                  <div className="flex gap-2 w-full sm:w-auto">
+                    {/* Quick Action Button */}
+                    {!isEditing && (() => {
+                      const nextAction = getNextStatusAction(selectedOrder);
+                      if (nextAction) {
+                        return (
+                          <button
+                            type="button"
+                            onClick={() => quickUpdateStatus(selectedOrder.id, nextAction.status)}
+                            className={`flex-1 sm:flex-none px-4 py-2 text-white rounded-lg transition text-sm font-medium ${nextAction.color}`}
+                          >
+                            {nextAction.label}
+                          </button>
+                        );
+                      }
+                      return null;
+                    })()}
+                    {!isEditing && (
+                      <button
+                        type="button"
+                        onClick={() => setIsEditing(true)}
+                        className="flex-1 sm:flex-none px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition text-sm font-medium"
+                      >
+                        Edit Details
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {isEditing ? (
                   <div className="space-y-4">
-                    {/* Status Dropdown */}
+                    {/* Status Dropdown - Contextual based on order type */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Order Status *
@@ -431,9 +707,19 @@ export default function AdminOrdersPage() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
                       >
                         <option value="pending">Pending</option>
-                        <option value="processing">Processing</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="delivered">Delivered</option>
+                        {selectedOrder.order_type === 'retail' ? (
+                          <>
+                            <option value="processing">Processing</option>
+                            <option value="shipped">Shipped</option>
+                            <option value="delivered">Delivered</option>
+                          </>
+                        ) : (
+                          <>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="ready">Ready for Pickup</option>
+                            <option value="picked_up">Picked Up</option>
+                          </>
+                        )}
                         <option value="cancelled">Cancelled</option>
                       </select>
                     </div>
@@ -496,13 +782,15 @@ export default function AdminOrdersPage() {
                     <div>
                       <p className="text-gray-600 mb-1">Status</p>
                       <span className={`inline-block px-3 py-1 text-sm font-semibold rounded-full ${getStatusBadge(selectedOrder.status)}`}>
-                        {selectedOrder.status}
+                        {formatStatus(selectedOrder.status)}
                       </span>
                     </div>
-                    <div>
-                      <p className="text-gray-600 mb-1">Tracking Number</p>
-                      <p className="font-medium">{selectedOrder.tracking_number || 'Not added yet'}</p>
-                    </div>
+                    {selectedOrder.order_type === 'retail' && (
+                      <div>
+                        <p className="text-gray-600 mb-1">Tracking Number</p>
+                        <p className="font-medium">{selectedOrder.tracking_number || 'Not added yet'}</p>
+                      </div>
+                    )}
                     {selectedOrder.admin_notes && (
                       <div className="md:col-span-2">
                         <p className="text-gray-600 mb-1">Admin Notes</p>
@@ -543,20 +831,68 @@ export default function AdminOrdersPage() {
                 </div>
               </div>
 
-              {/* Shipping Address */}
-              <div>
-                <h3 className="font-semibold text-gray-900 mb-3">Shipping Address</h3>
-                <div className="text-sm text-gray-700 bg-gray-50 p-4 rounded-lg">
-                  <p className="font-medium">{selectedOrder.shipping_address_line1}</p>
-                  {selectedOrder.shipping_address_line2 && <p>{selectedOrder.shipping_address_line2}</p>}
-                  <p>{selectedOrder.shipping_city}, {selectedOrder.shipping_state} {selectedOrder.shipping_zip}</p>
-                  <p>{selectedOrder.shipping_country}</p>
-                  <p className="mt-3 pt-3 border-t border-gray-200">
-                    <span className="text-gray-600">Shipping Method:</span> 
-                    <span className="font-medium ml-1">{selectedOrder.shipping_method}</span>
-                  </p>
+              {/* Acai Pickup Info (for acai orders) */}
+              {selectedOrder.order_type === 'acai' && (
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-3">🍰 Acai Cake Details</h3>
+                  <div className="text-sm bg-purple-50 border border-purple-200 p-4 rounded-lg space-y-2">
+                    {selectedOrder.acai_pickup_date && (
+                      <p>
+                        <span className="text-purple-600 font-medium">Pickup Date:</span> 
+                        <span className="font-medium ml-1">
+                          {new Date(selectedOrder.acai_pickup_date + 'T00:00:00').toLocaleDateString('en-US', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </span>
+                      </p>
+                    )}
+                    {selectedOrder.acai_pickup_time && (
+                      <p>
+                        <span className="text-purple-600 font-medium">Pickup Time:</span> 
+                        <span className="font-medium ml-1">{selectedOrder.acai_pickup_time}</span>
+                      </p>
+                    )}
+                    {selectedOrder.acai_crust_type && (
+                      <p>
+                        <span className="text-purple-600 font-medium">Base/Crust:</span> 
+                        <span className="font-medium ml-1">{selectedOrder.acai_crust_type}</span>
+                      </p>
+                    )}
+                    {selectedOrder.acai_include_placard && selectedOrder.acai_placard_text && (
+                      <p>
+                        <span className="text-purple-600 font-medium">Placard Message:</span> 
+                        <span className="font-medium ml-1 italic">"{selectedOrder.acai_placard_text}"</span>
+                      </p>
+                    )}
+                    {selectedOrder.pickup_location && (
+                      <p className="mt-3 pt-3 border-t border-purple-200">
+                        <span className="text-purple-600 font-medium">Pickup Location:</span> 
+                        <span className="font-medium ml-1">{selectedOrder.pickup_location}</span>
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Shipping Address (for retail orders) */}
+              {selectedOrder.order_type === 'retail' && selectedOrder.shipping_address_line1 && (
+                <div>
+                  <h3 className="font-semibold text-gray-900 mb-3">Shipping Address</h3>
+                  <div className="text-sm text-gray-700 bg-gray-50 p-4 rounded-lg">
+                    <p className="font-medium">{selectedOrder.shipping_address_line1}</p>
+                    {selectedOrder.shipping_address_line2 && <p>{selectedOrder.shipping_address_line2}</p>}
+                    <p>{selectedOrder.shipping_city}, {selectedOrder.shipping_state} {selectedOrder.shipping_zip}</p>
+                    <p>{selectedOrder.shipping_country}</p>
+                    <p className="mt-3 pt-3 border-t border-gray-200">
+                      <span className="text-gray-600">Shipping Method:</span> 
+                      <span className="font-medium ml-1">{selectedOrder.shipping_method}</span>
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Customer Notes */}
               {selectedOrder.notes && (
@@ -605,28 +941,129 @@ export default function AdminOrdersPage() {
                   </div>
                   <div className="flex justify-between font-bold text-lg pt-3 border-t border-gray-300">
                     <span>Total:</span>
-                    <span className="text-hafalohaRed">{formatCurrency(selectedOrder.total_cents)}</span>
+                    <span className="text-hafalohaRed print:text-black">{formatCurrency(selectedOrder.total_cents)}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Action Buttons (bottom) */}
-              <div className="flex gap-3 pt-4 border-t">
+              {/* Print-only thank you message */}
+              <div className="hidden print:block text-center pt-8 border-t border-gray-300 mt-4">
+                <p className="text-lg font-semibold text-gray-800">Thank you for your order!</p>
+                <p className="text-sm text-gray-600 mt-2">Hafaloha - Chamorro Pride. Island Style.</p>
+                <p className="text-xs text-gray-500 mt-1">Questions? Contact us at info@hafaloha.com</p>
+              </div>
+
+              {/* Action Buttons (bottom) - Hidden in print */}
+              <div className="flex flex-wrap gap-3 pt-4 border-t print-hide">
+                {/* Notify Customer button for ready/shipped orders */}
+                {(selectedOrder.status === 'ready' || selectedOrder.status === 'shipped') && (
+                  <button
+                    type="button"
+                    onClick={() => resendNotification(selectedOrder.id, selectedOrder.order_type, selectedOrder.status)}
+                    className="flex-1 min-w-[140px] px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
+                  >
+                    🔔 Notify Customer
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="flex-1 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition font-medium"
+                  className="flex-1 min-w-[140px] px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition font-medium"
                 >
                   🖨️ Print Packing Slip
                 </button>
                 <button
                   type="button"
                   onClick={() => window.open(`mailto:${selectedOrder.customer_email}`, '_blank')}
-                  className="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                  className="flex-1 min-w-[140px] px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
                 >
                   ✉️ Email Customer
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Ship Order Modal */}
+      {showShipModal && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/30"
+          onClick={() => {
+            setShowShipModal(false);
+            setShipOrderId(null);
+          }}
+        >
+          <div 
+            className="bg-white rounded-lg max-w-md w-full shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">📦 Ship Order</h2>
+              <p className="text-sm text-gray-500 mt-1">
+                Add tracking information and mark as shipped
+              </p>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Carrier Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Shipping Carrier
+                </label>
+                <select
+                  value={shipCarrier}
+                  onChange={(e) => setShipCarrier(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                >
+                  <option value="">Select carrier...</option>
+                  <option value="USPS">USPS</option>
+                  <option value="UPS">UPS</option>
+                  <option value="FedEx">FedEx</option>
+                  <option value="DHL">DHL</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              {/* Tracking Number */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Tracking Number
+                </label>
+                <input
+                  type="text"
+                  value={shipTrackingNumber}
+                  onChange={(e) => setShipTrackingNumber(e.target.value)}
+                  placeholder="Enter tracking number..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                />
+              </div>
+
+              <p className="text-sm text-gray-500">
+                💡 The customer will receive an email notification with the tracking information.
+              </p>
+            </div>
+
+            <div className="p-6 border-t border-gray-200 flex gap-3">
+              <button
+                type="button"
+                onClick={shipOrder}
+                disabled={saving}
+                className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving ? 'Shipping...' : '📦 Mark as Shipped'}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowShipModal(false);
+                  setShipOrderId(null);
+                }}
+                disabled={saving}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium disabled:opacity-50"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

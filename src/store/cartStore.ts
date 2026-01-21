@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import api from '../services/api';
 import type { Cart, CartValidation } from '../types/cart';
+import toast from 'react-hot-toast';
 
 interface CartStore {
   // State
@@ -99,7 +100,7 @@ export const useCartStore = create<CartStore>()(
           
           // Handle error (show toast)
           const errorMessage = error.response?.data?.error || 'Failed to add item to cart';
-          alert(errorMessage); // Replace with toast notification
+          toast.error(errorMessage);
           throw error;
         }
       },
@@ -127,7 +128,7 @@ export const useCartStore = create<CartStore>()(
           set({ isLoading: false });
           
           const errorMessage = error.response?.data?.error || 'Failed to update quantity';
-          alert(errorMessage);
+          toast.error(errorMessage);
           throw error;
         }
       },

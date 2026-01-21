@@ -17,6 +17,7 @@ interface Order {
   order_number: string;
   status: string;
   payment_status: string;
+  order_type: 'retail' | 'acai' | 'wholesale';
   customer_name: string;
   customer_email: string;
   customer_phone: string;
@@ -25,12 +26,22 @@ interface Order {
   tax_cents: number;
   total_cents: number;
   shipping_method: string;
-  shipping_address_line1: string;
+  // Retail/Shipping fields
+  shipping_address_line1?: string;
   shipping_address_line2?: string;
-  shipping_city: string;
-  shipping_state: string;
-  shipping_zip: string;
-  shipping_country: string;
+  shipping_city?: string;
+  shipping_state?: string;
+  shipping_zip?: string;
+  shipping_country?: string;
+  // Acai-specific fields
+  acai_pickup_date?: string;
+  acai_pickup_time?: string;
+  acai_crust_type?: string;
+  acai_include_placard?: boolean;
+  acai_placard_text?: string;
+  pickup_location?: string;
+  pickup_phone?: string;
+  // Common
   order_items: OrderItem[];
   created_at: string;
 }
@@ -78,6 +89,60 @@ export default function OrderConfirmationPage() {
     });
   };
 
+  const formatPickupDate = (dateString: string) => {
+    const date = new Date(dateString + 'T00:00:00');
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const formatPickupTime = (timeString: string) => {
+    if (!timeString) return 'Time not specified';
+    
+    // Handle ISO datetime format (e.g., "2000-01-01T13:30:00.000Z")
+    if (timeString.includes('T')) {
+      try {
+        const date = new Date(timeString);
+        // Get the hours and minutes from the UTC time (since time-only is stored as UTC)
+        const hours = date.getUTCHours();
+        const minutes = date.getUTCMinutes();
+        const period = hours >= 12 ? 'PM' : 'AM';
+        const hour12 = hours > 12 ? hours - 12 : hours === 0 ? 12 : hours;
+        return `${hour12}:${minutes.toString().padStart(2, '0')} ${period}`;
+      } catch {
+        return timeString;
+      }
+    }
+    
+    // Handle "HH:MM-HH:MM" format (slot range)
+    if (timeString.includes('-') && timeString.includes(':')) {
+      const parts = timeString.split('-');
+      return parts.map(part => {
+        const [hours, minutes] = part.trim().split(':');
+        const hour = parseInt(hours);
+        if (isNaN(hour)) return part;
+        const period = hour >= 12 ? 'PM' : 'AM';
+        const hour12 = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+        return `${hour12}:${minutes} ${period}`;
+      }).join(' - ');
+    }
+    
+    // Handle simple "HH:MM" format
+    if (timeString.includes(':')) {
+      const [hours, minutes] = timeString.split(':');
+      const hour = parseInt(hours);
+      if (isNaN(hour)) return timeString;
+      const period = hour >= 12 ? 'PM' : 'AM';
+      const hour12 = hour > 12 ? hour - 12 : hour === 0 ? 12 : hour;
+      return `${hour12}:${minutes} ${period}`;
+    }
+    
+    return timeString;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
@@ -107,14 +172,53 @@ export default function OrderConfirmationPage() {
     );
   }
 
+  const isAcaiOrder = order.order_type === 'acai';
+  const isPickupOrder = order.shipping_method === 'pickup' || isAcaiOrder;
+
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
-        {/* Success Header */}
-        <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6 text-center">
-          <div className="text-6xl mb-4">🎉</div>
+    <>
+      {/* Print styles */}
+      <style>{`
+        @media print {
+          body {
+            background: white !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          .print\\:hidden {
+            display: none !important;
+          }
+          .print\\:break-inside-avoid {
+            break-inside: avoid !important;
+          }
+          .print\\:shadow-none {
+            box-shadow: none !important;
+          }
+          .print\\:border {
+            border: 1px solid #e5e7eb !important;
+          }
+          .print\\:p-4 {
+            padding: 1rem !important;
+          }
+          .print\\:mb-4 {
+            margin-bottom: 1rem !important;
+          }
+          .print\\:text-sm {
+            font-size: 0.875rem !important;
+          }
+          @page {
+            margin: 0.75in;
+            size: letter;
+          }
+        }
+      `}</style>
+      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 print:bg-white print:py-0">
+        <div className="max-w-3xl mx-auto">
+          {/* Success Header */}
+          <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6 text-center print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
+          <div className="text-6xl mb-4">{isAcaiOrder ? '🍰' : '🎉'}</div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-            Order Confirmed!
+            {isAcaiOrder ? 'Acai Cake Order Confirmed!' : 'Order Confirmed!'}
           </h1>
           <p className="text-gray-600 mb-4">
             Thank you for your order, {order.customer_name}!
@@ -128,8 +232,64 @@ export default function OrderConfirmationPage() {
           </p>
         </div>
 
+        {/* Acai Pickup Details */}
+        {isAcaiOrder && order.acai_pickup_date && (
+          <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 border-b pb-2 flex items-center">
+              <span className="text-2xl mr-2">📍</span> Pickup Details
+            </h2>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-blue-600 font-medium mb-1">Pickup Date</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    📅 {formatPickupDate(order.acai_pickup_date)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-blue-600 font-medium mb-1">Pickup Time</p>
+                  <p className="text-lg font-bold text-gray-900">
+                    🕐 {order.acai_pickup_time && formatPickupTime(order.acai_pickup_time)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-gray-600 font-medium mb-1">Location</p>
+                <p className="font-semibold text-gray-900">{order.pickup_location}</p>
+              </div>
+              
+              {order.pickup_phone && (
+                <div>
+                  <p className="text-sm text-gray-600 font-medium mb-1">Phone</p>
+                  <a href={`tel:${order.pickup_phone}`} className="font-semibold text-hafalohaRed hover:underline">
+                    {order.pickup_phone}
+                  </a>
+                </div>
+              )}
+
+              {order.acai_crust_type && (
+                <div>
+                  <p className="text-sm text-gray-600 font-medium mb-1">Base/Crust</p>
+                  <p className="font-semibold text-gray-900">{order.acai_crust_type}</p>
+                </div>
+              )}
+
+              {order.acai_include_placard && order.acai_placard_text && (
+                <div>
+                  <p className="text-sm text-gray-600 font-medium mb-1">Message Placard</p>
+                  <p className="font-semibold text-gray-900 italic">"{order.acai_placard_text}"</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Order Details */}
-        <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6">
+        <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
           <h2 className="text-xl font-bold text-gray-900 mb-4 border-b pb-2">Order Details</h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
@@ -152,8 +312,12 @@ export default function OrderConfirmationPage() {
               <p className="font-semibold capitalize">{order.status}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Shipping Method</p>
-              <p className="font-semibold">{order.shipping_method}</p>
+              <p className="text-sm text-gray-600">
+                {isPickupOrder ? 'Fulfillment' : 'Shipping Method'}
+              </p>
+              <p className="font-semibold">
+                {isPickupOrder ? '📍 Pickup' : order.shipping_method}
+              </p>
             </div>
           </div>
 
@@ -188,10 +352,12 @@ export default function OrderConfirmationPage() {
               <span className="text-gray-600">Subtotal</span>
               <span className="font-semibold">{formatPrice(order.subtotal_cents)}</span>
             </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Shipping</span>
-              <span className="font-semibold">{formatPrice(order.shipping_cost_cents)}</span>
-            </div>
+            {!isPickupOrder && (
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-600">Shipping</span>
+                <span className="font-semibold">{formatPrice(order.shipping_cost_cents)}</span>
+              </div>
+            )}
             {order.tax_cents > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Tax</span>
@@ -205,31 +371,33 @@ export default function OrderConfirmationPage() {
           </div>
         </div>
 
-        {/* Shipping Address */}
-        <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-4 border-b pb-2">Shipping Address</h2>
-          <div className="text-gray-700">
-            <p className="font-semibold">{order.customer_name}</p>
-            <p>{order.shipping_address_line1}</p>
-            {order.shipping_address_line2 && <p>{order.shipping_address_line2}</p>}
-            <p>
-              {order.shipping_city}, {order.shipping_state} {order.shipping_zip}
-            </p>
-            <p>{order.shipping_country}</p>
+        {/* Shipping Address - Only for non-pickup orders */}
+        {!isPickupOrder && order.shipping_address_line1 && (
+          <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 border-b pb-2">Shipping Address</h2>
+            <div className="text-gray-700">
+              <p className="font-semibold">{order.customer_name}</p>
+              <p>{order.shipping_address_line1}</p>
+              {order.shipping_address_line2 && <p>{order.shipping_address_line2}</p>}
+              <p>
+                {order.shipping_city}, {order.shipping_state} {order.shipping_zip}
+              </p>
+              <p>{order.shipping_country}</p>
+            </div>
+            <div className="mt-4 text-sm text-gray-600">
+              <p>Phone: {order.customer_phone}</p>
+              <p>Email: {order.customer_email}</p>
+            </div>
           </div>
-          <div className="mt-4 text-sm text-gray-600">
-            <p>Phone: {order.customer_phone}</p>
-            <p>Email: {order.customer_email}</p>
-          </div>
-        </div>
+        )}
 
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-4">
+        {/* Actions - Hidden when printing */}
+        <div className="flex flex-col sm:flex-row gap-4 print:hidden">
           <button
-            onClick={() => navigate('/products')}
+            onClick={() => navigate(isAcaiOrder ? '/acai-cakes' : '/products')}
             className="flex-1 bg-hafalohaRed text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition text-center"
           >
-            Continue Shopping
+            {isAcaiOrder ? 'Order Another Cake' : 'Continue Shopping'}
           </button>
           <button
             onClick={() => window.print()}
@@ -239,8 +407,8 @@ export default function OrderConfirmationPage() {
           </button>
         </div>
 
-        {/* Help Text */}
-        <div className="mt-8 text-center text-sm text-gray-600">
+        {/* Help Text - Hidden when printing */}
+        <div className="mt-8 text-center text-sm text-gray-600 print:hidden">
           <p>
             Questions about your order? Contact us at{' '}
             <a href="tel:671-989-3444" className="text-hafalohaRed hover:underline">
@@ -250,5 +418,6 @@ export default function OrderConfirmationPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

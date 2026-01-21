@@ -14,6 +14,11 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000
 interface SiteSettings {
   payment_test_mode: boolean;
   payment_processor: string;
+  // Per-order-type email settings
+  send_retail_emails: boolean;
+  send_acai_emails: boolean;
+  send_wholesale_emails: boolean;
+  // Legacy field (kept for backwards compatibility)
   send_customer_emails: boolean;
   store_name: string;
   store_email: string;
@@ -160,34 +165,37 @@ export default function AdminSettingsPage() {
     }
   };
 
-  const handleToggleCustomerEmails = async () => {
+  // Toggle individual email settings per order type
+  const handleToggleEmailSetting = async (field: 'send_retail_emails' | 'send_acai_emails' | 'send_wholesale_emails') => {
     if (!settings) return;
 
     try {
       setSaving(true);
 
+      const newValue = !settings[field];
       const token = await getToken();
       const response = await axios.put(
         `${API_BASE_URL}/api/v1/admin/settings`,
-        {
-          settings: {
-            send_customer_emails: !settings.send_customer_emails
-          }
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        { settings: { [field]: newValue } },
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       setSettings({ ...settings, ...response.data.settings });
-      const message = settings.send_customer_emails 
-        ? 'Customer emails disabled - No confirmation emails will be sent' 
-        : 'Customer emails enabled - Customers will receive order confirmations';
       
-      toast.success(message, { duration: 4000 });
+      const orderTypeLabels: Record<string, string> = {
+        send_retail_emails: 'Retail',
+        send_acai_emails: 'Acai Cake',
+        send_wholesale_emails: 'Wholesale'
+      };
+      const label = orderTypeLabels[field];
+      const message = newValue
+        ? `${label} order emails enabled`
+        : `${label} order emails disabled`;
+      
+      toast.success(message, { duration: 3000 });
     } catch (err: any) {
-      console.error('Failed to toggle customer emails:', err);
-      toast.error('Failed to update setting. Please try again.');
+      console.error('Failed to toggle email setting:', err);
+      toast.error('Failed to update email setting');
     } finally {
       setSaving(false);
     }
@@ -370,7 +378,7 @@ export default function AdminSettingsPage() {
             settings={settings}
             saving={saving}
             onToggleTestMode={handleToggleTestMode}
-            onToggleCustomerEmails={handleToggleCustomerEmails}
+            onToggleEmailSetting={handleToggleEmailSetting}
             onSaveStoreInfo={handleSaveStoreInfo}
             onUpdateSettings={updateSettings}
             onUpdateShippingAddress={updateShippingAddress}
@@ -405,7 +413,7 @@ interface GeneralSettingsTabProps {
   settings: SiteSettings;
   saving: boolean;
   onToggleTestMode: () => void;
-  onToggleCustomerEmails: () => void;
+  onToggleEmailSetting: (field: 'send_retail_emails' | 'send_acai_emails' | 'send_wholesale_emails') => void;
   onSaveStoreInfo: (e: React.FormEvent) => void;
   onUpdateSettings: (updates: Partial<SiteSettings>) => void;
   onUpdateShippingAddress: (updates: Partial<SiteSettings['shipping_origin_address']>) => void;
@@ -415,7 +423,7 @@ function GeneralSettingsTab({
   settings,
   saving,
   onToggleTestMode,
-  onToggleCustomerEmails,
+  onToggleEmailSetting,
   onSaveStoreInfo,
   onUpdateSettings,
   onUpdateShippingAddress,
@@ -478,54 +486,89 @@ function GeneralSettingsTab({
           </div>
         </div>
 
-        {/* Customer Emails Toggle */}
+        {/* Customer Emails Toggles - Per Order Type */}
         <div className="border-b border-gray-200 pb-4 mb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex-grow">
-              <h3 className="font-medium text-gray-900">Customer Confirmation Emails</h3>
-              <p className="text-sm text-gray-600 mt-1">
-                When enabled, customers will receive order confirmation emails after purchase.
-                Disable this during development to avoid email errors.
-              </p>
+          <h3 className="font-medium text-gray-900 mb-1">Customer Confirmation Emails</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Configure which order types send confirmation emails to customers.
+            Admin notifications are always sent regardless of these settings.
+          </p>
+
+          {/* Retail Orders Toggle */}
+          <div className="flex items-center justify-between py-3 border-b border-gray-100">
+            <div>
+              <p className="font-medium text-gray-900">Retail Orders</p>
+              <p className="text-sm text-gray-500">Online store purchases</p>
             </div>
             <button
-              onClick={onToggleCustomerEmails}
+              onClick={() => onToggleEmailSetting('send_retail_emails')}
               disabled={saving}
-              className={`relative inline-flex h-8 w-14 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-hafalohaRed focus:ring-offset-2 ml-4 ${
-                settings.send_customer_emails ? 'bg-green-500' : 'bg-gray-200'
+              className={`relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-hafalohaRed focus:ring-offset-2 ${
+                settings.send_retail_emails ? 'bg-green-500' : 'bg-gray-200'
               } ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               <span
-                className={`inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                  settings.send_customer_emails ? 'translate-x-6' : 'translate-x-0'
+                className={`inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  settings.send_retail_emails ? 'translate-x-5' : 'translate-x-0'
                 }`}
               />
             </button>
           </div>
 
+          {/* Acai Orders Toggle */}
+          <div className="flex items-center justify-between py-3 border-b border-gray-100">
+            <div>
+              <p className="font-medium text-gray-900">Acai Cake Orders</p>
+              <p className="text-sm text-gray-500">Acai cake pickup orders</p>
+            </div>
+            <button
+              onClick={() => onToggleEmailSetting('send_acai_emails')}
+              disabled={saving}
+              className={`relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-hafalohaRed focus:ring-offset-2 ${
+                settings.send_acai_emails ? 'bg-green-500' : 'bg-gray-200'
+              } ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <span
+                className={`inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  settings.send_acai_emails ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Wholesale Orders Toggle */}
+          <div className="flex items-center justify-between py-3">
+            <div>
+              <p className="font-medium text-gray-900">Wholesale Orders</p>
+              <p className="text-sm text-gray-500">Fundraiser and wholesale orders</p>
+            </div>
+            <button
+              onClick={() => onToggleEmailSetting('send_wholesale_emails')}
+              disabled={saving}
+              className={`relative inline-flex h-7 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-hafalohaRed focus:ring-offset-2 ${
+                settings.send_wholesale_emails ? 'bg-green-500' : 'bg-gray-200'
+              } ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <span
+                className={`inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  settings.send_wholesale_emails ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Summary */}
           <div className="mt-4 p-3 bg-gray-50 rounded-md">
             <div className="flex items-center">
-              {settings.send_customer_emails ? (
-                <>
-                  <span className="text-2xl mr-2">✉️</span>
-                  <div>
-                    <p className="font-medium text-gray-900">Customer Emails Enabled</p>
-                    <p className="text-sm text-gray-600">
-                      Customers will receive order confirmations via email.
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <span className="text-2xl mr-2">🔕</span>
-                  <div>
-                    <p className="font-medium text-gray-900">Customer Emails Disabled</p>
-                    <p className="text-sm text-gray-600">
-                      No confirmation emails will be sent to customers.
-                    </p>
-                  </div>
-                </>
-              )}
+              <span className="text-xl mr-2">📧</span>
+              <p className="text-sm text-gray-600">
+                <strong>Status:</strong>{' '}
+                {[
+                  settings.send_retail_emails && 'Retail',
+                  settings.send_acai_emails && 'Acai',
+                  settings.send_wholesale_emails && 'Wholesale'
+                ].filter(Boolean).join(', ') || 'All emails disabled'}
+              </p>
             </div>
           </div>
         </div>
