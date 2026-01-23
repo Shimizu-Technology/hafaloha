@@ -74,6 +74,7 @@ export default function AdminLayout() {
     { name: 'Orders', path: '/admin/orders', icon: '📦' },
     { name: 'Products', path: '/admin/products', icon: '🛍️' },
     { name: 'Collections', path: '/admin/collections', icon: '📂' },
+    { name: 'Fundraisers', path: '/admin/fundraisers', icon: '🎗️' },
     { name: 'Acai Cakes', path: '/admin/acai', icon: '🧁' },
     { name: 'Users', path: '/admin/users', icon: '👥' },
     { name: 'Import', path: '/admin/import', icon: '📤' },

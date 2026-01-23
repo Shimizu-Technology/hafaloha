@@ -8,9 +8,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000
 interface User {
   id: number;
   email: string;
-  first_name: string | null;
-  last_name: string | null;
-  full_name: string;
+  name: string | null;
+  phone: string | null;
   role: 'admin' | 'customer';
   is_admin: boolean;
   clerk_id: string;
@@ -219,11 +218,11 @@ export default function AdminUsersPage() {
                           <div className={`h-10 w-10 rounded-full flex items-center justify-center text-white font-semibold ${
                             user.is_admin ? 'bg-indigo-500' : 'bg-gray-400'
                           }`}>
-                            {user.full_name.charAt(0).toUpperCase()}
+                            {(user.name || user.email).charAt(0).toUpperCase()}
                           </div>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{user.full_name}</div>
+                          <div className="text-sm font-medium text-gray-900">{user.name || 'No name'}</div>
                           <div className="text-sm text-gray-500">{user.email}</div>
                         </div>
                       </div>
@@ -276,10 +275,10 @@ export default function AdminUsersPage() {
                     <div className={`h-12 w-12 rounded-full flex items-center justify-center text-white font-semibold text-lg ${
                       user.is_admin ? 'bg-indigo-500' : 'bg-gray-400'
                     }`}>
-                      {user.full_name.charAt(0).toUpperCase()}
+                      {(user.name || user.email).charAt(0).toUpperCase()}
                     </div>
                     <div className="ml-3">
-                      <p className="font-semibold text-gray-900">{user.full_name}</p>
+                      <p className="font-semibold text-gray-900">{user.name || 'No name'}</p>
                       <p className="text-sm text-gray-500">{user.email}</p>
                     </div>
                   </div>

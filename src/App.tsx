@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Link, useNavigate, useLocation } from 'react-router-dom';
 import { SignedIn, SignedOut, SignInButton, UserButton, useUser, useAuth } from '@clerk/clerk-react';
 import ProductsPage from './pages/ProductsPage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -17,15 +17,21 @@ import AdminImportPage from './pages/admin/AdminImportPage';
 import ProductFormPage from './pages/admin/ProductFormPage';
 import AdminAcaiPage from './pages/admin/AdminAcaiPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
+import AdminFundraisersPage from './pages/admin/AdminFundraisersPage';
+import AdminFundraiserDetailPage from './pages/admin/AdminFundraiserDetailPage';
+import AdminFundraiserFormPage from './pages/admin/AdminFundraiserFormPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import AcaiCakesPage from './pages/AcaiCakesPage';
+import FundraiserPage from './pages/FundraiserPage';
 import NotFoundPage from './pages/NotFoundPage';
 import axios from 'axios';
 import { Toaster } from 'react-hot-toast';
 import CartIcon from './components/CartIcon'; // Import CartIcon
 import CartDrawer from './components/CartDrawer'; // Import CartDrawer
 import ScrollToTop from './components/ScrollToTop'; // Import ScrollToTop
+import NavDropdown from './components/NavDropdown'; // Import NavDropdown
+import MobileNavDropdown from './components/MobileNavDropdown'; // Import MobileNavDropdown
 import { useCartStore } from './store/cartStore'; // Import cart store
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
@@ -58,12 +64,19 @@ function AppContent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isLoaded } = useUser();
   const { getToken } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
   const { closeCart } = useCartStore(); // Get closeCart function
 
-  // Helper to close both mobile menu and cart
+  // Close cart and mobile menu on route change (handles back/forward, programmatic navigation, etc.)
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    closeCart();
+  }, [location.pathname, closeCart]);
+
+  // Helper to close both mobile menu and cart (for explicit link clicks)
   const handleNavClick = () => {
     setMobileMenuOpen(false);
     closeCart();
@@ -168,20 +181,8 @@ function AppContent() {
 
               {/* Desktop Navigation Links */}
               <div className="hidden md:flex items-center space-x-8">
-                <Link
-                  to="/products"
-                  className="text-gray-700 hover:text-hafalohaRed font-medium transition"
-                  onClick={handleNavClick}
-                >
-                  Shop
-                </Link>
-                <Link
-                  to="/collections"
-                  className="text-gray-700 hover:text-hafalohaRed font-medium transition"
-                  onClick={handleNavClick}
-                >
-                  Collections
-                </Link>
+                {/* Shop Dropdown */}
+                <NavDropdown onItemClick={handleNavClick} />
                 <Link
                   to="/acai-cakes"
                   className="text-gray-700 hover:text-hafalohaRed font-medium transition"
@@ -294,20 +295,8 @@ function AppContent() {
                   </div>
                 </form>
 
-                <Link
-                  to="/products"
-                  className="block text-gray-700 hover:text-hafalohaRed font-medium py-2"
-                  onClick={handleNavClick}
-                >
-                  Shop
-                </Link>
-                <Link
-                  to="/collections"
-                  className="block text-gray-700 hover:text-hafalohaRed font-medium py-2"
-                  onClick={handleNavClick}
-                >
-                  Collections
-                </Link>
+                {/* Shop Dropdown */}
+                <MobileNavDropdown onItemClick={handleNavClick} />
                 <Link
                   to="/acai-cakes"
                   className="block text-gray-700 hover:text-hafalohaRed font-medium py-2"
@@ -351,6 +340,7 @@ function AppContent() {
           <Route path="/collections/:slug" element={<CollectionDetailPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/acai-cakes" element={<AcaiCakesPage />} />
+          <Route path="/fundraisers/:slug" element={<FundraiserPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/orders/:id" element={<OrderConfirmationPage />} />
           
@@ -363,6 +353,10 @@ function AppContent() {
             <Route path="products/:id/edit" element={<ProductFormPage />} />
             <Route path="collections" element={<AdminCollectionsPage />} />
             <Route path="import" element={<AdminImportPage />} />
+            <Route path="fundraisers" element={<AdminFundraisersPage />} />
+            <Route path="fundraisers/new" element={<AdminFundraiserFormPage />} />
+            <Route path="fundraisers/:id" element={<AdminFundraiserDetailPage />} />
+            <Route path="fundraisers/:id/edit" element={<AdminFundraiserFormPage />} />
             <Route path="acai" element={<AdminAcaiPage />} />
             <Route path="users" element={<AdminUsersPage />} />
             <Route path="settings" element={<AdminSettingsPage />} />

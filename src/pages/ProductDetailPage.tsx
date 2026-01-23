@@ -203,11 +203,19 @@ export default function ProductDetailPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumbs */}
         <Breadcrumbs
-          items={[
-            { label: 'Home', path: '/' },
-            { label: 'Products', path: '/products' },
-            { label: product.name }
-          ]}
+          items={
+            product.collections && product.collections.length > 0
+              ? [
+                  { label: 'Home', path: '/' },
+                  { label: product.collections[0].name, path: `/collections/${product.collections[0].slug}` },
+                  { label: product.name }
+                ]
+              : [
+                  { label: 'Home', path: '/' },
+                  { label: 'Products', path: '/products' },
+                  { label: product.name }
+                ]
+          }
         />
 
         <div className="bg-white rounded-lg shadow-lg overflow-hidden">

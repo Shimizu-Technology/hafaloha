@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Eye, Edit, X } from 'lucide-react';
+import { Eye, Edit, X, MoreVertical, Archive, ArchiveRestore, Copy, Globe, GlobeLock, ArrowUpDown } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
@@ -75,6 +76,9 @@ export default function AdminProductsPage() {
   const [filterPublished, setFilterPublished] = useState<'all' | 'true' | 'false' | 'archived'>('all');
   const [filterType, setFilterType] = useState<string>('all');
   const [productTypes, setProductTypes] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<'name' | 'price' | 'stock' | 'created'>('name');
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
+  const [actionMenuOpen, setActionMenuOpen] = useState<number | null>(null);
   const itemsPerPage = 25;
 
   // Prevent body scroll when modal is open
@@ -117,6 +121,80 @@ export default function AdminProductsPage() {
     }
   };
 
+  // Quick Actions
+  const handleTogglePublished = async (product: Product) => {
+    try {
+      const token = await getToken();
+      await axios.put(
+        `${API_BASE_URL}/api/v1/admin/products/${product.id}`,
+        { product: { published: !product.published } },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(product.published ? 'Product unpublished' : 'Product published');
+      fetchProducts();
+    } catch (err) {
+      toast.error('Failed to update product');
+    }
+    setActionMenuOpen(null);
+  };
+
+  const handleArchive = async (product: Product) => {
+    try {
+      const token = await getToken();
+      await axios.post(
+        `${API_BASE_URL}/api/v1/admin/products/${product.id}/archive`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success('Product archived');
+      fetchProducts();
+    } catch (err) {
+      toast.error('Failed to archive product');
+    }
+    setActionMenuOpen(null);
+  };
+
+  const handleUnarchive = async (product: Product) => {
+    try {
+      const token = await getToken();
+      await axios.post(
+        `${API_BASE_URL}/api/v1/admin/products/${product.id}/unarchive`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success('Product restored');
+      fetchProducts();
+    } catch (err) {
+      toast.error('Failed to restore product');
+    }
+    setActionMenuOpen(null);
+  };
+
+  const handleDuplicate = async (product: Product) => {
+    try {
+      const token = await getToken();
+      await axios.post(
+        `${API_BASE_URL}/api/v1/admin/products/${product.id}/duplicate`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success('Product duplicated');
+      fetchProducts();
+    } catch (err) {
+      toast.error('Failed to duplicate product');
+    }
+    setActionMenuOpen(null);
+  };
+
+  const handleSort = (column: 'name' | 'price' | 'stock' | 'created') => {
+    if (sortBy === column) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortDir('asc');
+    }
+  };
+
   // Filter and search products
   const filteredProducts = products.filter(product => {
     // Search filter
@@ -145,17 +223,42 @@ export default function AdminProductsPage() {
     return true;
   });
 
+  // Sort products
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    let comparison = 0;
+    switch (sortBy) {
+      case 'name':
+        comparison = a.name.localeCompare(b.name);
+        break;
+      case 'price':
+        comparison = a.base_price_cents - b.base_price_cents;
+        break;
+      case 'stock':
+        const stockA = a.inventory_level === 'product' ? (a.product_stock_quantity || 0) : 
+                       a.inventory_level === 'variant' ? (a.total_variant_stock || 0) : 0;
+        const stockB = b.inventory_level === 'product' ? (b.product_stock_quantity || 0) : 
+                       b.inventory_level === 'variant' ? (b.total_variant_stock || 0) : 0;
+        comparison = stockA - stockB;
+        break;
+      case 'created':
+        comparison = 0; // Would need created_at field
+        break;
+    }
+    return sortDir === 'asc' ? comparison : -comparison;
+  });
+
   // Paginate products
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-  const paginatedProducts = filteredProducts.slice(
+  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
+  const paginatedProducts = sortedProducts.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
   
-  // Reset to page 1 when filters change
+  // Reset to page 1 when filters or sort change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, filterPublished, filterType]);
+    setActionMenuOpen(null);
+  }, [searchQuery, filterPublished, filterType, sortBy, sortDir]);
 
   const fetchProductDetails = async (slug: string) => {
     try {
@@ -326,17 +429,35 @@ export default function AdminProductsPage() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Product
+                  <th 
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('name')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Product
+                      {sortBy === 'name' && <ArrowUpDown className="w-3 h-3" />}
+                    </div>
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Price
+                  <th 
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('price')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Price
+                      {sortBy === 'price' && <ArrowUpDown className="w-3 h-3" />}
+                    </div>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Variants
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Stock
+                  <th 
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => handleSort('stock')}
+                  >
+                    <div className="flex items-center gap-1">
+                      Stock
+                      {sortBy === 'stock' && <ArrowUpDown className="w-3 h-3" />}
+                    </div>
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Status
@@ -414,19 +535,73 @@ export default function AdminProductsPage() {
                         {product.archived ? 'Archived' : product.published ? 'Published' : 'Draft'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm space-x-3">
-                      <button
-                        onClick={() => handleViewProduct(product)}
-                        className="text-hafalohaRed hover:text-red-700 font-medium inline-flex items-center"
-                      >
-                        <Eye className="w-4 h-4 mr-1" /> View
-                      </button>
-                      <button 
-                        onClick={() => navigate(`/admin/products/${product.id}/edit`)}
-                        className="text-blue-600 hover:text-blue-900 font-medium inline-flex items-center"
-                      >
-                        <Edit className="w-4 h-4 mr-1" /> Edit
-                      </button>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleViewProduct(product)}
+                          className="text-hafalohaRed hover:text-red-700 font-medium inline-flex items-center"
+                        >
+                          <Eye className="w-4 h-4 mr-1" /> View
+                        </button>
+                        <button 
+                          onClick={() => navigate(`/admin/products/${product.id}/edit`)}
+                          className="text-blue-600 hover:text-blue-900 font-medium inline-flex items-center"
+                        >
+                          <Edit className="w-4 h-4 mr-1" /> Edit
+                        </button>
+                        
+                        {/* More Actions Dropdown */}
+                        <div className="relative">
+                          <button
+                            onClick={() => setActionMenuOpen(actionMenuOpen === product.id ? null : product.id)}
+                            className="p-1 text-gray-400 hover:text-gray-600 rounded"
+                          >
+                            <MoreVertical className="w-4 h-4" />
+                          </button>
+                          
+                          {actionMenuOpen === product.id && (
+                            <>
+                              <div 
+                                className="fixed inset-0 z-10" 
+                                onClick={() => setActionMenuOpen(null)}
+                              />
+                              <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border z-20">
+                                <button
+                                  onClick={() => handleTogglePublished(product)}
+                                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                                >
+                                  {product.published ? (
+                                    <><GlobeLock className="w-4 h-4" /> Unpublish</>
+                                  ) : (
+                                    <><Globe className="w-4 h-4" /> Publish</>
+                                  )}
+                                </button>
+                                <button
+                                  onClick={() => handleDuplicate(product)}
+                                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                                >
+                                  <Copy className="w-4 h-4" /> Duplicate
+                                </button>
+                                {product.archived ? (
+                                  <button
+                                    onClick={() => handleUnarchive(product)}
+                                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-green-600"
+                                  >
+                                    <ArchiveRestore className="w-4 h-4" /> Restore
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() => handleArchive(product)}
+                                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-orange-600"
+                                  >
+                                    <Archive className="w-4 h-4" /> Archive
+                                  </button>
+                                )}
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -508,6 +683,58 @@ export default function AdminProductsPage() {
                   >
                     <Edit className="w-4 h-4 mr-1" /> Edit
                   </button>
+                  
+                  {/* Quick Actions */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setActionMenuOpen(actionMenuOpen === product.id ? null : product.id)}
+                      className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+                    >
+                      <MoreVertical className="w-5 h-5" />
+                    </button>
+                    
+                    {actionMenuOpen === product.id && (
+                      <>
+                        <div 
+                          className="fixed inset-0 z-10" 
+                          onClick={() => setActionMenuOpen(null)}
+                        />
+                        <div className="absolute right-0 bottom-full mb-1 w-48 bg-white rounded-lg shadow-lg border z-20">
+                          <button
+                            onClick={() => handleTogglePublished(product)}
+                            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                          >
+                            {product.published ? (
+                              <><GlobeLock className="w-4 h-4" /> Unpublish</>
+                            ) : (
+                              <><Globe className="w-4 h-4" /> Publish</>
+                            )}
+                          </button>
+                          <button
+                            onClick={() => handleDuplicate(product)}
+                            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
+                          >
+                            <Copy className="w-4 h-4" /> Duplicate
+                          </button>
+                          {product.archived ? (
+                            <button
+                              onClick={() => handleUnarchive(product)}
+                              className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-green-600"
+                            >
+                              <ArchiveRestore className="w-4 h-4" /> Restore
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleArchive(product)}
+                              className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-orange-600"
+                            >
+                              <Archive className="w-4 h-4" /> Archive
+                            </button>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -519,9 +746,9 @@ export default function AdminProductsPage() {
               <p className="text-sm text-gray-700">
                 Showing <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to{' '}
                 <span className="font-medium">
-                  {Math.min(currentPage * itemsPerPage, filteredProducts.length)}
+                  {Math.min(currentPage * itemsPerPage, sortedProducts.length)}
                 </span>{' '}
-                of <span className="font-medium">{filteredProducts.length}</span> results
+                of <span className="font-medium">{sortedProducts.length}</span> results
               </p>
               
               <div className="flex items-center gap-2">
