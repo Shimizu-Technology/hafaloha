@@ -72,6 +72,15 @@ export default defineConfig({
       },
     },
     
+    // Auth tests - mixed (some need auth, some don't)
+    {
+      name: 'auth',
+      testMatch: /auth\/.*\.spec\.ts/,
+      use: { 
+        ...devices['Desktop Chrome'],
+      },
+    },
+    
     // Admin tests - require authentication
     {
       name: 'admin',
@@ -90,6 +99,21 @@ export default defineConfig({
       use: { 
         ...devices['Desktop Chrome'],
       },
+    },
+    
+    // Guest flow tests - start without auth, may sign in during test
+    // NO dependencies on setup, NO stored auth state
+    {
+      name: 'guest-flow',
+      testMatch: /comprehensive\/guest-.*\.spec\.ts/,
+      use: { 
+        ...devices['Desktop Chrome'],
+        // NO storageState - starts as guest
+        actionTimeout: 15000,
+        navigationTimeout: 30000,
+      },
+      // NO dependencies - don't run setup first
+      fullyParallel: false,
     },
     
     // Mobile tests
@@ -126,9 +150,10 @@ export default defineConfig({
     // Comprehensive tests - full user journey testing (desktop)
     // Run manually with: npm run test:comprehensive
     // Creates real data, exercises full workflows
+    // Excludes guest-* tests (those run with guest-flow project)
     {
       name: 'comprehensive',
-      testMatch: /comprehensive\/(?!mobile-).*\.spec\.ts/,
+      testMatch: /comprehensive\/(?!mobile-)(?!guest-).*\.spec\.ts/,
       use: { 
         ...devices['Desktop Chrome'],
         storageState: 'playwright/.auth/admin.json',

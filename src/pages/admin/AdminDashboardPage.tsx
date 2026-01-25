@@ -62,84 +62,144 @@ export default function AdminDashboardPage() {
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString();
 
   if (loading) {
-    return <div className="text-center py-8">Loading dashboard...</div>;
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-hafalohaRed mx-auto mb-4"></div>
+          <p className="text-gray-500">Loading dashboard...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard Overview</h1>
+    <div className="space-y-8">
+      {/* Welcome Header */}
+      <div className="rounded-2xl p-6 sm:p-8 shadow-lg" style={{ background: 'linear-gradient(to right, #C1191F, #d63939)' }}>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: 'white' }}>Welcome back! 👋</h1>
+        <p style={{ color: 'rgba(255,255,255,0.85)' }}>Here's what's happening with your store today.</p>
+      </div>
       
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {/* Total Orders */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md transition">
+          <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-600">Total Orders</p>
-              <p className="text-3xl font-bold text-gray-900 mt-1">{stats.total_orders}</p>
+              <p className="text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Total Orders</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-2">{stats.total_orders}</p>
             </div>
-            <div className="text-4xl">📦</div>
+            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-2xl">📦</div>
           </div>
         </div>
 
         {/* Revenue */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md transition">
+          <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-600">Total Revenue</p>
-              <p className="text-3xl font-bold text-gray-900 mt-1">{formatCurrency(stats.total_revenue_cents)}</p>
+              <p className="text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Revenue</p>
+              <p className="text-2xl sm:text-3xl font-bold text-green-600 mt-2">{formatCurrency(stats.total_revenue_cents)}</p>
             </div>
-            <div className="text-4xl">💰</div>
+            <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-2xl">💰</div>
           </div>
         </div>
 
         {/* Pending Orders */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md transition">
+          <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-600">Pending Orders</p>
-              <p className="text-3xl font-bold text-hafalohaRed mt-1">{stats.pending_orders}</p>
+              <p className="text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Pending</p>
+              <p className="text-2xl sm:text-3xl font-bold text-hafalohaRed mt-2">{stats.pending_orders}</p>
             </div>
-            <div className="text-4xl">⏳</div>
+            <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-2xl">⏳</div>
           </div>
+          {stats.pending_orders > 0 && (
+            <Link to="/admin/orders?status=pending" className="inline-block mt-3 text-xs font-medium text-hafalohaRed hover:underline">
+              View pending →
+            </Link>
+          )}
         </div>
 
         {/* Products */}
-        <div className="bg-white rounded-lg shadow p-6">
-          <div className="flex items-center justify-between">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md transition">
+          <div className="flex items-start justify-between">
             <div>
-              <p className="text-sm text-gray-600">Total Products</p>
-              <p className="text-3xl font-bold text-gray-900 mt-1">{stats.total_products}</p>
+              <p className="text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Products</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-2">{stats.total_products}</p>
             </div>
-            <div className="text-4xl">🛍️</div>
+            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-2xl">🛍️</div>
           </div>
         </div>
       </div>
 
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <Link to="/admin/products/new" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group">
+          <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
+            <span className="text-xl">➕</span>
+          </div>
+          <p className="text-sm font-medium text-gray-700">Add Product</p>
+        </Link>
+        <Link to="/admin/orders" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group">
+          <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
+            <span className="text-xl">📋</span>
+          </div>
+          <p className="text-sm font-medium text-gray-700">View Orders</p>
+        </Link>
+        <Link to="/admin/collections" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group">
+          <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
+            <span className="text-xl">📂</span>
+          </div>
+          <p className="text-sm font-medium text-gray-700">Collections</p>
+        </Link>
+        <Link to="/admin/settings" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group">
+          <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
+            <span className="text-xl">⚙️</span>
+          </div>
+          <p className="text-sm font-medium text-gray-700">Settings</p>
+        </Link>
+      </div>
+
       {/* Recent Orders */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-900">Recent Orders</h2>
-          <Link to="/admin/orders" className="text-hafalohaRed hover:text-red-700 text-sm font-medium">
-            View All →
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+          <h2 className="text-lg font-bold text-gray-900">Recent Orders</h2>
+          <Link to="/admin/orders" className="text-sm font-medium text-hafalohaRed hover:underline flex items-center gap-1">
+            View All
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
           </Link>
         </div>
         <div className="p-6">
           {recentOrders.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No orders yet</p>
+            <div className="text-center py-12">
+              <div className="text-4xl mb-4">📭</div>
+              <p className="text-gray-500">No orders yet</p>
+              <p className="text-sm text-gray-400 mt-1">Orders will appear here once customers start purchasing</p>
+            </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {recentOrders.map((order) => (
-                <div key={order.id} className="flex items-center justify-between py-3 border-b last:border-b-0">
-                  <div>
-                    <p className="font-medium text-gray-900">{order.order_number}</p>
-                    <p className="text-sm text-gray-600">{order.customer_name}</p>
+                <Link 
+                  key={order.id} 
+                  to={`/admin/orders?id=${order.id}`}
+                  className="flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition -mx-2"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-sm font-semibold text-gray-600">
+                      {order.customer_name.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-semibold text-gray-900">{order.order_number}</p>
+                      <p className="text-sm text-gray-500">{order.customer_name}</p>
+                    </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-semibold text-gray-900">{formatCurrency(order.total_cents)}</p>
-                    <p className="text-sm text-gray-600">{formatDate(order.created_at)}</p>
+                    <p className="font-bold text-gray-900">{formatCurrency(order.total_cents)}</p>
+                    <p className="text-xs text-gray-400">{formatDate(order.created_at)}</p>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}

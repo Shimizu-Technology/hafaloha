@@ -225,12 +225,15 @@ export default function CheckoutPage() {
   }
   
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-6 sm:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Checkout</h1>
-          <p className="text-gray-600 mt-2">Complete your order</p>
+        <div className="mb-8 text-center sm:text-left">
+          <span className="inline-block text-hafalohaRed font-semibold text-sm uppercase tracking-wider mb-2">
+            Secure Checkout
+          </span>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">Complete Your Order</h1>
+          <p className="text-gray-500 mt-2">Fill in the details below to complete your purchase</p>
         </div>
         
         {/* Test Mode Banner */}
@@ -256,11 +259,18 @@ export default function CheckoutPage() {
           <div className="lg:col-span-2">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Contact Information */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Contact Information</h2>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-hafalohaCream rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-hafalohaRed" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">Contact Information</h2>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-1.5">
                       Full Name *
                     </label>
                     <input
@@ -269,12 +279,12 @@ export default function CheckoutPage() {
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
                       placeholder="John Doe"
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1.5">
                       Email *
                     </label>
                     <input
@@ -283,12 +293,12 @@ export default function CheckoutPage() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
                       placeholder="your@email.com"
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                    <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-1.5">
                       Phone *
                     </label>
                     <input
@@ -297,7 +307,7 @@ export default function CheckoutPage() {
                       required
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
                       placeholder="(555) 123-4567"
                     />
                   </div>
@@ -305,8 +315,15 @@ export default function CheckoutPage() {
               </div>
               
               {/* Delivery Method */}
-              <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Delivery Method</h2>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-hafalohaCream rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-hafalohaRed" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">Delivery Method</h2>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <button
                     type="button"
@@ -315,18 +332,18 @@ export default function CheckoutPage() {
                       setShippingMethod(null);
                       setAvailableShippingRates([]);
                     }}
-                    className={`p-4 border-2 rounded-lg transition ${
+                    className={`p-5 border-2 rounded-xl transition-all ${
                       deliveryMethod === 'shipping'
-                        ? 'border-hafalohaRed bg-red-50'
-                        : 'border-gray-300 hover:border-gray-400'
+                        ? 'border-hafalohaRed bg-red-50 ring-4 ring-hafalohaRed/10'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="text-left">
-                        <p className="font-semibold text-gray-900">Ship to Address</p>
-                        <p className="text-sm text-gray-600 mt-1">Delivered to your door</p>
+                        <p className="font-bold text-gray-900">Ship to Address</p>
+                        <p className="text-sm text-gray-500 mt-1">Delivered to your door</p>
                       </div>
-                      <svg className="w-6 h-6 text-hafalohaRed" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className={`w-6 h-6 ${deliveryMethod === 'shipping' ? 'text-hafalohaRed' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>

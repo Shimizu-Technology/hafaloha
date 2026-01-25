@@ -69,81 +69,74 @@ export default function FeaturedProducts() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-      <div className="text-center mb-8 sm:mb-12">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+      <div className="text-center mb-10 sm:mb-14">
         <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900">
           Featured Products
         </h2>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <p className="text-base text-gray-500 max-w-2xl mx-auto">
           Discover our hand-picked selection of premium island living apparel
         </p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 mb-12">
         {products.map((product) => {
           const isOnSale = product.sale_price_cents && product.sale_price_cents < product.base_price_cents;
-          const saveAmount = isOnSale ? (product.base_price_cents - product.sale_price_cents!) / 100 : 0;
 
           return (
             <Link
               key={product.id}
               to={`/products/${product.slug}`}
-              className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col"
+              className="group flex flex-col"
             >
               {/* Image */}
-              <div className="relative bg-white overflow-hidden" style={{ aspectRatio: '1/1' }}>
+              <div className="relative bg-gray-50 overflow-hidden rounded-lg" style={{ aspectRatio: '1/1' }}>
                 {product.primary_image_url ? (
                   <img
                     src={product.primary_image_url}
                     alt={product.name}
-                    className="w-full h-full"
+                    className="w-full h-full group-hover:scale-105 transition-transform duration-500"
                     style={{ objectFit: 'contain' }}
                     loading="lazy"
                   />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                  <div className="w-full h-full flex items-center justify-center bg-gray-50">
                     <img
                       src="/images/hafaloha-logo.png"
                       alt="Hafaloha"
-                      className="w-1/2 h-1/2"
+                      className="w-1/3 opacity-20"
                       style={{ objectFit: 'contain' }}
                     />
                   </div>
                 )}
 
-                {/* Badges */}
-                <div className="absolute top-2 left-2 flex flex-col gap-2">
+                {/* Badges - Only essential ones */}
+                <div className="absolute top-3 left-3 flex flex-col gap-2">
                   {!product.actually_available && <ProductBadge type="sold-out" />}
-                  {product.new_product && <ProductBadge type="new" />}
-                  {isOnSale && <ProductBadge type="sale" saveAmount={saveAmount} />}
-                  {product.featured && (
-                    <span className="bg-hafalohaGold text-black text-xs font-semibold px-2 py-1 rounded">
-                      Featured
-                    </span>
-                  )}
+                  {isOnSale && <ProductBadge type="sale" />}
                 </div>
               </div>
 
               {/* Content */}
-              <div className="p-3 sm:p-4 flex flex-col flex-grow">
+              <div className="pt-4 flex flex-col grow">
                 {/* Product Name */}
-                <h3 className="font-semibold text-sm sm:text-base text-gray-900 mb-2 line-clamp-2 group-hover:text-hafalohaRed transition">
+                <h3 className="font-medium text-sm sm:text-base text-gray-900 mb-2 line-clamp-2 group-hover:text-hafalohaRed transition">
                   {product.name}
                 </h3>
 
                 {/* Price */}
                 <div className="mt-auto">
                   {isOnSale ? (
-                    <div className="flex flex-col items-start">
-                      <span className="text-xs sm:text-sm text-gray-500 line-through">
-                        {formatPrice(product.base_price_cents)}
-                      </span>
-                      <span className="text-lg sm:text-xl font-bold text-hafalohaRed">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base font-medium text-gray-900">
                         {formatPrice(product.sale_price_cents!)}
+                      </span>
+                      <span className="text-sm text-gray-400 line-through">
+                        {formatPrice(product.base_price_cents)}
                       </span>
                     </div>
                   ) : (
-                    <span className="text-lg sm:text-xl font-bold text-hafalohaRed">
+                    <span className="text-base font-medium text-gray-900">
                       {formatPrice(product.base_price_cents)}
                     </span>
                   )}
@@ -158,9 +151,12 @@ export default function FeaturedProducts() {
       <div className="text-center">
         <Link
           to="/products"
-          className="inline-block bg-hafalohaRed text-white px-8 py-3 rounded-lg hover:bg-red-700 transition font-semibold text-lg shadow-lg hover:shadow-xl"
+          className="inline-flex items-center gap-2 text-base px-8 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition font-medium"
         >
-          View All Products →
+          View All Products
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
         </Link>
       </div>
     </div>

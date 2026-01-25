@@ -344,32 +344,39 @@ export default function AdminOrdersPage() {
   };
 
   return (
-    <div>
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
-          <p className="text-gray-600 mt-1">{totalCount} total orders</p>
+          <p className="text-sm text-gray-500 mt-1">
+            <span className="font-semibold text-gray-700">{totalCount}</span> total orders
+          </p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Search */}
           <div className="md:col-span-2">
             <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="Search by order #, email, or name..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
-              />
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  placeholder="Search by order #, email, or name..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                  className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition text-sm"
+                />
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
               <button
                 onClick={handleSearch}
-                className="px-6 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition"
+                className="btn-primary px-6 py-2.5 text-sm"
               >
                 Search
               </button>
@@ -383,7 +390,7 @@ export default function AdminOrdersPage() {
               setStatusFilter(e.target.value);
               setPage(1);
             }}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent hover:border-gray-300 transition text-sm"
           >
             <option value="all">All Status</option>
             <option value="pending">Pending</option>
@@ -405,7 +412,7 @@ export default function AdminOrdersPage() {
               setOrderTypeFilter(e.target.value);
               setPage(1);
             }}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+            className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent hover:border-gray-300 transition text-sm"
           >
             <option value="all">All Types</option>
             <option value="retail">🛍️ Retail</option>
@@ -417,21 +424,24 @@ export default function AdminOrdersPage() {
 
       {/* Orders Table/List */}
       {loading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-hafalohaRed"></div>
+        <div className="flex items-center justify-center py-16">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-hafalohaRed mx-auto mb-4"></div>
+            <p className="text-gray-500">Loading orders...</p>
+          </div>
         </div>
       ) : orders.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-12 text-center">
-          <div className="text-6xl mb-4">📦</div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">No orders yet</h3>
-          <p className="text-gray-600">Orders will appear here once customers start placing them.</p>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
+          <div className="text-5xl mb-4">📭</div>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">No orders yet</h3>
+          <p className="text-gray-500">Orders will appear here once customers start placing them.</p>
         </div>
       ) : (
         <>
           {/* Desktop Table - Scrollable on medium screens */}
-          <div className="hidden md:block bg-white rounded-lg shadow overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+          <div className="hidden md:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-100">
+              <thead className="bg-gray-50/80">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Order

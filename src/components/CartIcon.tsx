@@ -1,7 +1,11 @@
 import { useEffect } from 'react';
 import { useCartStore } from '../store/cartStore';
 
-export default function CartIcon() {
+interface CartIconProps {
+  darkMode?: boolean;
+}
+
+export default function CartIcon({ darkMode = false }: CartIconProps) {
   const { itemCount, toggleCart, fetchCart } = useCartStore();
   const count = itemCount();
 
@@ -13,7 +17,11 @@ export default function CartIcon() {
   return (
     <button
       onClick={toggleCart}
-      className="relative p-2 text-gray-700 hover:text-hafalohaRed transition"
+      className={`relative p-2 transition ${
+        darkMode 
+          ? 'text-white hover:text-hafalohaGold' 
+          : 'text-gray-700 hover:text-hafalohaRed'
+      }`}
       aria-label={`Shopping cart with ${count} item${count !== 1 ? 's' : ''}`}
     >
       {/* Cart Icon SVG */}

@@ -16,14 +16,18 @@ import AdminCollectionsPage from './pages/admin/AdminCollectionsPage';
 import AdminImportPage from './pages/admin/AdminImportPage';
 import ProductFormPage from './pages/admin/ProductFormPage';
 import AdminAcaiPage from './pages/admin/AdminAcaiPage';
+import AdminInventoryPage from './pages/admin/AdminInventoryPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
+import AdminVariantPresetsPage from './pages/admin/AdminVariantPresetsPage';
 import AdminFundraisersPage from './pages/admin/AdminFundraisersPage';
 import AdminFundraiserDetailPage from './pages/admin/AdminFundraiserDetailPage';
 import AdminFundraiserFormPage from './pages/admin/AdminFundraiserFormPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
+import OrderHistoryPage from './pages/OrderHistoryPage';
 import AcaiCakesPage from './pages/AcaiCakesPage';
 import FundraiserPage from './pages/FundraiserPage';
+import FundraisersListPage from './pages/FundraisersListPage';
 import NotFoundPage from './pages/NotFoundPage';
 import axios from 'axios';
 import { Toaster } from 'react-hot-toast';
@@ -36,14 +40,25 @@ import { useCartStore } from './store/cartStore'; // Import cart store
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
-// Custom UserButton with Admin Dashboard Link
+// Custom UserButton with Admin Dashboard Link and My Orders
 function CustomUserButton({ isAdmin }: { isAdmin: boolean }) {
   const navigate = useNavigate();
 
   return (
     <UserButton afterSignOutUrl="/">
-      {isAdmin && (
-        <UserButton.MenuItems>
+      <UserButton.MenuItems>
+        {/* My Orders - available to all signed-in users */}
+        <UserButton.Action
+          label="My Orders"
+          labelIcon={
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+          }
+          onClick={() => navigate('/orders')}
+        />
+        {/* Admin Dashboard - only for admins */}
+        {isAdmin && (
           <UserButton.Action
             label="Admin Dashboard"
             labelIcon={
@@ -53,8 +68,8 @@ function CustomUserButton({ isAdmin }: { isAdmin: boolean }) {
             }
             onClick={() => navigate('/admin')}
           />
-        </UserButton.MenuItems>
-      )}
+        )}
+      </UserButton.MenuItems>
     </UserButton>
   );
 }
@@ -126,6 +141,9 @@ function AppContent() {
     checkAdminStatus();
   }, [isLoaded, user, getToken]);
 
+  // Check if we're on admin pages
+  const isAdminPage = location.pathname.startsWith('/admin');
+
   return (
     <>
       <ScrollToTop />
@@ -162,37 +180,45 @@ function AppContent() {
           },
         }}
       />
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-white">
         {/* Cart Drawer */}
         <CartDrawer />
 
-        {/* Navigation - Hidden when printing */}
-        <nav className="bg-white shadow-md sticky top-0 z-50 print:hidden">
+        {/* Navigation - Hidden when printing and on admin pages */}
+        {!isAdminPage && (
+        <nav className="bg-white border-b border-gray-100 sticky top-0 z-40 print:hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between items-center h-16">
+            <div className="flex justify-between items-center h-18 py-3">
               {/* Logo */}
-              <Link to="/" className="flex items-center" onClick={handleNavClick}>
+              <Link to="/" className="flex items-center group" onClick={handleNavClick}>
                 <img 
-                  src="/images/hafaloha-logo.png" 
+                  src="/images/hafaloha-red-logo.webp" 
                   alt="Hafaloha" 
-                  className="h-10 w-auto object-contain"
+                  className="h-8 sm:h-10 w-auto"
                 />
               </Link>
 
               {/* Desktop Navigation Links */}
-              <div className="hidden md:flex items-center space-x-8">
+              <div className="hidden md:flex items-center space-x-10">
                 {/* Shop Dropdown */}
-                <NavDropdown onItemClick={handleNavClick} />
+                <NavDropdown onItemClick={handleNavClick} darkMode={false} />
                 <Link
                   to="/acai-cakes"
-                  className="text-gray-700 hover:text-hafalohaRed font-medium transition"
+                  className="text-gray-700 hover:text-hafalohaRed font-medium transition py-2"
                   onClick={handleNavClick}
                 >
-                  Acai Cakes
+                  Açaí Cakes
+                </Link>
+                <Link
+                  to="/fundraisers"
+                  className="text-gray-700 hover:text-hafalohaRed font-medium transition py-2"
+                  onClick={handleNavClick}
+                >
+                  Fundraisers
                 </Link>
                 <Link
                   to="/about"
-                  className="text-gray-700 hover:text-hafalohaRed font-medium transition"
+                  className="text-gray-700 hover:text-hafalohaRed font-medium transition py-2"
                   onClick={handleNavClick}
                 >
                   Our Story
@@ -200,19 +226,19 @@ function AppContent() {
               </div>
 
               {/* Right Side: Search, Cart, Auth, Mobile Menu */}
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3 md:space-x-4">
                 {/* Search Bar - Desktop */}
-                <form onSubmit={handleSearch} className="hidden md:block">
+                <form onSubmit={handleSearch} className="hidden lg:block">
                   <div className="relative">
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search products..."
-                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-hafalohaRed focus:border-transparent w-64"
+                      className="pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-hafalohaRed/20 focus:border-hafalohaRed w-56 xl:w-64 transition-all text-sm text-gray-900 placeholder-gray-400"
                     />
                     <svg
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+                      className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -227,28 +253,43 @@ function AppContent() {
                   </div>
                 </form>
 
+                {/* Search Icon - Tablet */}
+                <button
+                  type="button"
+                  className="hidden md:block lg:hidden p-2 text-gray-600 hover:text-hafalohaRed transition"
+                  onClick={() => {
+                    const input = document.querySelector('input[placeholder="Search products..."]') as HTMLInputElement;
+                    if (input) input.focus();
+                  }}
+                  aria-label="Search"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </button>
+
                 {/* Cart Icon */}
-                <CartIcon />
+                <CartIcon darkMode={false} />
 
-                    {/* Auth - Desktop */}
-                    <div className="hidden md:flex items-center">
-                      <SignedOut>
-                        <SignInButton mode="modal">
-                          <button className="bg-hafalohaRed text-white px-4 py-2 rounded-lg hover:bg-red-700 transition font-medium">
-                            Sign In
-                          </button>
-                        </SignInButton>
-                      </SignedOut>
+                {/* Auth - Desktop */}
+                <div className="hidden md:flex items-center">
+                  <SignedOut>
+                    <SignInButton mode="modal">
+                      <button className="text-sm px-5 py-2.5 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition font-medium">
+                        Log In
+                      </button>
+                    </SignInButton>
+                  </SignedOut>
 
-                      <SignedIn>
-                        <CustomUserButton isAdmin={isAdmin} />
-                      </SignedIn>
-                    </div>
+                  <SignedIn>
+                    <CustomUserButton isAdmin={isAdmin} />
+                  </SignedIn>
+                </div>
 
                 {/* Mobile Menu Button */}
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="md:hidden p-2 text-gray-700 hover:text-hafalohaRed transition"
+                  className="md:hidden p-2 text-gray-600 hover:text-hafalohaRed transition rounded-lg"
                   aria-label="Toggle menu"
                 >
                   {mobileMenuOpen ? (
@@ -267,20 +308,20 @@ function AppContent() {
 
           {/* Mobile Menu */}
           {mobileMenuOpen && (
-            <div className="md:hidden border-t border-gray-200 bg-white">
-              <div className="px-4 py-3 space-y-3">
+            <div className="md:hidden border-t border-gray-100 bg-white animate-slide-down">
+              <div className="px-4 py-4 space-y-4">
                 {/* Mobile Search */}
-                <form onSubmit={handleSearch} className="mb-3">
+                <form onSubmit={handleSearch}>
                   <div className="relative">
                     <input
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search products..."
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-hafalohaRed/20 focus:border-hafalohaRed text-gray-900 placeholder-gray-400 transition text-sm"
                     />
                     <svg
-                      className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+                      className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -296,32 +337,46 @@ function AppContent() {
                 </form>
 
                 {/* Shop Dropdown */}
-                <MobileNavDropdown onItemClick={handleNavClick} />
+                <MobileNavDropdown onItemClick={handleNavClick} darkMode={false} />
+                
+                {/* Other Nav Links */}
                 <Link
                   to="/acai-cakes"
-                  className="block text-gray-700 hover:text-hafalohaRed font-medium py-2"
+                  className="flex items-center gap-3 text-gray-700 hover:text-hafalohaRed font-medium py-2"
                   onClick={handleNavClick}
                 >
-                  Acai Cakes
+                  <span className="text-xl">🍰</span>
+                  Açaí Cakes
+                </Link>
+                <Link
+                  to="/fundraisers"
+                  className="flex items-center gap-3 text-gray-700 hover:text-hafalohaRed font-medium py-2"
+                  onClick={handleNavClick}
+                >
+                  <span className="text-xl">❤️</span>
+                  Fundraisers
                 </Link>
                 <Link
                   to="/about"
-                  className="block text-gray-700 hover:text-hafalohaRed font-medium py-2"
+                  className="flex items-center gap-3 text-gray-700 hover:text-hafalohaRed font-medium py-2"
                   onClick={handleNavClick}
                 >
+                  <span className="text-xl">📖</span>
                   Our Story
                 </Link>
-                <div className="pt-3 border-t border-gray-200">
+                
+                {/* Auth Section */}
+                <div className="pt-4 border-t border-gray-100">
                   <SignedOut>
                     <SignInButton mode="modal">
-                      <button className="w-full bg-hafalohaRed text-white px-4 py-2 rounded-lg hover:bg-red-700 transition font-medium">
-                        Sign In
+                      <button className="w-full py-3 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition font-medium">
+                        Log In
                       </button>
                     </SignInButton>
                   </SignedOut>
                   <SignedIn>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-700">Account</span>
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-gray-700 font-medium">My Account</span>
                       <CustomUserButton isAdmin={isAdmin} />
                     </div>
                   </SignedIn>
@@ -330,6 +385,7 @@ function AppContent() {
             </div>
           )}
         </nav>
+        )}
 
         {/* Routes */}
         <Routes>
@@ -340,8 +396,10 @@ function AppContent() {
           <Route path="/collections/:slug" element={<CollectionDetailPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/acai-cakes" element={<AcaiCakesPage />} />
+          <Route path="/fundraisers" element={<FundraisersListPage />} />
           <Route path="/fundraisers/:slug" element={<FundraiserPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/orders" element={<OrderHistoryPage />} />
           <Route path="/orders/:id" element={<OrderConfirmationPage />} />
           
           {/* Admin Routes with Layout */}
@@ -358,39 +416,40 @@ function AppContent() {
             <Route path="fundraisers/:id" element={<AdminFundraiserDetailPage />} />
             <Route path="fundraisers/:id/edit" element={<AdminFundraiserFormPage />} />
             <Route path="acai" element={<AdminAcaiPage />} />
+            <Route path="inventory" element={<AdminInventoryPage />} />
             <Route path="users" element={<AdminUsersPage />} />
             <Route path="settings" element={<AdminSettingsPage />} />
+            <Route path="settings/variant-presets" element={<AdminVariantPresetsPage />} />
           </Route>
           
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
 
-        {/* Footer - Hidden when printing */}
-        <footer className="bg-gray-900 text-white print:hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+        {/* Footer - Hidden when printing and on admin pages */}
+        {!isAdminPage && (
+        <footer className="bg-gray-50 border-t border-gray-100 print:hidden">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12">
               {/* Brand */}
               <div className="sm:col-span-2 md:col-span-1">
                 <img 
-                  src="/images/hafaloha-logo-white-bg.png" 
+                  src="/images/hafaloha-red-logo.webp" 
                   alt="Hafaloha" 
-                  className="h-12 w-auto mb-4 bg-white p-2 rounded"
+                  className="h-8 w-auto"
                 />
-                <p className="text-gray-400 text-sm sm:text-base mb-4 leading-relaxed">
-                  <span className="block mb-2 font-semibold text-gray-300">Island Living Apparel for All</span>
-                  Uniform & Fundraiser Wholesale Apparel<br />
-                  Taste of the islands: Shave Ice<br />
-                  <span className="block mt-2 italic text-hafalohaGold">Håfa Adai Spirit + Essence of Aloha</span>
+                <p className="text-gray-500 text-sm mt-4 leading-relaxed">
+                  Island Living Apparel for All<br />
+                  Celebrating Chamorro and Hawaiian heritage
                 </p>
-                <div className="flex space-x-4">
+                <div className="flex space-x-4 mt-4">
                   <a 
                     href="https://www.facebook.com/hafaloha" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-white transition"
+                    className="text-gray-400 hover:text-gray-600 transition"
                     aria-label="Facebook"
                   >
-                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
                     </svg>
                   </a>
@@ -398,37 +457,37 @@ function AppContent() {
                     href="https://www.instagram.com/hafaloha" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-white transition"
+                    className="text-gray-400 hover:text-gray-600 transition"
                     aria-label="Instagram"
                   >
-                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                     </svg>
-        </a>
-      </div>
+                  </a>
+                </div>
               </div>
 
               {/* Footer Navigation */}
               <div>
-                <h4 className="font-semibold mb-3 sm:mb-4 text-hafalohaGold">Shop</h4>
+                <h4 className="font-medium text-gray-900 mb-4">Shop</h4>
                 <ul className="space-y-2">
                   <li>
-                    <Link to="/products" className="text-gray-400 hover:text-white transition text-sm sm:text-base">
+                    <Link to="/products" className="text-gray-500 hover:text-gray-900 transition text-sm">
                       All Products
                     </Link>
                   </li>
                   <li>
-                    <Link to="/products?category=mens" className="text-gray-400 hover:text-white transition text-sm sm:text-base">
+                    <Link to="/products?category=mens" className="text-gray-500 hover:text-gray-900 transition text-sm">
                       Mens
                     </Link>
                   </li>
                   <li>
-                    <Link to="/products?category=womens" className="text-gray-400 hover:text-white transition text-sm sm:text-base">
+                    <Link to="/products?category=womens" className="text-gray-500 hover:text-gray-900 transition text-sm">
                       Womens
                     </Link>
                   </li>
                   <li>
-                    <Link to="/collections" className="text-gray-400 hover:text-white transition text-sm sm:text-base">
+                    <Link to="/collections" className="text-gray-500 hover:text-gray-900 transition text-sm">
                       Collections
                     </Link>
                   </li>
@@ -436,25 +495,25 @@ function AppContent() {
               </div>
 
               <div>
-                <h4 className="font-semibold mb-3 sm:mb-4 text-hafalohaGold">Info</h4>
+                <h4 className="font-medium text-gray-900 mb-4">Info</h4>
                 <ul className="space-y-2">
                   <li>
-                    <Link to="/about" className="text-gray-400 hover:text-white transition text-sm sm:text-base">
+                    <Link to="/about" className="text-gray-500 hover:text-gray-900 transition text-sm">
                       Our Story
                     </Link>
                   </li>
                   <li>
-                    <Link to="/contact" className="text-gray-400 hover:text-white transition text-sm sm:text-base">
+                    <Link to="/contact" className="text-gray-500 hover:text-gray-900 transition text-sm">
                       Contact
                     </Link>
                   </li>
                   <li>
-                    <Link to="/shipping" className="text-gray-400 hover:text-white transition text-sm sm:text-base">
+                    <Link to="/shipping" className="text-gray-500 hover:text-gray-900 transition text-sm">
                       Shipping Info
                     </Link>
                   </li>
                   <li>
-                    <Link to="/returns" className="text-gray-400 hover:text-white transition text-sm sm:text-base">
+                    <Link to="/returns" className="text-gray-500 hover:text-gray-900 transition text-sm">
                       Returns
                     </Link>
                   </li>
@@ -462,29 +521,29 @@ function AppContent() {
               </div>
 
               <div>
-                <h4 className="font-semibold mb-3 sm:mb-4 text-hafalohaGold">Location</h4>
-                <address className="text-gray-400 text-sm sm:text-base not-italic">
+                <h4 className="font-medium text-gray-900 mb-4">Location</h4>
+                <address className="text-gray-500 text-sm not-italic">
                   121 E. Marine Corps Dr<br />
                   Suite 1-103 & Suite 1-104<br />
                   Hagåtña, Guam 96910<br />
                   <br />
-                  <a href="tel:+16714727733" className="hover:text-white transition">
+                  <a href="tel:+16714727733" className="hover:text-gray-900 transition">
                     +1 (671) 472-7733
                   </a>
                 </address>
               </div>
             </div>
 
-            <div className="border-t border-gray-800 mt-8 pt-8">
+            <div className="border-t border-gray-200 mt-12 pt-8">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                 <p className="text-gray-400 text-sm text-center sm:text-left">
                   &copy; 2025 Hafaloha. All rights reserved.
                 </p>
-                <div className="flex gap-4 text-sm">
-                  <Link to="/privacy" className="text-gray-400 hover:text-white transition">
+                <div className="flex gap-6 text-sm">
+                  <Link to="/privacy" className="text-gray-400 hover:text-gray-600 transition">
                     Privacy Policy
                   </Link>
-                  <Link to="/terms" className="text-gray-400 hover:text-white transition">
+                  <Link to="/terms" className="text-gray-400 hover:text-gray-600 transition">
                     Terms of Service
                   </Link>
                 </div>
@@ -492,6 +551,7 @@ function AppContent() {
             </div>
           </div>
         </footer>
+        )}
       </div>
     </>
   );

@@ -48,8 +48,8 @@ test.describe('Homepage', () => {
     // Should have "Our Story" link (not "About")
     await expect(page.locator('nav >> text=Our Story').first()).toBeVisible();
     
-    // Should have "Acai Cakes" link
-    await expect(page.locator('nav >> text=Acai Cakes').first()).toBeVisible();
+    // Should have "Açaí Cakes" or "Acai Cakes" link (with or without accent)
+    await expect(page.locator('nav').locator('text=/A[cç]a[ií] Cakes/i').first()).toBeVisible();
   });
 
   test('shop dropdown shows collections', async ({ page }) => {

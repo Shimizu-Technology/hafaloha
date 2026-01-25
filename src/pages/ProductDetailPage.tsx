@@ -200,7 +200,7 @@ export default function ProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Breadcrumbs */}
         <Breadcrumbs
           items={
@@ -218,28 +218,28 @@ export default function ProductDetailPage() {
           }
         />
 
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
             {/* Images */}
-            <div>
+            <div className="p-6 sm:p-8 lg:p-10 bg-gray-50/50">
               {/* Main Image */}
-              <div className="bg-white rounded-lg overflow-hidden mb-4" style={{ aspectRatio: '1/1' }}>
+              <div className="bg-white rounded-xl overflow-hidden mb-4 shadow-sm border border-gray-100" style={{ aspectRatio: '1/1' }}>
                 {displayImages[selectedImageIndex].url ? (
                   <img
                     src={displayImages[selectedImageIndex].url}
                     alt={displayImages[selectedImageIndex].alt_text}
-                    className="w-full h-full"
+                    className="w-full h-full hover:scale-105 transition-transform duration-500"
                     style={{
                       objectFit: 'contain',
                       backgroundColor: 'white'
                     }}
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50 border-2 border-gray-200">
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
                     <img 
                       src="/images/hafaloha-logo.png" 
                       alt="Hafaloha" 
-                      className="w-32 opacity-30 mb-4"
+                      className="w-32 opacity-20 mb-4"
                       style={{ objectFit: 'contain', maxHeight: '8rem' }}
                     />
                     <span className="text-gray-400 text-lg font-medium">No Image Available</span>
@@ -249,13 +249,13 @@ export default function ProductDetailPage() {
 
               {/* Thumbnail Gallery */}
               {product.images.length > 1 && (
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-4 gap-3">
                   {product.images.map((image, index) => (
                     <button
                       key={image.id}
                       onClick={() => setSelectedImageIndex(index)}
-                      className={`bg-white rounded-lg overflow-hidden border-2 ${
-                        selectedImageIndex === index ? 'border-hafalohaRed' : 'border-transparent'
+                      className={`bg-white rounded-lg overflow-hidden border-2 transition-all hover:scale-105 shadow-sm ${
+                        selectedImageIndex === index ? 'border-hafalohaRed ring-2 ring-hafalohaRed/20' : 'border-gray-200 hover:border-gray-300'
                       }`}
                       style={{ aspectRatio: '1/1' }}
                     >
@@ -275,43 +275,36 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Product Info */}
-            <div>
-              {/* Name & Price */}
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
-              <div className="text-4xl font-bold text-hafalohaRed mb-6">
-                {formatPrice(displayPrice)}
-              </div>
-
+            <div className="p-6 sm:p-8 lg:p-10 flex flex-col">
               {/* Collections */}
               {product.collections.length > 0 && (
-                <div className="mb-6">
-                  <p className="text-sm font-medium text-gray-500 mb-2">Collections:</p>
+                <div className="mb-4">
                   <div className="flex flex-wrap gap-2">
                     {product.collections.map((collection) => (
                       <Link
                         key={collection.id}
                         to={`/collections/${collection.slug}`}
-                        className="inline-flex items-center text-sm bg-hafalohaRed text-white px-4 py-1.5 rounded-full hover:bg-red-700 transition shadow-sm"
+                        className="inline-flex items-center text-xs font-semibold bg-hafalohaCream text-gray-700 px-3 py-1 rounded-full hover:bg-hafalohaGold/30 transition"
                       >
-                        <svg
-                          className="w-4 h-4 mr-1.5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-                          />
-                        </svg>
                         {collection.name}
                       </Link>
                     ))}
                   </div>
                 </div>
               )}
+
+              {/* Name & Price */}
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3">{product.name}</h1>
+              <div className="flex items-baseline gap-3 mb-6">
+                <span className="text-3xl sm:text-4xl font-bold text-hafalohaRed">
+                  {formatPrice(displayPrice)}
+                </span>
+                {product.sale_price_cents && product.sale_price_cents < product.base_price_cents && (
+                  <span className="text-xl text-gray-400 line-through">
+                    {formatPrice(product.base_price_cents)}
+                  </span>
+                )}
+              </div>
 
               {/* Description */}
               <div className="mb-8">
@@ -419,49 +412,77 @@ export default function ProductDetailPage() {
               )}
 
               {/* Add to Cart Button */}
-              <button
-                onClick={handleAddToCart}
-                className={`w-full py-4 rounded-lg font-semibold text-lg transition-colors ${
-                  canAddToCart && !isAdding
-                    ? 'bg-hafalohaRed text-white hover:bg-red-700'
-                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                }`}
-                disabled={!canAddToCart || isAdding}
-              >
-                {isAdding ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    Adding...
-                  </span>
-                ) : !product.in_stock || !selectedVariant?.in_stock ? (
-                  'Out of Stock'
-                ) : !selectedVariant ? (
-                  'Select an Option'
-                ) : (
-                  'Add to Cart'
-                )}
-              </button>
+              <div className="mt-auto pt-6">
+                <button
+                  onClick={handleAddToCart}
+                  className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-3 ${
+                    canAddToCart && !isAdding
+                      ? 'btn-primary shadow-lg hover:shadow-xl'
+                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  }`}
+                  disabled={!canAddToCart || isAdding}
+                >
+                  {isAdding ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      Adding to Cart...
+                    </>
+                  ) : !product.in_stock || !selectedVariant?.in_stock ? (
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      Out of Stock
+                    </>
+                  ) : !selectedVariant ? (
+                    'Select an Option'
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      Add to Cart
+                    </>
+                  )}
+                </button>
+
+                {/* Trust Badges */}
+                <div className="flex items-center justify-center gap-6 mt-6 pt-6 border-t border-gray-100">
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                    </svg>
+                    Secure Checkout
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                    <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                    Fast Shipping
+                  </div>
+                </div>
+              </div>
 
               {/* Product Details */}
-              <div className="mt-8 border-t pt-8">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Product Details</h3>
-                <dl className="space-y-2">
+              <div className="mt-8 pt-6 border-t border-gray-100">
+                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Product Details</h3>
+                <dl className="space-y-3">
                   {product.vendor && (
-                    <div className="flex">
-                      <dt className="text-gray-600 w-32">Vendor:</dt>
-                      <dd className="text-gray-900 font-medium">{product.vendor}</dd>
+                    <div className="flex items-center">
+                      <dt className="text-gray-500 w-28 text-sm">Vendor</dt>
+                      <dd className="text-gray-900 font-medium text-sm">{product.vendor}</dd>
                     </div>
                   )}
                   {selectedVariant && (
                     <>
-                      <div className="flex">
-                        <dt className="text-gray-600 w-32">SKU:</dt>
-                        <dd className="text-gray-900 font-mono text-sm">{selectedVariant.sku}</dd>
+                      <div className="flex items-center">
+                        <dt className="text-gray-500 w-28 text-sm">SKU</dt>
+                        <dd className="text-gray-900 font-mono text-sm bg-gray-50 px-2 py-0.5 rounded">{selectedVariant.sku}</dd>
                       </div>
                       {selectedVariant.weight_oz && (
-                        <div className="flex">
-                          <dt className="text-gray-600 w-32">Weight:</dt>
-                          <dd className="text-gray-900">{selectedVariant.weight_oz} oz</dd>
+                        <div className="flex items-center">
+                          <dt className="text-gray-500 w-28 text-sm">Weight</dt>
+                          <dd className="text-gray-900 text-sm">{selectedVariant.weight_oz} oz</dd>
                         </div>
                       )}
                     </>

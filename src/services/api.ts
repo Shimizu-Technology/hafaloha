@@ -49,8 +49,13 @@ export interface ProductFull extends Product {
 
 export interface ProductVariant {
   id: number;
+  // Flexible options (new system)
+  options?: Record<string, string>;
+  option_types?: string[];
+  // Legacy fields (for backward compatibility)
   size: string;
   color: string;
+  // Display
   display_name: string;
   sku: string;
   price_cents: number;
@@ -209,9 +214,12 @@ export const ordersApi = {
   // Create order
   createOrder: async (orderData: CreateOrderRequest, token?: string | null, sessionId?: string | null): Promise<CreateOrderResponse> => {
     const headers: Record<string, string> = {};
+    // Always include both auth token and session ID if available
+    // This allows the backend to merge session cart items to the user
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-    } else if (sessionId) {
+    }
+    if (sessionId) {
       headers['X-Session-ID'] = sessionId;
     }
     
@@ -243,9 +251,11 @@ export const shippingApi = {
     total_weight_oz: number;
   }> => {
     const headers: Record<string, string> = {};
+    // Always include both auth token and session ID if available
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
-    } else if (sessionId) {
+    }
+    if (sessionId) {
       headers['X-Session-ID'] = sessionId;
     }
     

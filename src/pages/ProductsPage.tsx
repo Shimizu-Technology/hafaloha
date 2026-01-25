@@ -157,56 +157,59 @@ export default function ProductsPage() {
   const totalPages = Math.ceil(meta.total / meta.per_page);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
-            Shop <span className="text-hafalohaRed">Hafaloha</span>
-          </h1>
-          <p className="text-gray-600 text-sm sm:text-base">
-            Chamorro pride. Island style. Premium quality.
-          </p>
+      <div style={{ backgroundColor: '#FDFBF7' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+          <div className="text-center">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3">
+              Shop Hafaloha
+            </h1>
+            <p className="text-gray-500 text-base sm:text-lg max-w-2xl mx-auto">
+              Chamorro pride. Island style. Premium quality apparel for the whole ohana.
+            </p>
+          </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-        {/* Search Bar */}
-        <div className="mb-4 sm:mb-6">
-          <div className="relative max-w-lg">
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={search}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="w-full px-4 py-3 pl-11 sm:pl-12 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
-            />
-            <svg
-              className="absolute left-3 sm:left-4 top-3 sm:top-3.5 h-5 w-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+        {/* Search and Filter Bar */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-6">
+          {/* Search Bar */}
+          <div className="mb-4">
+            <div className="relative max-w-2xl mx-auto">
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={search}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="w-full px-4 py-3 pl-11 text-sm sm:text-base bg-gray-50 border border-gray-200 rounded-full focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
               />
-            </svg>
+              <svg
+                className="absolute left-4 top-3.5 h-5 w-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
           </div>
-        </div>
 
-        {/* Filters */}
-        <div className="mb-6 sm:mb-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          {/* Filters */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {/* Collection Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Collection</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Collection</label>
               <select
                 value={collection}
                 onChange={(e) => handleFilterChange('collection', e.target.value)}
-                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent hover:border-gray-300 transition"
               >
                 <option value="">All Collections</option>
                 {collections.map((c) => (
@@ -219,11 +222,11 @@ export default function ProductsPage() {
 
             {/* Product Type Filter */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Product Type</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Product Type</label>
               <select
                 value={productType}
                 onChange={(e) => handleFilterChange('type', e.target.value)}
-                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent hover:border-gray-300 transition"
               >
                 <option value="">All Types</option>
                 <option value="T-Shirt">T-Shirt</option>
@@ -240,11 +243,11 @@ export default function ProductsPage() {
 
             {/* Sort Options */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1.5">Sort By</label>
+              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Sort By</label>
               <select
                 value={sort}
                 onChange={(e) => handleFilterChange('sort', e.target.value)}
-                className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent hover:border-gray-300 transition"
               >
                 <option value="">Featured</option>
                 <option value="price_asc">Price: Low to High</option>
@@ -260,9 +263,12 @@ export default function ProductsPage() {
               <button
                 onClick={clearFilters}
                 disabled={!search && !collection && !productType && !sort}
-                className="w-full px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full px-4 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
               >
-                Clear Filters
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Clear
               </button>
             </div>
           </div>
@@ -272,11 +278,11 @@ export default function ProductsPage() {
             <div className="mt-4 flex flex-wrap gap-2">
               <span className="text-sm text-gray-600 font-medium">Active filters:</span>
               {search && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-hafalohaRed text-white text-sm rounded-full">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-900 text-white text-sm rounded-full">
                   Search: "{search}"
                   <button
                     onClick={() => handleSearch('')}
-                    className="hover:bg-red-700 rounded-full p-0.5"
+                    className="hover:bg-gray-700 rounded-full p-0.5"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -285,11 +291,11 @@ export default function ProductsPage() {
                 </span>
               )}
               {collection && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-hafalohaRed text-white text-sm rounded-full">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-900 text-white text-sm rounded-full">
                   {collections.find(c => c.slug === collection)?.name}
                   <button
                     onClick={() => handleFilterChange('collection', '')}
-                    className="hover:bg-red-700 rounded-full p-0.5"
+                    className="hover:bg-gray-700 rounded-full p-0.5"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -298,11 +304,11 @@ export default function ProductsPage() {
                 </span>
               )}
               {productType && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-hafalohaRed text-white text-sm rounded-full">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-900 text-white text-sm rounded-full">
                   {productType}
                   <button
                     onClick={() => handleFilterChange('type', '')}
-                    className="hover:bg-red-700 rounded-full p-0.5"
+                    className="hover:bg-gray-700 rounded-full p-0.5"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -311,11 +317,11 @@ export default function ProductsPage() {
                 </span>
               )}
               {sort && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-hafalohaRed text-white text-sm rounded-full">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-900 text-white text-sm rounded-full">
                   Sort: {sort === 'price_asc' ? 'Price ↑' : sort === 'price_desc' ? 'Price ↓' : sort === 'newest' ? 'Newest' : sort === 'name_asc' ? 'A-Z' : 'Z-A'}
                   <button
                     onClick={() => handleFilterChange('sort', '')}
-                    className="hover:bg-red-700 rounded-full p-0.5"
+                    className="hover:bg-gray-700 rounded-full p-0.5"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -328,25 +334,32 @@ export default function ProductsPage() {
         </div>
 
         {/* Results Count */}
-        <div className="mb-4 sm:mb-6">
+        <div className="flex items-center justify-between mb-6">
           <p className="text-gray-600 text-sm sm:text-base">
-            Showing {products.length} of {meta.total} products
+            <span className="font-semibold text-gray-900">{meta.total}</span> products
             {(search || collection || productType) && (
-              <span className="ml-2 text-gray-500">
+              <span className="ml-1 text-gray-400">
                 (filtered)
               </span>
             )}
           </p>
+          {totalPages > 1 && (
+            <p className="text-sm text-gray-500">
+              Page {page} of {totalPages}
+            </p>
+          )}
         </div>
 
         {/* Products Grid */}
         {products.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No products found</p>
+          <div className="text-center py-16 bg-white rounded-xl border border-gray-100">
+            <div className="text-5xl mb-4">🔍</div>
+            <p className="text-gray-700 text-lg font-medium mb-2">No products found</p>
+            <p className="text-gray-500 mb-6">Try adjusting your search or filters</p>
             {search && (
               <button
                 onClick={() => handleSearch('')}
-                className="mt-4 text-hafalohaRed hover:underline"
+                className="btn-primary"
               >
                 Clear search
               </button>
@@ -354,7 +367,7 @@ export default function ProductsPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 mb-12">
               {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
@@ -362,14 +375,16 @@ export default function ProductsPage() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-1 sm:gap-2 flex-wrap">
+              <div className="flex justify-center items-center gap-2 sm:gap-3">
                 <button
                   onClick={() => handlePageChange(page - 1)}
                   disabled={page === 1}
-                  className="px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="flex items-center gap-1 px-4 py-2.5 text-sm font-medium bg-white border border-gray-200 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-300 transition"
                 >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
                   <span className="hidden sm:inline">Previous</span>
-                  <span className="sm:hidden">Prev</span>
                 </button>
                 
                 <div className="flex gap-1 sm:gap-2">
@@ -389,10 +404,10 @@ export default function ProductsPage() {
                       <button
                         key={pageNum}
                         onClick={() => handlePageChange(pageNum)}
-                        className={`px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg ${
+                        className={`min-w-[40px] px-3 py-2 text-sm font-medium rounded-lg transition ${
                           page === pageNum
-                            ? 'bg-hafalohaRed text-white'
-                            : 'border border-gray-300 hover:bg-gray-50'
+                            ? 'bg-hafalohaRed text-white shadow-md'
+                            : 'bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300'
                         }`}
                       >
                         {pageNum}
@@ -404,9 +419,12 @@ export default function ProductsPage() {
                 <button
                   onClick={() => handlePageChange(page + 1)}
                   disabled={page === totalPages}
-                  className="px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="flex items-center gap-1 px-4 py-2.5 text-sm font-medium bg-white border border-gray-200 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-300 transition"
                 >
-                  Next
+                  <span className="hidden sm:inline">Next</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
               </div>
             )}

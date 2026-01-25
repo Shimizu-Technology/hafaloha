@@ -16,6 +16,7 @@ interface Order {
   id: number;
   order_number: string;
   status: string;
+  status_display?: string;
   payment_status: string;
   order_type: 'retail' | 'acai' | 'wholesale';
   customer_name: string;
@@ -33,6 +34,10 @@ interface Order {
   shipping_state?: string;
   shipping_zip?: string;
   shipping_country?: string;
+  // Tracking fields
+  tracking_number?: string;
+  tracking_url?: string;
+  can_track?: boolean;
   // Acai-specific fields
   acai_pickup_date?: string;
   acai_pickup_time?: string;
@@ -215,21 +220,37 @@ export default function OrderConfirmationPage() {
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 print:bg-white print:py-0">
         <div className="max-w-3xl mx-auto">
           {/* Success Header */}
-          <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6 text-center print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
-          <div className="text-6xl mb-4">{isAcaiOrder ? '🍰' : '🎉'}</div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-            {isAcaiOrder ? 'Acai Cake Order Confirmed!' : 'Order Confirmed!'}
-          </h1>
-          <p className="text-gray-600 mb-4">
-            Thank you for your order, {order.customer_name}!
-          </p>
-          <div className="bg-gray-100 rounded-lg p-4 inline-block">
-            <p className="text-sm text-gray-600 mb-1">Order Number</p>
-            <p className="text-xl font-bold text-hafalohaRed">{order.order_number}</p>
+          <div className="bg-white rounded-2xl shadow-lg p-8 sm:p-10 mb-6 text-center print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid relative overflow-hidden">
+          {/* Decorative background */}
+          <div className="absolute inset-0 bg-linear-to-br from-green-50 via-white to-green-50 opacity-50"></div>
+          
+          <div className="relative">
+            {/* Success icon */}
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+              {isAcaiOrder ? '🍰 Açaí Cake Order Confirmed!' : 'Order Confirmed!'}
+            </h1>
+            <p className="text-gray-600 mb-6">
+              Thank you for your order, <span className="font-semibold">{order.customer_name}</span>!
+            </p>
+            
+            <div className="bg-gray-100 border border-gray-200 rounded-xl p-5 inline-block">
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Order Number</p>
+              <p className="text-2xl font-bold font-mono text-gray-900">{order.order_number}</p>
+            </div>
+            
+            <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-600">
+              <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Confirmation sent to <span className="font-semibold">{order.customer_email}</span>
+            </div>
           </div>
-          <p className="text-sm text-gray-600 mt-4">
-            A confirmation email has been sent to <span className="font-semibold">{order.customer_email}</span>
-          </p>
         </div>
 
         {/* Acai Pickup Details */}
@@ -289,8 +310,13 @@ export default function OrderConfirmationPage() {
         )}
 
         {/* Order Details */}
-        <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
-          <h2 className="text-xl font-bold text-gray-900 mb-4 border-b pb-2">Order Details</h2>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
+          <h2 className="text-xl font-bold text-gray-900 mb-4 pb-4 border-b border-gray-100 flex items-center">
+            <svg className="w-6 h-6 text-hafalohaRed mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            Order Details
+          </h2>
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <div>
@@ -371,6 +397,96 @@ export default function OrderConfirmationPage() {
           </div>
         </div>
 
+        {/* Order Tracking - For shipped retail orders */}
+        {order.order_type === 'retail' && (order.status === 'shipped' || order.can_track) && (
+          <div id="tracking" className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 pb-4 border-b border-gray-100 flex items-center">
+              <svg className="w-6 h-6 text-purple-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+              </svg>
+              Order Tracking
+            </h2>
+            
+            {/* Order Status Progress */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2">
+                {['pending', 'processing', 'shipped', 'delivered'].map((step, idx) => {
+                  const stepIndex = ['pending', 'processing', 'shipped', 'delivered'].indexOf(order.status);
+                  const isComplete = idx <= stepIndex;
+                  const isCurrent = step === order.status;
+                  
+                  return (
+                    <div key={step} className="flex flex-col items-center flex-1">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${
+                        isComplete 
+                          ? 'bg-green-500 text-white' 
+                          : 'bg-gray-200 text-gray-500'
+                      } ${isCurrent ? 'ring-2 ring-green-300' : ''}`}>
+                        {isComplete ? (
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        ) : (
+                          <span className="text-xs">{idx + 1}</span>
+                        )}
+                      </div>
+                      <span className={`text-xs text-center ${isCurrent ? 'font-bold text-green-600' : 'text-gray-500'}`}>
+                        {step.charAt(0).toUpperCase() + step.slice(1)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              {/* Progress bar */}
+              <div className="h-1 bg-gray-200 rounded-full mt-2">
+                <div 
+                  className="h-1 bg-green-500 rounded-full transition-all duration-500"
+                  style={{ 
+                    width: `${((['pending', 'processing', 'shipped', 'delivered'].indexOf(order.status) + 1) / 4) * 100}%` 
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Tracking Number */}
+            {order.tracking_number ? (
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <p className="text-sm text-purple-600 font-medium mb-1">Tracking Number</p>
+                    <p className="text-lg font-mono font-bold text-gray-900">{order.tracking_number}</p>
+                    {order.shipping_method && (
+                      <p className="text-sm text-gray-600 mt-1">via {order.shipping_method}</p>
+                    )}
+                  </div>
+                  {order.tracking_url && (
+                    <a
+                      href={order.tracking_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                      Track Package
+                    </a>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                <p className="text-gray-600">
+                  {order.status === 'pending' && 'Your order is being prepared. Tracking will be available once shipped.'}
+                  {order.status === 'processing' && 'Your order is being processed. Tracking information coming soon.'}
+                  {order.status === 'shipped' && 'Shipped! Tracking info will be updated shortly.'}
+                  {order.status === 'delivered' && 'Your order has been delivered!'}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Shipping Address - Only for non-pickup orders */}
         {!isPickupOrder && order.shipping_address_line1 && (
           <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
@@ -395,26 +511,40 @@ export default function OrderConfirmationPage() {
         <div className="flex flex-col sm:flex-row gap-4 print:hidden">
           <button
             onClick={() => navigate(isAcaiOrder ? '/acai-cakes' : '/products')}
-            className="flex-1 bg-hafalohaRed text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition text-center"
+            className="flex-1 btn-primary py-4 flex items-center justify-center gap-2"
           >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
             {isAcaiOrder ? 'Order Another Cake' : 'Continue Shopping'}
           </button>
           <button
             onClick={() => window.print()}
-            className="flex-1 bg-white text-gray-700 border-2 border-gray-300 px-6 py-3 rounded-lg font-semibold hover:bg-gray-50 transition text-center"
+            className="flex-1 btn-secondary py-4 flex items-center justify-center gap-2"
           >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
             Print Order
           </button>
         </div>
 
         {/* Help Text - Hidden when printing */}
-        <div className="mt-8 text-center text-sm text-gray-600 print:hidden">
-          <p>
-            Questions about your order? Contact us at{' '}
-            <a href="tel:671-989-3444" className="text-hafalohaRed hover:underline">
+        <div className="mt-8 text-center print:hidden">
+          <div className="bg-hafalohaCream rounded-xl p-6">
+            <p className="text-gray-700 mb-2 font-medium">
+              Questions about your order?
+            </p>
+            <a 
+              href="tel:671-989-3444" 
+              className="inline-flex items-center gap-2 text-hafalohaRed font-bold hover:underline"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
               (671) 989-3444
             </a>
-          </p>
+          </div>
         </div>
       </div>
     </div>
