@@ -30,8 +30,10 @@ export default function AdminFundraisersPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [editingFundraiser, setEditingFundraiser] = useState<Fundraiser | null>(null);
+  // Reserved for future modal functionality
+  const [_showCreateModal, _setShowCreateModal] = useState(false);
+  const [_editingFundraiser, _setEditingFundraiser] = useState<Fundraiser | null>(null);
+  void _showCreateModal; void _setShowCreateModal; void _editingFundraiser; void _setEditingFundraiser;
 
   useEffect(() => {
     loadFundraisers();

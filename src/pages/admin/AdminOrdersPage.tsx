@@ -311,7 +311,7 @@ export default function AdminOrdersPage() {
   };
 
   // Resend notification email (for orders that are ready/shipped)
-  const resendNotification = async (orderId: number, orderType: string, status: string) => {
+  const resendNotification = async (orderId: number, _orderType: string, _status: string) => {
     try {
       const token = await getToken();
       

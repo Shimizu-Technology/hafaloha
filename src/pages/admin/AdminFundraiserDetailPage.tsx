@@ -80,7 +80,8 @@ export default function AdminFundraiserDetailPage() {
   // Modal states
   const [showAddParticipant, setShowAddParticipant] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
-  const [editingParticipant, setEditingParticipant] = useState<Participant | null>(null);
+  const [_editingParticipant, _setEditingParticipant] = useState<Participant | null>(null);
+  void _editingParticipant; void _setEditingParticipant; // Reserved for future edit functionality
 
   useEffect(() => {
     if (id) loadFundraiser();

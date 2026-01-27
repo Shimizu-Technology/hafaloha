@@ -40,11 +40,12 @@ const StepCard = memo(function StepCard({
   children, 
   isActive, 
   isComplete, 
-  isVisited,
+  isVisited: _isVisited,
   summary,
   canAccess,
   onStepClick
 }: StepCardProps) {
+  void _isVisited; // Suppress unused variable warning
   return (
     <div 
       className={`rounded-2xl border-2 transition-all duration-300 overflow-hidden ${
@@ -242,13 +243,14 @@ export default function AcaiCakesPage() {
     return null;
   };
 
-  // Advance to next step
-  const advanceToNextStep = useCallback(() => {
+  // Advance to next step (kept for future use)
+  const _advanceToNextStep = useCallback(() => {
     const nextStep = getNextStep(currentStep);
     if (nextStep) {
       setCurrentStep(nextStep);
     }
   }, [currentStep, steps]);
+  void _advanceToNextStep; // Suppress unused variable warning
 
   // Load config on mount
   useEffect(() => {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, Calendar, Users, ArrowRight } from 'lucide-react';
+import { Heart, Calendar, ArrowRight } from 'lucide-react';
 import api from '../services/api';
 
 interface Fundraiser {

@@ -450,7 +450,7 @@ function ProductCard({
 // Cart Modal Component
 function CartModal({
   cart,
-  fundraiser,
+  fundraiser: _fundraiser,
   selectedParticipant,
   participants,
   onUpdateQuantity,

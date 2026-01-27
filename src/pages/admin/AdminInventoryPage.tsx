@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
-import { Package, Filter, Download, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, Minus } from 'lucide-react';
+import { Package, Filter, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import api from '../../services/api';
 import { format } from 'date-fns';
 
