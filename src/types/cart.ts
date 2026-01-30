@@ -7,7 +7,11 @@ export interface ProductVariant {
   price_cents: number;
   stock_quantity: number;
   in_stock: boolean;
+  /** Flexible variant options (e.g., { "Size": "M", "Color": "Red", "Material": "Cotton" }) */
+  options?: Record<string, string>;
+  /** @deprecated Use options instead. Legacy size field for backward compatibility. */
   size?: string;
+  /** @deprecated Use options instead. Legacy color field for backward compatibility. */
   color?: string;
 }
 

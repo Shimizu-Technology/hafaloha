@@ -38,8 +38,13 @@ export interface OrderItem {
   quantity: number;
   price_cents: number;
   product_name: string;
+  variant_name?: string;
   variant_details: {
+    /** Flexible variant options (e.g., { "Size": "M", "Color": "Red" }) */
+    options?: Record<string, string>;
+    /** @deprecated Use options instead. Legacy size field. */
     size?: string;
+    /** @deprecated Use options instead. Legacy color field. */
     color?: string;
     sku: string;
   };
