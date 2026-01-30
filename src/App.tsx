@@ -537,7 +537,7 @@ function AppContent() {
             <div className="border-t border-gray-200 mt-12 pt-8">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                 <p className="text-gray-400 text-sm text-center sm:text-left">
-                  &copy; 2025 Hafaloha. All rights reserved.
+                  &copy; 2026 Hafaloha. All rights reserved.
                 </p>
                 <div className="flex gap-6 text-sm">
                   <Link to="/privacy" className="text-gray-400 hover:text-gray-600 transition">
