@@ -143,6 +143,7 @@ export default function CheckoutPage() {
       const orderData: any = {
         email,
         phone,
+        customer_name: name,
         payment_method: {
           type: appConfig?.app_mode === 'test' ? 'test' : 'stripe',
           token: appConfig?.app_mode === 'test' ? undefined : 'tok_test_placeholder', // TODO: Real Stripe token
