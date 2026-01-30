@@ -102,7 +102,7 @@ To access the admin dashboard:
    - Click "Admin Dashboard"
    - Or go directly to http://localhost:5173/admin
 
-**Default admin email:** `shimizutechnology@gmail.com` (ask Leon to set you up)
+**Admin whitelist emails:** `shimizutechnology@gmail.com`, `jerry.shimizutechnology@gmail.com` (auto-promoted on first login via `ADMIN_EMAILS` constant). Any existing admin can also promote users from the Admin User Management page.
 
 ---
 
@@ -138,12 +138,33 @@ To access the admin dashboard:
 4. **Manage Orders:**
    - View all orders
    - Filter by status (pending, processing, shipped, etc.)
-   - Update order status
+   - Update order status (full fulfillment workflow)
    - Add tracking numbers
    - Add admin notes
    - Send tracking emails to customers
 
-5. **Settings:**
+5. **Manage Acai Cakes:**
+   - Configure pickup windows per day of week
+   - Block dates/time slots (holidays, fully booked)
+   - Manage crust options + placard options
+   - View orders by pickup date/time
+
+6. **Manage Fundraisers (Wholesale):**
+   - Create/manage fundraiser campaigns
+   - Add campaign-specific products
+   - Manage participants
+   - View orders by fundraiser/participant
+
+7. **Manage Inventory:**
+   - Real-time stock tracking (3 levels: none/product/variant)
+   - Inventory audit trail (who changed stock, when, why)
+
+8. **Manage Users:**
+   - View all registered users
+   - Promote users to admin role
+   - Admin whitelist auto-promotes on first login
+
+9. **Settings:**
    - Toggle test mode (bypass Stripe for testing)
    - Enable/disable customer emails
    - View API key status

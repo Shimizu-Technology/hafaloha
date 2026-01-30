@@ -54,15 +54,31 @@
 ### **Admin Dashboard**
 - ✅ Product management (CRUD, images, variants)
 - ✅ Order management (view, update status, tracking)
+- ✅ Order fulfillment workflow (status progression, tracking emails)
 - ✅ CSV import (Shopify products)
 - ✅ Collections management
 - ✅ Global settings (test mode, email toggle)
 - ✅ Import history tracking
+- ✅ User management (admin promotion via UI)
+- ✅ Inventory audits + tracking
 
-### **Future (Phase 1B & 2)**
-- ⏳ Acai Cakes scheduling
-- ⏳ Wholesale/fundraiser system
-- ⏳ Inventory audit trail
+### **Acai Cakes** ✅ Complete (Jan 21)
+- ✅ Pickup date/time slot scheduling
+- ✅ Crust options + placard options
+- ✅ Admin pickup window management
+- ✅ Blocked dates/slots
+- ✅ 24-hour advance notice requirement
+
+### **Wholesale/Fundraiser** ✅ Complete (Jan 23)
+- ✅ Fundraiser campaigns with participants
+- ✅ Campaign-specific products (FundraiserProduct)
+- ✅ Participant selection at checkout
+- ✅ Admin fundraiser management
+
+### **Still Pending (Phase 2)**
+- ⏳ Refund processing (Stripe)
+- ⏳ CI/CD pipeline (GitHub Actions)
+- ⏳ SEO setup
 - ⏳ Advanced analytics
 
 ---
@@ -122,7 +138,8 @@ hafaloha/
 - Guest checkout available (no account required)
 
 ### **Admin Access**
-- Only `shimizutechnology@gmail.com` is admin
+- **Admin whitelist** (auto-promoted on first login): `shimizutechnology@gmail.com`, `jerry.shimizutechnology@gmail.com`
+- Any existing admin can promote other users via the Admin UI (User Management page)
 - Admin dashboard at `/admin`
 - Requires Clerk authentication
 
@@ -143,14 +160,26 @@ hafaloha/
 
 ## Database Highlights
 
-### **Core Models**
-- `User` - Clerk-managed users
+### **Core Models (24 total)**
+- `User` - Clerk-managed users (with admin whitelist + UI promotion)
 - `Product` - All products (retail, wholesale, acai)
 - `ProductVariant` - Size/color combinations
 - `ProductImage` - Photos stored in S3
+- `ProductCollection` - Join table
 - `Collection` - Product categories
 - `Order` - All order types
 - `OrderItem` - Line items
+- `CartItem` - Shopping cart items
+- `SiteSetting` - Global app settings
+- `HomepageSection` - Homepage content management
+- `Import` - CSV import history
+- `Page` - Static/CMS pages
+- `Fundraiser` - Wholesale campaigns
+- `FundraiserProduct` - Campaign-specific products
+- `Participant` - Fundraiser participants
+- `AcaiPickupWindow`, `AcaiBlockedSlot`, `AcaiCrustOption`, `AcaiPlacardOption`, `AcaiSetting` - Acai Cakes system
+- `InventoryAudit` - Stock change audit trail
+- `VariantPreset` - Reusable variant templates
 
 ### **Inventory System**
 **3 Levels:**
@@ -166,14 +195,14 @@ hafaloha/
 
 ---
 
-## Deployment (Future)
+## Deployment ✅ Live
 
-| Component | Platform |
-|-----------|----------|
-| Backend | Render (Rails + Sidekiq) |
-| Frontend | Netlify |
-| Database | Neon (PostgreSQL) |
-| Images | AWS S3 |
+| Component | Platform | URL |
+|-----------|----------|-----|
+| Frontend | Netlify | [hafaloha-v2.netlify.app](https://hafaloha-v2.netlify.app) |
+| Backend | Render (Rails + Sidekiq) | [hafaloha-api-ttx6.onrender.com](https://hafaloha-api-ttx6.onrender.com) |
+| Database | Neon (PostgreSQL) | — |
+| Images | AWS S3 | — |
 
 ---
 
@@ -204,20 +233,25 @@ npm run dev  # http://localhost:5173
 
 ## Current Status
 
-**Phase 1A: ✅ Complete**
-- Product catalog
-- Shopping cart
-- Checkout & payments
-- Admin dashboard
-- CSV import
+**Phase 1A: ✅ Complete** (Dec 10–14, 2025)
+- Product catalog, shopping cart, checkout & payments
+- Admin dashboard, CSV import from Shopify
 
-**Phase 1B: ⏳ In Progress**
-- Acai Cakes scheduling
-- Wholesale/fundraiser system
+**Phase 1B: ✅ Complete** (Dec 15, 2025 – Jan 30, 2026)
+- Acai Cakes scheduling (Jan 21)
+- Order fulfillment workflow (Jan 21)
+- Wholesale/fundraiser system (Jan 23)
+- Variant presets backend (Jan 23)
+- Inventory audits + tracking (Jan 25)
+- Admin user management (whitelist + UI promotion)
+- 15 bug fixes (HAF-2 through HAF-16)
+- Production deployment
 
 **Phase 2: 📋 Planned**
+- Refund processing (Stripe)
+- CI/CD pipeline (GitHub Actions)
+- SEO setup
 - Advanced analytics
-- Inventory audit trail
 - Newsletter system
 - Customer reviews
 
@@ -257,10 +291,11 @@ npm run dev  # http://localhost:5173
 - Never trust cart contents
 - Revalidate stock before payment
 
-### **Admin Credentials**
-- **Email:** `shimizutechnology@gmail.com`
-- **Password:** Ask Leon
-- **Role:** Set in `users` table (`role: 'admin'`)
+### **Admin Access**
+- **Whitelist:** `shimizutechnology@gmail.com`, `jerry.shimizutechnology@gmail.com` (auto-promoted via `ADMIN_EMAILS` constant)
+- **UI Promotion:** Any admin can promote other users from the Admin User Management page
+- **Role:** `role: 'admin'` in `users` table
+- Admin dashboard at `/admin`
 
 ---
 
