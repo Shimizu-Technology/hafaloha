@@ -3,6 +3,9 @@ import { useSearchParams } from 'react-router-dom';
 import type { Product } from '../services/api';
 import { productsApi, collectionsApi } from '../services/api';
 import ProductCard from '../components/ProductCard';
+import FadeIn from '../components/animations/FadeIn';
+import { PageHeaderSkeleton, ProductGridSkeleton } from '../components/Skeleton';
+import { StaggerContainer, StaggerItem } from '../components/animations/StaggerContainer';
 
 interface Collection {
   id: number;
@@ -109,10 +112,14 @@ export default function ProductsPage() {
 
   if (loading && products.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hafalohaRed mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading products...</p>
+      <div className="min-h-screen bg-white">
+        <div className="bg-warm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <PageHeaderSkeleton />
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <ProductGridSkeleton count={12} />
         </div>
       </div>
     );
@@ -161,14 +168,16 @@ export default function ProductsPage() {
       {/* Header */}
       <div className="bg-warm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-          <div className="text-center">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 tracking-tight">
-              Shop Hafaloha
-            </h1>
-            <p className="text-gray-500 text-base sm:text-lg max-w-2xl mx-auto">
-              Chamorro pride. Island style. Premium quality apparel for the whole ohana.
-            </p>
-          </div>
+          <FadeIn>
+            <div className="text-center">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 tracking-tight">
+                Shop Hafaloha
+              </h1>
+              <p className="text-warm-500 text-base sm:text-lg max-w-2xl mx-auto">
+                Chamorro pride. Island style. Premium quality apparel for the whole ohana.
+              </p>
+            </div>
+          </FadeIn>
         </div>
       </div>
 
@@ -367,11 +376,13 @@ export default function ProductsPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 mb-12">
+            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 mb-12" staggerDelay={0.05}>
               {products.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <StaggerItem key={product.id}>
+                  <ProductCard product={product} />
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
 
             {/* Pagination */}
             {totalPages > 1 && (

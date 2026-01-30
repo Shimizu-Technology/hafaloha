@@ -2,6 +2,16 @@
 
 @theme {
   --color-warm: #FDFBF7;
+  --color-warm-50: #FAFAF8;
+  --color-warm-100: #F5F5F0;
+  --color-warm-200: #E8E8E0;
+  --color-warm-300: #D6D3CC;
+  --color-warm-400: #A8A29E;
+  --color-warm-500: #78716C;
+  --color-warm-600: #57534E;
+  --color-warm-700: #44403C;
+  --color-warm-800: #292524;
+  --color-warm-900: #1C1917;
 }
 
 :root {

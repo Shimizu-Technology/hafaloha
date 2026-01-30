@@ -30,6 +30,7 @@ export default function ProductCard({ product }: ProductCardProps) {
                 objectFit: 'contain',
                 backgroundColor: '#f9fafb'
               }}
+              loading="lazy"
             />
           ) : (
             <div className="w-full h-full flex flex-col items-center justify-center bg-gray-50">

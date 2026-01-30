@@ -1,9 +1,18 @@
 import FadeIn from '../components/animations/FadeIn';
 import { StaggerContainer, StaggerItem } from '../components/animations/StaggerContainer';
+import Breadcrumbs from '../components/Breadcrumbs';
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-white">
+      {/* Breadcrumbs */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <Breadcrumbs items={[
+          { label: 'Home', path: '/' },
+          { label: 'Our Story' }
+        ]} />
+      </div>
+
       {/* Hero Section - Clean and minimal */}
       <div className="bg-warm">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24">
@@ -144,6 +153,7 @@ export default function AboutPage() {
                 src="/images/len_and_tara_hafaloha.webp" 
                 alt="Leonard and Tara Kaae - Hafaloha Founders" 
                 className="w-full h-auto object-cover rounded-lg"
+                loading="lazy"
               />
             </div>
           </FadeIn>

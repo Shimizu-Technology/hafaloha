@@ -5,6 +5,7 @@ import type { Product } from '../services/api';
 import ProductBadge from './ProductBadge';
 import FadeIn from './animations/FadeIn';
 import { StaggerContainer, StaggerItem } from './animations/StaggerContainer';
+import { ProductGridSkeleton } from './Skeleton';
 
 export default function FeaturedProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -57,11 +58,7 @@ export default function FeaturedProducts() {
         <h2 className="text-3xl font-bold text-center mb-8 sm:mb-12 text-gray-900 tracking-tight">
           Featured Products
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div key={i} className="bg-gray-200 rounded-lg animate-pulse" style={{ aspectRatio: '1/1.3' }}></div>
-          ))}
-        </div>
+        <ProductGridSkeleton count={8} />
       </div>
     );
   }

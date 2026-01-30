@@ -11,6 +11,7 @@ import {
 } from '../services/api';
 import type { AppConfig } from '../types/order';
 import toast from 'react-hot-toast';
+import FadeIn from '../components/animations/FadeIn';
 
 // Step configuration
 type StepId = 'date' | 'time' | 'crust' | 'quantity' | 'placard' | 'contact';
@@ -476,16 +477,36 @@ export default function AcaiCakesPage() {
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-orange-100/30 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2"></div>
         
         <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-          {config.settings.image_url ? (
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div className="order-1">
-                <img
-                  src={config.settings.image_url}
-                  alt={config.settings.name}
-                  className="w-full max-w-sm mx-auto rounded-2xl shadow-xl"
-                />
+          <FadeIn>
+            {config.settings.image_url ? (
+              <div className="grid md:grid-cols-2 gap-8 items-center">
+                <div className="order-1">
+                  <img
+                    src={config.settings.image_url}
+                    alt={config.settings.name}
+                    className="w-full max-w-sm mx-auto rounded-2xl shadow-xl"
+                    loading="lazy"
+                  />
+                </div>
+                <div className="order-2 text-center md:text-left">
+                  <span className="inline-block text-sm font-medium text-hafalohaRed uppercase tracking-wider mb-2">
+                    Order Fresh
+                  </span>
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 text-gray-900">
+                    {config.settings.name}
+                  </h1>
+                  <p className="text-3xl font-bold mb-3 text-hafalohaRed">
+                    {config.settings.formatted_price}
+                  </p>
+                  {config.settings.description && (
+                    <p className="max-w-xl whitespace-pre-line text-gray-600 leading-relaxed text-sm">
+                      {config.settings.description}
+                    </p>
+                  )}
+                </div>
               </div>
-              <div className="order-2 text-center md:text-left">
+            ) : (
+              <div className="text-center max-w-2xl mx-auto">
                 <span className="inline-block text-sm font-medium text-hafalohaRed uppercase tracking-wider mb-2">
                   Order Fresh
                 </span>
@@ -496,30 +517,13 @@ export default function AcaiCakesPage() {
                   {config.settings.formatted_price}
                 </p>
                 {config.settings.description && (
-                  <p className="max-w-xl whitespace-pre-line text-gray-600 leading-relaxed text-sm">
+                  <p className="max-w-xl mx-auto whitespace-pre-line text-gray-600 leading-relaxed text-sm">
                     {config.settings.description}
                   </p>
                 )}
               </div>
-            </div>
-          ) : (
-            <div className="text-center max-w-2xl mx-auto">
-              <span className="inline-block text-sm font-medium text-hafalohaRed uppercase tracking-wider mb-2">
-                Order Fresh
-              </span>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 text-gray-900">
-                {config.settings.name}
-              </h1>
-              <p className="text-3xl font-bold mb-3 text-hafalohaRed">
-                {config.settings.formatted_price}
-              </p>
-              {config.settings.description && (
-                <p className="max-w-xl mx-auto whitespace-pre-line text-gray-600 leading-relaxed text-sm">
-                  {config.settings.description}
-                </p>
-              )}
-            </div>
-          )}
+            )}
+          </FadeIn>
         </div>
       </div>
 

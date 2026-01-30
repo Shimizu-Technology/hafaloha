@@ -427,7 +427,7 @@ function AppContent() {
 
         {/* Footer - Hidden when printing and on admin pages */}
         {!isAdminPage && (
-        <footer className="bg-gray-50 border-t border-gray-100 print:hidden">
+        <footer className="bg-warm-50 border-t border-warm-100 print:hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12">
               {/* Brand */}

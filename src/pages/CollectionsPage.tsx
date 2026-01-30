@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { collectionsApi } from '../services/api';
+import { CollectionCardSkeleton, PageHeaderSkeleton } from '../components/Skeleton';
+import FadeIn from '../components/animations/FadeIn';
+import { StaggerContainer, StaggerItem } from '../components/animations/StaggerContainer';
 
 interface Collection {
   id: number;
@@ -69,10 +72,18 @@ export default function CollectionsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-hafalohaRed mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading collections...</p>
+      <div className="min-h-screen bg-warm-50">
+        <div className="bg-white border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <PageHeaderSkeleton />
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <CollectionCardSkeleton key={i} />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -127,10 +138,12 @@ export default function CollectionsPage() {
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Collections</h1>
-          <p className="text-lg text-gray-600">
-            Shop our curated collections of Chamorro pride apparel and merchandise
-          </p>
+          <FadeIn>
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">Collections</h1>
+            <p className="text-lg text-gray-600">
+              Shop our curated collections of Chamorro pride apparel and merchandise
+            </p>
+          </FadeIn>
         </div>
       </div>
 
@@ -181,8 +194,10 @@ export default function CollectionsPage() {
       {/* Collections Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hafalohaRed"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <CollectionCardSkeleton key={i} />
+            ))}
           </div>
         ) : collections.length === 0 ? (
           <div className="text-center py-12">
@@ -200,63 +215,64 @@ export default function CollectionsPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {collections.map((collection) => (
-                <Link
-                  key={collection.id}
-                  to={`/collections/${collection.slug}`}
-                  className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300"
-                >
-                  {/* Thumbnail */}
-                  <div className="aspect-square bg-gray-100 relative overflow-hidden">
-                    {collection.thumbnail_url ? (
-                      <img
-                        src={collection.thumbnail_url}
-                        alt={collection.name}
-                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                        style={{ objectFit: 'contain' }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                        <svg
-                          className="w-24 h-24 text-gray-400"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={1.5}
-                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                          />
-                        </svg>
-                      </div>
-                    )}
-                    {collection.featured && (
-                      <div className="absolute top-3 right-3 bg-hafalohaGold text-gray-900 px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                        Featured
-                      </div>
-                    )}
-                  </div>
+                <StaggerItem key={collection.id}>
+                  <Link
+                    to={`/collections/${collection.slug}`}
+                    className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 block"
+                  >
+                    {/* Thumbnail */}
+                    <div className="aspect-square bg-gray-100 relative overflow-hidden">
+                      {collection.thumbnail_url ? (
+                        <img
+                          src={collection.thumbnail_url}
+                          alt={collection.name}
+                          className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                          style={{ objectFit: 'contain' }}
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                          <svg
+                            className="w-24 h-24 text-gray-400"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={1.5}
+                              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                            />
+                          </svg>
+                        </div>
+                      )}
+                      {collection.featured && (
+                        <div className="absolute top-3 right-3 bg-hafalohaGold text-gray-900 px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                          Featured
+                        </div>
+                      )}
+                    </div>
 
-                  {/* Collection Info */}
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-hafalohaRed transition-colors">
-                      {collection.name}
-                    </h3>
-                    {collection.description && (
-                      <p className="text-sm text-gray-600 mb-3 line-clamp-2">
-                        {collection.description}
+                    {/* Collection Info */}
+                    <div className="p-6">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-hafalohaRed transition-colors">
+                        {collection.name}
+                      </h3>
+                      {collection.description && (
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                          {collection.description}
+                        </p>
+                      )}
+                      <p className="text-sm text-gray-500">
+                        {collection.product_count} {collection.product_count === 1 ? 'product' : 'products'}
                       </p>
-                    )}
-                    <p className="text-sm text-gray-500">
-                      {collection.product_count} {collection.product_count === 1 ? 'product' : 'products'}
-                    </p>
-                  </div>
-                </Link>
+                    </div>
+                  </Link>
+                </StaggerItem>
               ))}
-            </div>
+            </StaggerContainer>
 
             {/* Pagination */}
             {totalPages > 1 && (
