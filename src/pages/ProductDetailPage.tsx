@@ -1,10 +1,42 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import type { ProductFull, ProductVariant } from '../services/api';
 import { productsApi, formatPrice } from '../services/api';
 import { useCartStore } from '../store/cartStore';
 import Breadcrumbs from '../components/Breadcrumbs';
 
+// ── Color swatch mapping ────────────────────────────────────────────────────
+const CSS_COLOR_MAP: Record<string, string> = {
+  red: '#DC2626', blue: '#2563EB', green: '#16A34A', black: '#000000',
+  white: '#FFFFFF', yellow: '#EAB308', orange: '#EA580C', purple: '#9333EA',
+  pink: '#EC4899', gray: '#6B7280', grey: '#6B7280', brown: '#92400E',
+  navy: '#1E3A5A', teal: '#0D9488', maroon: '#7F1D1D', coral: '#F97316',
+  gold: '#CA8A04', silver: '#9CA3AF', beige: '#D4C5A9', ivory: '#FFFFF0',
+  charcoal: '#374151', cream: '#FFFDD0', tan: '#D2B48C', olive: '#65A30D',
+  burgundy: '#800020', lavender: '#A78BFA', turquoise: '#06B6D4',
+  salmon: '#FA8072', khaki: '#BDB76B', mint: '#A7F3D0', rose: '#F43F5E',
+  slate: '#64748B', indigo: '#4F46E5', cyan: '#06B6D4', magenta: '#D946EF',
+  lime: '#84CC16', aqua: '#22D3EE',
+};
+
+/** True when the option-type key represents a colour dimension */
+const isColorOptionType = (key: string): boolean => /colou?r/i.test(key);
+
+/** "size" → "Size", "shirt_color" → "Shirt color" */
+const formatOptionLabel = (key: string): string =>
+  key.charAt(0).toUpperCase() + key.slice(1).replace(/_/g, ' ');
+
+/** Resolve a human colour name to a hex string, or null */
+const getColorCSS = (colorName: string): string | null => {
+  const n = colorName.toLowerCase().trim();
+  if (CSS_COLOR_MAP[n]) return CSS_COLOR_MAP[n];
+  for (const [key, value] of Object.entries(CSS_COLOR_MAP)) {
+    if (n.includes(key)) return value;
+  }
+  return null;
+};
+
+// ── Component ───────────────────────────────────────────────────────────────
 export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>();
   const [product, setProduct] = useState<ProductFull | null>(null);
@@ -15,6 +47,7 @@ export default function ProductDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [isAdding, setIsAdding] = useState(false);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
   
   const { addItem } = useCartStore();
   
@@ -45,6 +78,128 @@ export default function ProductDetailPage() {
       document.body.style.overflow = 'unset';
     };
   }, [showSizeGuide]);
+
+  // ── Flexible variant option selectors ───────────────────────────────────
+
+  /** Do any variants carry the `options` JSONB field? */
+  const hasFlexibleOptions = useMemo(() => {
+    if (!product?.variants) return false;
+    return product.variants.some(
+      v => v.options && typeof v.options === 'object' && Object.keys(v.options).length > 0
+    );
+  }, [product]);
+
+  /** Map of optionKey → ordered unique values (e.g. "size" → ["S","M","L"]) */
+  const optionTypes = useMemo(() => {
+    if (!product || !hasFlexibleOptions) return new Map<string, string[]>();
+
+    const typesMap = new Map<string, Set<string>>();
+    const typeOrder: string[] = [];
+
+    product.variants.forEach(v => {
+      if (v.options && typeof v.options === 'object') {
+        Object.entries(v.options).forEach(([key, value]) => {
+          if (!typesMap.has(key)) {
+            typesMap.set(key, new Set());
+            typeOrder.push(key);
+          }
+          typesMap.get(key)!.add(value as string);
+        });
+      }
+    });
+
+    const result = new Map<string, string[]>();
+    typeOrder.forEach(key => {
+      result.set(key, Array.from(typesMap.get(key)!));
+    });
+    return result;
+  }, [product, hasFlexibleOptions]);
+
+  /**
+   * Cross-filtering: for each option type, which values still lead to at
+   * least one existing variant given the *other* currently-selected options?
+   */
+  const availableValuesByType = useMemo(() => {
+    if (!product || !hasFlexibleOptions) return new Map<string, Set<string>>();
+
+    const result = new Map<string, Set<string>>();
+
+    for (const [optionKey] of optionTypes) {
+      const available = new Set<string>();
+      const otherSelections = Object.entries(selectedOptions).filter(([k]) => k !== optionKey);
+
+      product.variants.forEach(v => {
+        if (!v.options) return;
+        const matchesOthers = otherSelections.every(([k, val]) => v.options![k] === val);
+        if (matchesOthers && v.options[optionKey]) {
+          available.add(v.options[optionKey]);
+        }
+      });
+
+      result.set(optionKey, available);
+    }
+    return result;
+  }, [product, hasFlexibleOptions, optionTypes, selectedOptions]);
+
+  /** The single variant that matches every selected option (or null). */
+  const matchedVariant = useMemo(() => {
+    if (!product || !hasFlexibleOptions) return null;
+    if (Object.keys(selectedOptions).length === 0) return null;
+
+    const allKeys = Array.from(optionTypes.keys());
+    if (!allKeys.every(k => selectedOptions[k])) return null; // partial selection
+
+    return (
+      product.variants.find(v =>
+        v.options && allKeys.every(k => v.options![k] === selectedOptions[k])
+      ) ?? null
+    );
+  }, [product, hasFlexibleOptions, selectedOptions, optionTypes]);
+
+  // Auto-select options from the first available variant when product loads
+  useEffect(() => {
+    if (product && hasFlexibleOptions && product.variants.length > 0) {
+      const first =
+        product.variants.find(v => v.actually_available !== false) ?? product.variants[0];
+      if (first.options && Object.keys(first.options).length > 0) {
+        setSelectedOptions({ ...first.options });
+      }
+    }
+  }, [product, hasFlexibleOptions]);
+
+  // Keep selectedVariant in sync with option-based matching
+  useEffect(() => {
+    if (!hasFlexibleOptions) return;
+    if (matchedVariant) {
+      setSelectedVariant(matchedVariant);
+      setQuantity(1);
+    } else if (Object.keys(selectedOptions).length > 0) {
+      setSelectedVariant(null);
+    }
+  }, [matchedVariant, hasFlexibleOptions, selectedOptions]);
+
+  const handleOptionSelect = (optionKey: string, value: string) => {
+    setSelectedOptions(prev => ({ ...prev, [optionKey]: value }));
+  };
+
+  /**
+   * For a given option value + all other current selections, find the matching
+   * variant (if all option types are selected).  Returns null when a partial
+   * selection means we can't identify a unique variant.
+   */
+  const findVariantForOption = (optionKey: string, value: string): ProductVariant | null => {
+    if (!product) return null;
+    const testOptions = { ...selectedOptions, [optionKey]: value };
+    const allKeys = Array.from(optionTypes.keys());
+    if (!allKeys.every(k => testOptions[k])) return null;
+    return (
+      product.variants.find(v =>
+        v.options && allKeys.every(k => v.options![k] === testOptions[k])
+      ) ?? null
+    );
+  };
+
+  // ── Data fetching ─────────────────────────────────────────────────────────
 
   const fetchProduct = async (productSlug: string) => {
     try {
@@ -198,6 +353,125 @@ export default function ProductDetailPage() {
     setQuantity(1);
   };
 
+  // ── Render helpers for flexible option selectors ────────────────────────
+
+  /** Render a row of colour swatches for a "color"-type option. */
+  const renderColorSelector = (optionKey: string, values: string[]) => {
+    const availableValues = availableValuesByType.get(optionKey) ?? new Set<string>();
+
+    return (
+      <div className="flex flex-wrap gap-3">
+        {values.map(value => {
+          const isAvailable = availableValues.has(value);
+          const isSelected = selectedOptions[optionKey] === value;
+          const cssColor = getColorCSS(value);
+          const variant = findVariantForOption(optionKey, value);
+          const variantInStock = variant ? variant.actually_available !== false : isAvailable;
+
+          return (
+            <button
+              key={value}
+              onClick={() => handleOptionSelect(optionKey, value)}
+              disabled={!isAvailable}
+              title={value + (!variantInStock ? ' (Out of Stock)' : '')}
+              className={`relative w-10 h-10 rounded-full border-2 transition-all ${
+                isSelected
+                  ? 'border-hafalohaRed ring-2 ring-hafalohaRed/30 scale-110'
+                  : isAvailable && variantInStock
+                    ? 'border-gray-300 hover:border-hafalohaRed hover:scale-105'
+                    : 'border-gray-200 opacity-40 cursor-not-allowed'
+              }`}
+            >
+              {cssColor ? (
+                <span
+                  className="absolute inset-1 rounded-full"
+                  style={{
+                    backgroundColor: cssColor,
+                    border: value.toLowerCase() === 'white' ? '1px solid #e5e7eb' : undefined,
+                  }}
+                />
+              ) : (
+                /* Unknown colour — show first letter on a neutral swatch */
+                <span className="absolute inset-1 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-xs font-bold text-gray-600">
+                  {value.charAt(0).toUpperCase()}
+                </span>
+              )}
+              {/* Diagonal strike-through for out-of-stock */}
+              {!variantInStock && isAvailable && (
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <span className="block w-full h-0.5 bg-gray-400 rotate-45" />
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
+  /** Render a row of text buttons for a non-colour option type. */
+  const renderButtonSelector = (optionKey: string, values: string[]) => {
+    const availableValues = availableValuesByType.get(optionKey) ?? new Set<string>();
+
+    return (
+      <div className="flex flex-wrap gap-2">
+        {values.map(value => {
+          const isAvailable = availableValues.has(value);
+          const isSelected = selectedOptions[optionKey] === value;
+          const variant = findVariantForOption(optionKey, value);
+          const variantInStock = variant ? variant.actually_available !== false : isAvailable;
+          const showStockWarning =
+            variant &&
+            product.inventory_level === 'variant' &&
+            variant.stock_quantity !== undefined &&
+            variant.stock_quantity > 0 &&
+            variant.stock_quantity <= 5;
+
+          // Price difference relative to base price
+          const priceDiff =
+            variant && variant.price_cents !== product.base_price_cents
+              ? variant.price_cents - product.base_price_cents
+              : null;
+
+          return (
+            <button
+              key={value}
+              onClick={() => handleOptionSelect(optionKey, value)}
+              disabled={!isAvailable}
+              className={`px-4 py-2.5 rounded-lg border-2 transition-all ${
+                isSelected
+                  ? 'border-hafalohaRed bg-red-50 text-hafalohaRed font-semibold'
+                  : isAvailable && variantInStock
+                    ? 'border-gray-300 hover:border-hafalohaRed text-gray-700'
+                    : isAvailable && !variantInStock
+                      ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                      : 'border-gray-200 bg-gray-50 text-gray-300 cursor-not-allowed'
+              }`}
+            >
+              <span className="text-sm font-medium">{value}</span>
+              {priceDiff !== null && priceDiff !== 0 && (
+                <span className={`block text-xs ${priceDiff > 0 ? 'text-gray-500' : 'text-green-600'}`}>
+                  {priceDiff > 0 ? '+' : '−'}
+                  {formatPrice(Math.abs(priceDiff))}
+                </span>
+              )}
+              {!variantInStock && isAvailable && (
+                <span className="block text-xs text-gray-400">Out of Stock</span>
+              )}
+              {variantInStock && showStockWarning && (
+                <span className="block text-xs text-orange-600">
+                  Only {variant!.stock_quantity} left
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
+  // ── JSX ─────────────────────────────────────────────────────────────────
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
@@ -328,45 +602,77 @@ export default function ProductDetailPage() {
                 )}
               </div>
 
-              {/* Variants */}
-              {product.variants.length > 0 && (
-                <div className="mb-8">
-                  <label className="block text-sm font-semibold text-gray-900 mb-3">
-                    Select Option:
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                    {product.variants.map((variant) => {
-                      const variantAvailable = variant.actually_available !== false;
-                      const showStockWarning = product.inventory_level === 'variant' && 
-                                             variant.stock_quantity !== undefined && 
-                                             variant.stock_quantity > 0 && 
-                                             variant.stock_quantity <= 5;
-                      
-                      return (
-                        <button
-                          key={variant.id}
-                          onClick={() => handleVariantChange(variant)}
-                          disabled={!variantAvailable}
-                          className={`px-4 py-3 rounded-lg border-2 transition-all ${
-                            selectedVariant?.id === variant.id
-                              ? 'border-hafalohaRed bg-red-50 text-hafalohaRed'
-                              : variantAvailable
-                              ? 'border-gray-300 hover:border-hafalohaRed'
-                              : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                          }`}
-                        >
-                          <div className="text-sm font-medium">{variant.display_name}</div>
-                          {!variantAvailable && (
-                            <div className="text-xs">Out of Stock</div>
-                          )}
-                          {variantAvailable && showStockWarning && (
-                            <div className="text-xs text-orange-600">Only {variant.stock_quantity} left</div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
+              {/* ── Variant / Option Selectors ────────────────────────── */}
+              {hasFlexibleOptions ? (
+                /* Grouped option selectors (Size, Color, Material, etc.) */
+                <div className="mb-8 space-y-5">
+                  {Array.from(optionTypes.entries()).map(([optionKey, values]) => (
+                    <div key={optionKey}>
+                      <label className="block text-sm font-semibold text-gray-900 mb-2">
+                        {formatOptionLabel(optionKey)}
+                        {selectedOptions[optionKey] && (
+                          <span className="ml-2 font-normal text-gray-600">
+                            — {selectedOptions[optionKey]}
+                          </span>
+                        )}
+                      </label>
+
+                      {isColorOptionType(optionKey)
+                        ? renderColorSelector(optionKey, values)
+                        : renderButtonSelector(optionKey, values)}
+                    </div>
+                  ))}
+
+                  {/* Warning when matched variant is out of stock */}
+                  {matchedVariant && matchedVariant.actually_available === false && (
+                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-sm text-red-600 font-medium">
+                        This combination is currently out of stock.
+                      </p>
+                    </div>
+                  )}
                 </div>
+              ) : (
+                /* Legacy flat variant grid (backward compatibility) */
+                product.variants.length > 0 && (
+                  <div className="mb-8">
+                    <label className="block text-sm font-semibold text-gray-900 mb-3">
+                      Select Option:
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                      {product.variants.map((variant) => {
+                        const variantAvailable = variant.actually_available !== false;
+                        const showStockWarning = product.inventory_level === 'variant' && 
+                                               variant.stock_quantity !== undefined && 
+                                               variant.stock_quantity > 0 && 
+                                               variant.stock_quantity <= 5;
+                        
+                        return (
+                          <button
+                            key={variant.id}
+                            onClick={() => handleVariantChange(variant)}
+                            disabled={!variantAvailable}
+                            className={`px-4 py-3 rounded-lg border-2 transition-all ${
+                              selectedVariant?.id === variant.id
+                                ? 'border-hafalohaRed bg-red-50 text-hafalohaRed'
+                                : variantAvailable
+                                ? 'border-gray-300 hover:border-hafalohaRed'
+                                : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                            }`}
+                          >
+                            <div className="text-sm font-medium">{variant.display_name}</div>
+                            {!variantAvailable && (
+                              <div className="text-xs">Out of Stock</div>
+                            )}
+                            {variantAvailable && showStockWarning && (
+                              <div className="text-xs text-orange-600">Only {variant.stock_quantity} left</div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )
               )}
 
               {/* Quantity Selector */}
@@ -537,4 +843,3 @@ export default function ProductDetailPage() {
     </div>
   );
 }
-
