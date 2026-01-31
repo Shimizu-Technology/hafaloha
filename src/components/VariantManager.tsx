@@ -671,12 +671,12 @@ export default function VariantManager({ productId, basePriceCents, inventoryLev
                       <button
                         onClick={() => toggleAvailability(variant.id, variant.available)}
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition cursor-pointer hover:opacity-80 ${
-                          variant.actually_available 
+                          (variant.actually_available ?? variant.available ?? true)
                             ? 'bg-green-100 text-green-800 hover:bg-green-200' 
                             : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                         }`}
                       >
-                        {variant.actually_available ? '✓ Available' : (
+                        {(variant.actually_available ?? variant.available ?? true) ? '✓ Available' : (
                           inventoryLevel === 'variant' && variant.stock_quantity === 0 
                             ? '⚠️ Out of Stock' 
                             : '✗ Disabled'

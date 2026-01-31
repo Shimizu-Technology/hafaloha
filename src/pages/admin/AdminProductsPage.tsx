@@ -312,7 +312,10 @@ export default function AdminProductsPage() {
   const getVariantStatus = (variant: ProductVariant, inventoryLevel: string) => {
     // Use the computed actually_available field for display
     // This respects both manual 'available' flag AND stock levels
-    if (!variant.actually_available) {
+    // Default to available if actually_available is undefined/null (e.g., newly created variants)
+    const isAvailable = variant.actually_available ?? variant.available ?? true;
+    
+    if (!isAvailable) {
       // Check why it's unavailable
       if (inventoryLevel === 'variant' && variant.stock_quantity <= 0) {
         return {
