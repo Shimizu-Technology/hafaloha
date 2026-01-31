@@ -17,4 +17,9 @@ class ApplicationController < ActionController::API
   rescue_from ActionController::ParameterMissing do |e|
     render json: { error: e.message }, status: :unprocessable_entity
   end
+
+  # HAF-37: Clean JSON response for undefined API routes
+  def route_not_found
+    render json: { error: "Route not found" }, status: :not_found
+  end
 end
