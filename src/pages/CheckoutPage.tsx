@@ -1,14 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { useCartStore } from '../store/cartStore';
-import { configApi, ordersApi, shippingApi, formatPrice } from '../services/api';
+import { configApi, ordersApi, shippingApi, paymentIntentsApi, formatPrice } from '../services/api';
+import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
+import StripeProvider from '../components/payment/StripeProvider';
+import PaymentForm from '../components/payment/PaymentForm';
 import type { ShippingAddress, ShippingMethod, AppConfig } from '../types/order';
 
-export default function CheckoutPage() {
+function CheckoutForm() {
   const navigate = useNavigate();
   const { getToken, isSignedIn, isLoaded: authLoaded } = useAuth();
   const { cart, clearCart, sessionId, fetchCart, isLoading: cartLoading } = useCartStore();
+  const stripe = useStripe();
+  const elements = useElements();
   
   // Get items from cart (with fallback to empty array)
   const items = cart?.items || [];
@@ -39,10 +44,15 @@ export default function CheckoutPage() {
   const [calculatingShipping, setCalculatingShipping] = useState(false);
   const [shippingError, setShippingError] = useState<string | null>(null);
   
+  // Payment state
+  const [paymentReady, setPaymentReady] = useState(false);
+
   // Loading/error states
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
+  const isTestMode = appConfig?.app_mode === 'test';
+
   // Load app config
   useEffect(() => {
     const loadConfig = async () => {
@@ -101,20 +111,26 @@ export default function CheckoutPage() {
       if (response.rates.length > 0) {
         setShippingMethod(response.rates[0]); // Auto-select first option
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Shipping calculation error:', err);
-      setShippingError(err.response?.data?.error || 'Failed to calculate shipping. Please try again.');
+      const axiosErr = err as { response?: { data?: { error?: string } } };
+      setShippingError(axiosErr.response?.data?.error || 'Failed to calculate shipping. Please try again.');
     } finally {
       setCalculatingShipping(false);
     }
   };
   
+  // Handle payment ready state from PaymentForm
+  const handlePaymentReady = useCallback((ready: boolean) => {
+    setPaymentReady(ready);
+  }, []);
+
   // Check if all required fields are filled
   const isFormValid = () => {
     const hasContactInfo = name.trim() !== '' && email.trim() !== '' && phone.trim() !== '';
     
     if (deliveryMethod === 'pickup') {
-      return hasContactInfo;
+      return hasContactInfo && (isTestMode || paymentReady);
     }
     
     // For shipping, need address and shipping method selected
@@ -124,7 +140,7 @@ export default function CheckoutPage() {
       shippingAddress.state.trim() !== '' &&
       shippingAddress.zip.trim() !== '';
     
-    return hasContactInfo && hasAddress && shippingMethod !== null;
+    return hasContactInfo && hasAddress && shippingMethod !== null && (isTestMode || paymentReady);
   };
   
   const handleSubmit = async (e: React.FormEvent) => {
@@ -139,71 +155,109 @@ export default function CheckoutPage() {
         token = await getToken();
       }
       
-      // Build order data
-      const orderData: any = {
-        email,
-        phone,
-        customer_name: name,
-        payment_method: {
-          type: appConfig?.app_mode === 'test' ? 'test' : 'stripe',
-          token: appConfig?.app_mode === 'test' ? undefined : 'tok_test_placeholder', // TODO: Real Stripe token
-        },
-      };
-      
-      // Add shipping or pickup details
+      // Build shipping data
+      const shippingCostCents = deliveryMethod === 'pickup' ? 0 : (shippingMethod?.rate_cents || 0);
+      let orderShippingAddress;
+      let orderShippingMethod;
+
       if (deliveryMethod === 'shipping') {
         if (!shippingMethod) {
           setError('Please select a shipping method');
           setLoading(false);
           return;
         }
-        
-        orderData.shipping_address = {
-          ...shippingAddress,
-          name: name,
-        };
-        orderData.shipping_method = shippingMethod;
+        orderShippingAddress = { ...shippingAddress, name };
+        orderShippingMethod = shippingMethod;
       } else {
-        // Pickup - no shipping needed
-        orderData.shipping_address = {
-          name: name,
+        orderShippingAddress = {
+          name,
           street1: 'Pickup',
           city: 'Hagåtña',
           state: 'GU',
           zip: '96910',
           country: 'US',
         };
-        orderData.shipping_method = {
+        orderShippingMethod = {
           carrier: 'PICKUP',
           service: 'In-Store Pickup',
           rate_cents: 0,
         };
       }
-      
-      // Create order
-      const response = await ordersApi.createOrder(orderData, token, sessionId);
-      
-      if (response.success) {
-        // Clear cart
-        await clearCart();
-        
-        // Navigate to order confirmation page
-        navigate(`/orders/${response.order.id}`);
+
+      if (isTestMode) {
+        // Test mode: skip Stripe, create order directly
+        const orderData = {
+          customer_name: name,
+          email, phone,
+          shipping_address: orderShippingAddress,
+          shipping_method: orderShippingMethod,
+          payment_method: { type: 'test' },
+        };
+        const response = await ordersApi.createOrder(orderData, token, sessionId);
+        if (response.success) {
+          await clearCart();
+          navigate(`/orders/${response.order.id}`);
+        } else {
+          setError('Failed to create order. Please try again.');
+        }
       } else {
-        setError('Failed to create order. Please try again.');
+        // Real Stripe payment flow
+        if (!stripe || !elements) {
+          setError('Payment system is not ready. Please wait and try again.');
+          setLoading(false);
+          return;
+        }
+        const cardElement = elements.getElement(CardElement);
+        if (!cardElement) {
+          setError('Card input not found. Please refresh and try again.');
+          setLoading(false);
+          return;
+        }
+        // Step 1: Create PaymentIntent
+        const intentResponse = await paymentIntentsApi.create(
+          { email, shipping_cost_cents: shippingCostCents }, token, sessionId
+        );
+        // Step 2: Confirm card payment with Stripe
+        const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
+          intentResponse.client_secret,
+          { payment_method: { card: cardElement, billing_details: { name, email, phone } } }
+        );
+        if (stripeError) {
+          setError(stripeError.message || 'Payment failed. Please check your card details.');
+          setLoading(false);
+          return;
+        }
+        if (!paymentIntent || paymentIntent.status !== 'succeeded') {
+          setError('Payment was not completed. Please try again.');
+          setLoading(false);
+          return;
+        }
+        // Step 3: Create order with payment intent ID
+        const orderData = {
+          customer_name: name,
+          email, phone,
+          shipping_address: orderShippingAddress,
+          shipping_method: orderShippingMethod,
+          payment_method: { type: 'stripe' },
+          payment_intent_id: paymentIntent.id,
+        };
+        const response = await ordersApi.createOrder(orderData, token, sessionId);
+        if (response.success) {
+          await clearCart();
+          navigate(`/orders/${response.order.id}`);
+        } else {
+          setError('Your payment was processed but there was an issue creating your order. Please contact support with reference: ' + paymentIntent.id);
+        }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Checkout error:', err);
-      
-      // Handle cart validation errors with detailed messages
-      if (err.response?.data?.error === 'Cart validation failed' && err.response?.data?.issues) {
-        const issues = err.response.data.issues;
-        const errorMessages = issues.map((issue: any) => 
-          `• ${issue.message}`
-        ).join('\n');
+      const axiosErr = err as { response?: { data?: { error?: string; issues?: Array<{ message: string }> } } };
+      if (axiosErr.response?.data?.error === 'Cart validation failed' && axiosErr.response?.data?.issues) {
+        const issues = axiosErr.response.data.issues;
+        const errorMessages = issues.map((issue) => `• ${issue.message}`).join('\n');
         setError(`Unable to complete order:\n${errorMessages}`);
       } else {
-        setError(err.response?.data?.error || 'An error occurred. Please try again.');
+        setError(axiosErr.response?.data?.error || 'An error occurred. Please try again.');
       }
     } finally {
       setLoading(false);
@@ -238,7 +292,7 @@ export default function CheckoutPage() {
         </div>
         
         {/* Test Mode Banner */}
-        {appConfig?.app_mode === 'test' && (
+        {isTestMode && (
           <div className="mb-6 bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4">
             <div className="flex items-start">
               <svg className="w-6 h-6 text-yellow-600 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -533,6 +587,12 @@ export default function CheckoutPage() {
               </div>
               )}
               
+              {/* Payment Section */}
+              <PaymentForm
+                isTestMode={isTestMode}
+                onPaymentReady={handlePaymentReady}
+              />
+
               {/* Error Message */}
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -560,7 +620,7 @@ export default function CheckoutPage() {
                     Processing...
                   </>
                 ) : (
-                  `Place Order - ${formatPrice(totalCents)}`
+                  isTestMode ? `Place Test Order - ${formatPrice(totalCents)}` : `Pay ${formatPrice(totalCents)}`
                 )}
               </button>
             </form>
@@ -628,7 +688,7 @@ export default function CheckoutPage() {
               </div>
               
               <p className="text-xs text-gray-500 mt-4">
-                {appConfig?.app_mode === 'test' 
+                {isTestMode 
                   ? 'Test mode: No real payment will be charged.'
                   : deliveryMethod === 'shipping' && !shippingMethod
                   ? 'Enter shipping address and calculate rates to see final total.'
@@ -642,3 +702,14 @@ export default function CheckoutPage() {
   );
 }
 
+/**
+ * CheckoutPage wraps CheckoutForm in StripeProvider
+ * so Stripe hooks are available throughout the form.
+ */
+export default function CheckoutPage() {
+  return (
+    <StripeProvider>
+      <CheckoutForm />
+    </StripeProvider>
+  );
+}

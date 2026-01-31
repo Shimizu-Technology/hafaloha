@@ -228,6 +228,36 @@ export const ordersApi = {
   },
 };
 
+// Payment Intents API (Stripe)
+export interface CreatePaymentIntentRequest {
+  email: string;
+  shipping_cost_cents: number;
+}
+
+export interface CreatePaymentIntentResponse {
+  client_secret: string;
+  payment_intent_id: string;
+  amount_cents: number;
+}
+
+export const paymentIntentsApi = {
+  create: async (
+    data: CreatePaymentIntentRequest,
+    token?: string | null,
+    sessionId?: string | null
+  ): Promise<CreatePaymentIntentResponse> => {
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    if (sessionId) {
+      headers['X-Session-ID'] = sessionId;
+    }
+    const response = await api.post('/payment_intents', data, { headers });
+    return response.data;
+  },
+};
+
 // Shipping API
 export const shippingApi = {
   // Calculate shipping rates
