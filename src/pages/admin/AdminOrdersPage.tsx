@@ -698,14 +698,59 @@ export default function AdminOrdersPage() {
             setIsEditing(false);
           }}
         >
-          {/* Print Styles */}
+          {/* Print Styles - Packing Slip Layout */}
           <style>{`
             @media print {
+              /* Hide everything on the page */
               body * { visibility: hidden; }
-              .print-content, .print-content * { visibility: visible; }
-              .print-content { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; }
+
+              /* Hide admin layout elements completely (no space taken) */
+              aside, header, nav,
+              [class*='sidebar'], [class*='Sidebar'] {
+                display: none !important;
+              }
+
+              /* Remove sidebar padding from main content area */
+              .md\:pl-64, [class*='md:pl-64'] {
+                padding-left: 0 !important;
+              }
+
+              /* Show only the packing slip content */
+              .print-content,
+              .print-content * {
+                visibility: visible;
+              }
+              .print-content {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 0;
+                margin: 0;
+                max-width: 100% !important;
+                max-height: none !important;
+                overflow: visible !important;
+                box-shadow: none !important;
+                border-radius: 0 !important;
+              }
+
+              /* Hide interactive elements and admin-only sections */
               .print-hide { display: none !important; }
-              @page { margin: 0.5in; }
+              .print-content button { display: none !important; }
+              .print-content a { text-decoration: none; color: inherit; }
+
+              /* Page setup */
+              @page {
+                margin: 0.5in;
+                size: auto;
+              }
+
+              /* Ensure clean backgrounds */
+              .print-content {
+                background: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
             }
           `}</style>
           <div 
@@ -1021,9 +1066,9 @@ export default function AdminOrdersPage() {
                 </div>
               </div>
 
-              {/* Refund History */}
+              {/* Refund History - Hidden in print */}
               {selectedOrder.refunds && selectedOrder.refunds.length > 0 && (
-                <div>
+                <div className="print-hide">
                   <h3 className="font-semibold text-gray-900 mb-3">💰 Refund History</h3>
                   <div className="space-y-3">
                     {selectedOrder.refunds.map((refund) => (
