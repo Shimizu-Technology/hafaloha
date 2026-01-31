@@ -46,7 +46,7 @@ export default function AdminFundraisersPage() {
       if (search) params.append('search', search);
       if (statusFilter) params.append('status', statusFilter);
 
-      const response = await api.get(`/api/v1/admin/fundraisers?${params}`, {
+      const response = await api.get(`/admin/fundraisers?${params}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setFundraisers(response.data.fundraisers);
@@ -62,7 +62,7 @@ export default function AdminFundraisersPage() {
     
     try {
       const token = await getToken();
-      await api.delete(`/api/v1/admin/fundraisers/${fundraiser.id}`, {
+      await api.delete(`/admin/fundraisers/${fundraiser.id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       loadFundraisers();
