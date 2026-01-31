@@ -168,7 +168,7 @@ module Api
           end
 
           # Send refund notification email
-          OrderMailer.refund_notification(@order, refund).deliver_later
+          EmailService.send_refund_notification(@order, refund.amount_cents, refund.reason)
 
           render json: {
             message: 'Refund processed successfully',
