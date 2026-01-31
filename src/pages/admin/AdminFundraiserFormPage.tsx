@@ -65,7 +65,7 @@ export default function AdminFundraiserFormPage() {
   const loadFundraiser = async () => {
     try {
       const token = await getToken();
-      const response = await api.get(`/api/v1/admin/fundraisers/${id}`, {
+      const response = await api.get(`/admin/fundraisers/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const f = response.data.fundraiser;
@@ -142,12 +142,12 @@ export default function AdminFundraiserFormPage() {
       };
 
       if (isEditing) {
-        await api.put(`/api/v1/admin/fundraisers/${id}`, payload, {
+        await api.put(`/admin/fundraisers/${id}`, payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast.success('Fundraiser updated');
       } else {
-        const response = await api.post('/api/v1/admin/fundraisers', payload, {
+        const response = await api.post('/admin/fundraisers', payload, {
           headers: { Authorization: `Bearer ${token}` }
         });
         toast.success('Fundraiser created');

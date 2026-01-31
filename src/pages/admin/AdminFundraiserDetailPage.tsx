@@ -98,7 +98,7 @@ export default function AdminFundraiserDetailPage() {
   const loadFundraiser = async () => {
     try {
       const token = await getToken();
-      const response = await api.get(`/api/v1/admin/fundraisers/${id}`, {
+      const response = await api.get(`/admin/fundraisers/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setFundraiser(response.data.fundraiser);
@@ -114,7 +114,7 @@ export default function AdminFundraiserDetailPage() {
   const loadParticipants = async () => {
     try {
       const token = await getToken();
-      const response = await api.get(`/api/v1/admin/fundraisers/${id}/participants`, {
+      const response = await api.get(`/admin/fundraisers/${id}/participants`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setParticipants(response.data.participants);
@@ -126,7 +126,7 @@ export default function AdminFundraiserDetailPage() {
   const loadProducts = async () => {
     try {
       const token = await getToken();
-      const response = await api.get(`/api/v1/admin/fundraisers/${id}/products`, {
+      const response = await api.get(`/admin/fundraisers/${id}/products`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setProducts(response.data.products);
@@ -138,7 +138,7 @@ export default function AdminFundraiserDetailPage() {
   const loadAvailableProducts = async () => {
     try {
       const token = await getToken();
-      const response = await api.get(`/api/v1/admin/fundraisers/${id}/products/available`, {
+      const response = await api.get(`/admin/fundraisers/${id}/products/available`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setAvailableProducts(response.data.products);
@@ -150,7 +150,7 @@ export default function AdminFundraiserDetailPage() {
   const handleAddProduct = async (productId: number, priceCents: number) => {
     try {
       const token = await getToken();
-      await api.post(`/api/v1/admin/fundraisers/${id}/products`, {
+      await api.post(`/admin/fundraisers/${id}/products`, {
         fundraiser_product: { product_id: productId, price_cents: priceCents }
       }, {
         headers: { Authorization: `Bearer ${token}` }
@@ -168,7 +168,7 @@ export default function AdminFundraiserDetailPage() {
     if (!confirm('Remove this product from the fundraiser?')) return;
     try {
       const token = await getToken();
-      await api.delete(`/api/v1/admin/fundraisers/${id}/products/${fpId}`, {
+      await api.delete(`/admin/fundraisers/${id}/products/${fpId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Product removed');
@@ -183,7 +183,7 @@ export default function AdminFundraiserDetailPage() {
     if (!confirm(`Delete participant "${participant.name}"?`)) return;
     try {
       const token = await getToken();
-      await api.delete(`/api/v1/admin/fundraisers/${id}/participants/${participant.id}`, {
+      await api.delete(`/admin/fundraisers/${id}/participants/${participant.id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success('Participant deleted');
@@ -522,7 +522,7 @@ function AddParticipantModal({
     setSaving(true);
     try {
       const token = await getToken();
-      await api.post(`/api/v1/admin/fundraisers/${fundraiserId}/participants`, {
+      await api.post(`/admin/fundraisers/${fundraiserId}/participants`, {
         participant: form
       }, {
         headers: { Authorization: `Bearer ${token}` }
