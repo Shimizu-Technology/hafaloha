@@ -23,8 +23,13 @@ export default function AdminLayout() {
   // Check admin status from API
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (!isLoaded || !user) {
+      if (!isLoaded) {
+        return;
+      }
+
+      if (!user) {
         setCheckingAdmin(false);
+        setIsAdmin(false);
         return;
       }
 
