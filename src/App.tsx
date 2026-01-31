@@ -29,6 +29,10 @@ import AcaiCakesPage from './pages/AcaiCakesPage';
 import FundraiserPage from './pages/FundraiserPage';
 import FundraisersListPage from './pages/FundraisersListPage';
 import NotFoundPage from './pages/NotFoundPage';
+import ContactPage from './pages/ContactPage';
+import ShippingInfoPage from './pages/ShippingInfoPage';
+import ReturnsPage from './pages/ReturnsPage';
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
 import axios from 'axios';
 import { Toaster } from 'react-hot-toast';
 import CartIcon from './components/CartIcon'; // Import CartIcon
@@ -401,6 +405,10 @@ function AppContent() {
           <Route path="/checkout" element={<CheckoutPage />} />
           <Route path="/orders" element={<OrderHistoryPage />} />
           <Route path="/orders/:id" element={<OrderConfirmationPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/shipping" element={<ShippingInfoPage />} />
+          <Route path="/returns" element={<ReturnsPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
           
           {/* Admin Routes with Layout */}
           <Route path="/admin" element={<AdminLayout />}>

@@ -8,6 +8,7 @@ interface FadeInProps {
   direction?: 'up' | 'down' | 'left' | 'right' | 'none';
   duration?: number;
   className?: string;
+  immediate?: boolean;
 }
 
 export default function FadeIn({ 
@@ -15,10 +16,12 @@ export default function FadeIn({
   delay = 0, 
   direction = 'up', 
   duration = 0.6,
-  className = '' 
+  className = '',
+  immediate = false
 }: FadeInProps) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const inViewResult = useInView(ref, { once: true, margin: "-80px" });
+  const isInView = immediate || inViewResult;
 
   const directions = {
     up: { y: 30 },

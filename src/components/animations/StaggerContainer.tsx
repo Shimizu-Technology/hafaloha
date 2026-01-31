@@ -5,11 +5,13 @@ interface StaggerContainerProps {
   children: React.ReactNode;
   className?: string;
   staggerDelay?: number;
+  immediate?: boolean;
 }
 
-export function StaggerContainer({ children, className = '', staggerDelay = 0.08 }: StaggerContainerProps) {
+export function StaggerContainer({ children, className = '', staggerDelay = 0.08, immediate = false }: StaggerContainerProps) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const inViewResult = useInView(ref, { once: true, margin: "-80px" });
+  const isInView = immediate || inViewResult;
 
   return (
     <motion.div
