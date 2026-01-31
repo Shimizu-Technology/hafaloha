@@ -13,7 +13,7 @@ interface StripeProviderProps {
 export default function StripeProvider({ children, clientSecret }: StripeProviderProps) {
   const stripePromise = useMemo(() => {
     if (!stripePublishableKey) {
-      console.error('Missing VITE_STRIPE_PUBLISHABLE_KEY environment variable');
+      console.warn('Missing VITE_STRIPE_PUBLISHABLE_KEY — Stripe will not be available (test mode still works)');
       return null;
     }
     return loadStripe(stripePublishableKey);
@@ -57,14 +57,9 @@ export default function StripeProvider({ children, clientSecret }: StripeProvide
     return {};
   }, [clientSecret]);
 
-  if (!stripePromise) {
-    return (
-      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-sm text-yellow-700">
-        Stripe is not configured. Please set VITE_STRIPE_PUBLISHABLE_KEY.
-      </div>
-    );
-  }
-
+  // Always render children inside Elements — even with stripe={null}.
+  // In test mode the PaymentForm shows a test banner and useStripe()/useElements()
+  // safely return null, so the checkout works without a real Stripe key.
   return (
     <Elements stripe={stripePromise} options={clientSecret ? options : undefined}>
       {children}

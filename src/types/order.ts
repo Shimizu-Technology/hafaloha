@@ -25,7 +25,7 @@ export interface PaymentMethod {
 }
 
 export interface CreateOrderRequest {
-  customer_name: string;
+  customer_name?: string;
   email: string;
   phone: string;
   shipping_address: ShippingAddress;
@@ -59,7 +59,7 @@ export interface Order {
   payment_status: string;
   total_cents: number;
   total_formatted: string;
-  items_count: number;
+  item_count: number;
   created_at: string;
 }
 

@@ -1,15 +1,715 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
-import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import { useCartStore } from '../store/cartStore';
 import { configApi, ordersApi, shippingApi, paymentIntentsApi, formatPrice } from '../services/api';
-import type { ShippingAddress, ShippingMethod, AppConfig } from '../types/order';
+import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import StripeProvider from '../components/payment/StripeProvider';
 import PaymentForm from '../components/payment/PaymentForm';
+import type { ShippingAddress, ShippingMethod, AppConfig } from '../types/order';
+
+function CheckoutForm() {
+  const navigate = useNavigate();
+  const { getToken, isSignedIn, isLoaded: authLoaded } = useAuth();
+  const { cart, clearCart, sessionId, fetchCart, isLoading: cartLoading } = useCartStore();
+  const stripe = useStripe();
+  const elements = useElements();
+  
+  // Get items from cart (with fallback to empty array)
+  const items = cart?.items || [];
+  const subtotalCents = cart?.subtotal_cents || 0; // Use cents directly from cart
+  
+  // App config
+  const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
+  const [configLoading, setConfigLoading] = useState(true);
+  
+  // Form state
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [deliveryMethod, setDeliveryMethod] = useState<'pickup' | 'shipping'>('shipping');
+  const [shippingAddress, setShippingAddress] = useState<ShippingAddress>({
+    name: '',
+    street1: '',
+    street2: '',
+    city: '',
+    state: '',
+    zip: '',
+    country: 'US',
+  });
+  
+  // Shipping
+  const [shippingMethod, setShippingMethod] = useState<ShippingMethod | null>(null);
+  const [availableShippingRates, setAvailableShippingRates] = useState<ShippingMethod[]>([]);
+  const [calculatingShipping, setCalculatingShipping] = useState(false);
+  const [shippingError, setShippingError] = useState<string | null>(null);
+  
+  // Payment state
+  const [paymentReady, setPaymentReady] = useState(false);
+
+  // Loading/error states
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const isTestMode = appConfig?.app_mode === 'test';
+
+  // Load app config
+  useEffect(() => {
+    const loadConfig = async () => {
+      try {
+        const config = await configApi.getConfig();
+        setAppConfig(config);
+      } catch (err) {
+        console.error('Failed to load config:', err);
+      } finally {
+        setConfigLoading(false);
+      }
+    };
+    loadConfig();
+  }, []);
+  
+  // Fetch cart on mount
+  useEffect(() => {
+    fetchCart();
+  }, [fetchCart]);
+  
+  // Redirect if cart is empty (but wait for cart to load first!)
+  useEffect(() => {
+    // Only redirect if cart has loaded AND is empty
+    if (!cartLoading && cart !== null && items.length === 0 && !configLoading) {
+      navigate('/products');
+    }
+  }, [cartLoading, cart, items.length, navigate, configLoading]);
+  
+  // Calculate shipping rates
+  const handleCalculateShipping = async () => {
+    if (!shippingAddress.street1 || !shippingAddress.city || !shippingAddress.state || !shippingAddress.zip) {
+      setShippingError('Please fill out all required shipping address fields');
+      return;
+    }
+    
+    setCalculatingShipping(true);
+    setShippingError(null);
+    
+    try {
+      let token: string | null = null;
+      if (isSignedIn && authLoaded) {
+        token = await getToken();
+      }
+      
+      const response = await shippingApi.calculateRates(
+        {
+          ...shippingAddress,
+          name: shippingAddress.name || name,
+          country: shippingAddress.country || 'US',
+        },
+        sessionId,
+        token
+      );
+      
+      setAvailableShippingRates(response.rates);
+      if (response.rates.length > 0) {
+        setShippingMethod(response.rates[0]); // Auto-select first option
+      }
+    } catch (err: unknown) {
+      console.error('Shipping calculation error:', err);
+      const axiosErr = err as { response?: { data?: { error?: string } } };
+      setShippingError(axiosErr.response?.data?.error || 'Failed to calculate shipping. Please try again.');
+    } finally {
+      setCalculatingShipping(false);
+    }
+  };
+  
+  // Handle payment ready state from PaymentForm
+  const handlePaymentReady = useCallback((ready: boolean) => {
+    setPaymentReady(ready);
+  }, []);
+
+  // Check if all required fields are filled
+  const isFormValid = () => {
+    const hasContactInfo = name.trim() !== '' && email.trim() !== '' && phone.trim() !== '';
+    
+    if (deliveryMethod === 'pickup') {
+      return hasContactInfo && (isTestMode || paymentReady);
+    }
+    
+    // For shipping, need address and shipping method selected
+    const hasAddress = 
+      shippingAddress.street1.trim() !== '' &&
+      shippingAddress.city.trim() !== '' &&
+      shippingAddress.state.trim() !== '' &&
+      shippingAddress.zip.trim() !== '';
+    
+    return hasContactInfo && hasAddress && shippingMethod !== null && (isTestMode || paymentReady);
+  };
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    
+    try {
+      // Get auth token if signed in
+      let token: string | null = null;
+      if (isSignedIn && authLoaded) {
+        token = await getToken();
+      }
+      
+      // Build shipping data
+      const shippingCostCents = deliveryMethod === 'pickup' ? 0 : (shippingMethod?.rate_cents || 0);
+      let orderShippingAddress;
+      let orderShippingMethod;
+
+      if (deliveryMethod === 'shipping') {
+        if (!shippingMethod) {
+          setError('Please select a shipping method');
+          setLoading(false);
+          return;
+        }
+        orderShippingAddress = { ...shippingAddress, name };
+        orderShippingMethod = shippingMethod;
+      } else {
+        orderShippingAddress = {
+          name,
+          street1: 'Pickup',
+          city: 'Hagåtña',
+          state: 'GU',
+          zip: '96910',
+          country: 'US',
+        };
+        orderShippingMethod = {
+          carrier: 'PICKUP',
+          service: 'In-Store Pickup',
+          rate_cents: 0,
+        };
+      }
+
+      if (isTestMode) {
+        // Test mode: skip Stripe, create order directly
+        const orderData = {
+          customer_name: name,
+          email, phone,
+          shipping_address: orderShippingAddress,
+          shipping_method: orderShippingMethod,
+          payment_method: { type: 'test' },
+        };
+        const response = await ordersApi.createOrder(orderData, token, sessionId);
+        if (response.success) {
+          await clearCart();
+          navigate(`/orders/${response.order.id}`);
+        } else {
+          setError('Failed to create order. Please try again.');
+        }
+      } else {
+        // Real Stripe payment flow
+        if (!stripe || !elements) {
+          setError('Payment system is not ready. Please wait and try again.');
+          setLoading(false);
+          return;
+        }
+        const cardElement = elements.getElement(CardElement);
+        if (!cardElement) {
+          setError('Card input not found. Please refresh and try again.');
+          setLoading(false);
+          return;
+        }
+        // Step 1: Create PaymentIntent
+        const intentResponse = await paymentIntentsApi.create(
+          { email, shipping_cost_cents: shippingCostCents }, token, sessionId
+        );
+        // Step 2: Confirm card payment with Stripe
+        const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
+          intentResponse.client_secret,
+          { payment_method: { card: cardElement, billing_details: { name, email, phone } } }
+        );
+        if (stripeError) {
+          setError(stripeError.message || 'Payment failed. Please check your card details.');
+          setLoading(false);
+          return;
+        }
+        if (!paymentIntent || paymentIntent.status !== 'succeeded') {
+          setError('Payment was not completed. Please try again.');
+          setLoading(false);
+          return;
+        }
+        // Step 3: Create order with payment intent ID
+        const orderData = {
+          customer_name: name,
+          email, phone,
+          shipping_address: orderShippingAddress,
+          shipping_method: orderShippingMethod,
+          payment_method: { type: 'stripe' },
+          payment_intent_id: paymentIntent.id,
+        };
+        const response = await ordersApi.createOrder(orderData, token, sessionId);
+        if (response.success) {
+          await clearCart();
+          navigate(`/orders/${response.order.id}`);
+        } else {
+          setError('Your payment was processed but there was an issue creating your order. Please contact support with reference: ' + paymentIntent.id);
+        }
+      }
+    } catch (err: unknown) {
+      console.error('Checkout error:', err);
+      const axiosErr = err as { response?: { data?: { error?: string; issues?: Array<{ message: string }> } } };
+      if (axiosErr.response?.data?.error === 'Cart validation failed' && axiosErr.response?.data?.issues) {
+        const issues = axiosErr.response.data.issues;
+        const errorMessages = issues.map((issue) => `• ${issue.message}`).join('\n');
+        setError(`Unable to complete order:\n${errorMessages}`);
+      } else {
+        setError(axiosErr.response?.data?.error || 'An error occurred. Please try again.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // Calculate total
+  const shippingCostCents = deliveryMethod === 'pickup' ? 0 : (shippingMethod?.rate_cents || 0);
+  const totalCents = subtotalCents + shippingCostCents;
+  
+  if (configLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hafalohaRed mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading checkout...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="min-h-screen bg-gray-50 py-6 sm:py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="mb-8 text-center sm:text-left">
+          <span className="inline-block text-hafalohaRed font-semibold text-sm uppercase tracking-wider mb-2">
+            Secure Checkout
+          </span>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">Complete Your Order</h1>
+          <p className="text-gray-500 mt-2">Fill in the details below to complete your purchase</p>
+        </div>
+        
+        {/* Test Mode Banner */}
+        {isTestMode && (
+          <div className="mb-6 bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4">
+            <div className="flex items-start">
+              <svg className="w-6 h-6 text-yellow-600 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div>
+                <h3 className="font-semibold text-yellow-800 mb-1">Test Mode Active</h3>
+                <p className="text-sm text-yellow-700">
+                  This is a test environment. No real payments will be processed. 
+                  Orders will be created for testing purposes only.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column - Forms */}
+          <div className="lg:col-span-2">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Contact Information */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-hafalohaCream rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-hafalohaRed" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">Contact Information</h2>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="sm:col-span-2">
+                    <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      required
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
+                      placeholder="John Doe"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                      Email *
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
+                      placeholder="your@email.com"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-1.5">
+                      Phone *
+                    </label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      required
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
+                      placeholder="(555) 123-4567"
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              {/* Delivery Method */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-hafalohaCream rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-hafalohaRed" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-bold text-gray-900">Delivery Method</h2>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDeliveryMethod('shipping');
+                      setShippingMethod(null);
+                      setAvailableShippingRates([]);
+                    }}
+                    className={`p-5 border-2 rounded-xl transition-all ${
+                      deliveryMethod === 'shipping'
+                        ? 'border-hafalohaRed bg-red-50 ring-4 ring-hafalohaRed/10'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="text-left">
+                        <p className="font-bold text-gray-900">Ship to Address</p>
+                        <p className="text-sm text-gray-500 mt-1">Delivered to your door</p>
+                      </div>
+                      <svg className={`w-6 h-6 ${deliveryMethod === 'shipping' ? 'text-hafalohaRed' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDeliveryMethod('pickup');
+                      setShippingMethod(null);
+                    }}
+                    className={`p-4 border-2 rounded-lg transition ${
+                      deliveryMethod === 'pickup'
+                        ? 'border-hafalohaRed bg-red-50'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="text-left">
+                        <p className="font-semibold text-gray-900">Pickup</p>
+                        <p className="text-sm text-gray-600 mt-1">Free - Pickup at office</p>
+                      </div>
+                      {deliveryMethod === 'pickup' && (
+                        <svg className="w-6 h-6 text-hafalohaRed" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      )}
+                    </div>
+                  </button>
+                </div>
+                
+                {deliveryMethod === 'pickup' && (
+                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="text-sm text-blue-800">
+                      <strong>Pickup Location:</strong><br />
+                      121 E. Marine Corps Dr, Suite 1-103 & Suite 1-104<br />
+                      Hagåtña, Guam 96910<br />
+                      +1 (671) 472-7733
+                    </p>
+                    <p className="text-sm text-blue-700 mt-2">
+                      You'll receive an email when your order is ready for pickup.
+                    </p>
+                  </div>
+                )}
+              </div>
+              
+              {/* Shipping Address - Only show if shipping selected */}
+              {deliveryMethod === 'shipping' && (
+                <div className="bg-white rounded-lg shadow p-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Shipping Address</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="sm:col-span-2">
+                    <label htmlFor="street1" className="block text-sm font-medium text-gray-700 mb-1">
+                      Address Line 1 *
+                    </label>
+                    <input
+                      type="text"
+                      id="street1"
+                      required
+                      value={shippingAddress.street1}
+                      onChange={(e) => setShippingAddress({ ...shippingAddress, street1: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      placeholder="123 Main St"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label htmlFor="street2" className="block text-sm font-medium text-gray-700 mb-1">
+                      Address Line 2
+                    </label>
+                    <input
+                      type="text"
+                      id="street2"
+                      value={shippingAddress.street2 || ''}
+                      onChange={(e) => setShippingAddress({ ...shippingAddress, street2: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      placeholder="Apt, suite, etc. (optional)"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
+                      City *
+                    </label>
+                    <input
+                      type="text"
+                      id="city"
+                      required
+                      value={shippingAddress.city}
+                      onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
+                      State *
+                    </label>
+                    <input
+                      type="text"
+                      id="state"
+                      required
+                      value={shippingAddress.state}
+                      onChange={(e) => setShippingAddress({ ...shippingAddress, state: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      placeholder="CA"
+                      maxLength={2}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="zip" className="block text-sm font-medium text-gray-700 mb-1">
+                      ZIP Code *
+                    </label>
+                    <input
+                      type="text"
+                      id="zip"
+                      required
+                      value={shippingAddress.zip}
+                      onChange={(e) => setShippingAddress({ ...shippingAddress, zip: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      placeholder="12345"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">
+                      Country *
+                    </label>
+                    <select
+                      id="country"
+                      required
+                      value={shippingAddress.country}
+                      onChange={(e) => setShippingAddress({ ...shippingAddress, country: e.target.value })}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                    >
+                      <option value="US">United States</option>
+                      <option value="GU">Guam</option>
+                    </select>
+                  </div>
+                </div>
+                
+                {/* Calculate Shipping Button */}
+                <div className="mt-6">
+                  <button
+                    type="button"
+                    onClick={handleCalculateShipping}
+                    disabled={calculatingShipping || !shippingAddress.street1 || !shippingAddress.city || !shippingAddress.state || !shippingAddress.zip}
+                    className="w-full bg-hafalohaRed text-white py-3 px-4 rounded-lg font-medium hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                  >
+                    {calculatingShipping ? 'Calculating...' : 'Calculate Shipping Rates'}
+                  </button>
+                  
+                  {shippingError && (
+                    <p className="text-sm text-red-600 mt-2">{shippingError}</p>
+                  )}
+                </div>
+                
+                {/* Shipping Rates */}
+                {availableShippingRates.length > 0 && (
+                  <div className="mt-6">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Select Shipping Method:</h3>
+                    <div className="space-y-3">
+                      {availableShippingRates.map((rate, index) => (
+                        <button
+                          key={index}
+                          type="button"
+                          onClick={() => setShippingMethod(rate)}
+                          className={`w-full p-4 border-2 rounded-lg text-left transition ${
+                            shippingMethod?.carrier === rate.carrier && shippingMethod?.service === rate.service
+                              ? 'border-hafalohaRed bg-red-50'
+                              : 'border-gray-300 hover:border-gray-400'
+                          }`}
+                        >
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className="font-semibold text-gray-900">{rate.carrier} - {rate.service}</p>
+                              {rate.delivery_days && (
+                                <p className="text-sm text-gray-600 mt-1">
+                                  Estimated delivery: {rate.delivery_days} business days
+                                </p>
+                              )}
+                            </div>
+                            <p className="text-lg font-bold text-gray-900">{formatPrice(rate.rate_cents)}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              )}
+              
+              {/* Payment Section */}
+              <PaymentForm
+                isTestMode={isTestMode}
+                onPaymentReady={handlePaymentReady}
+              />
+
+              {/* Error Message */}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <div className="flex items-start">
+                    <svg className="w-5 h-5 text-red-600 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div className="text-sm text-red-700 whitespace-pre-line">{error}</div>
+                  </div>
+                </div>
+              )}
+              
+              {/* Submit Button */}
+              <button
+                type="submit"
+                disabled={loading || !isFormValid()}
+                className="w-full bg-hafalohaRed text-white py-4 px-6 rounded-lg font-semibold text-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {loading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Processing...
+                  </>
+                ) : (
+                  isTestMode ? `Place Test Order - ${formatPrice(totalCents)}` : `Pay ${formatPrice(totalCents)}`
+                )}
+              </button>
+            </form>
+          </div>
+          
+          {/* Right Column - Order Summary */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow p-6 sticky top-4">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Summary</h2>
+              
+              {/* Items */}
+              <div className="space-y-4 mb-4 max-h-64 overflow-y-auto">
+                {items.map((item) => (
+                  <div key={item.id} className="flex items-center">
+                    <div className="flex-shrink-0 w-16 h-16 rounded-md overflow-hidden border border-gray-200">
+                      {item.product.primary_image_url ? (
+                        <img
+                          src={item.product.primary_image_url}
+                          alt={item.product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs">
+                          No Image
+                        </div>
+                      )}
+                    </div>
+                    <div className="ml-4 flex-grow">
+                      <p className="text-sm font-medium text-gray-900">{item.product.name}</p>
+                      <p className="text-xs text-gray-500">{item.product_variant.display_name}</p>
+                      <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                    </div>
+                    <p className="text-sm font-medium text-gray-900">{formatPrice(item.subtotal_cents)}</p>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Totals */}
+              <div className="border-t pt-4 space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Subtotal</span>
+                  <span className="text-gray-900">{formatPrice(subtotalCents)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">
+                    {deliveryMethod === 'pickup' ? 'Pickup' : 'Shipping'}
+                  </span>
+                  <span className="text-gray-900">
+                    {deliveryMethod === 'pickup' 
+                      ? 'FREE' 
+                      : shippingMethod 
+                      ? formatPrice(shippingMethod.rate_cents)
+                      : 'Calculate after entering address'
+                    }
+                  </span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">Tax</span>
+                  <span className="text-gray-900">$0.00</span>
+                </div>
+                <div className="flex justify-between text-lg font-bold border-t pt-2 mt-2">
+                  <span className="text-gray-900">Total</span>
+                  <span className="text-hafalohaRed">{formatPrice(totalCents)}</span>
+                </div>
+              </div>
+              
+              <p className="text-xs text-gray-500 mt-4">
+                {isTestMode 
+                  ? 'Test mode: No real payment will be charged.'
+                  : deliveryMethod === 'shipping' && !shippingMethod
+                  ? 'Enter shipping address and calculate rates to see final total.'
+                  : 'Final total shown above.'}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /**
- * Inner checkout form that has access to Stripe hooks.
- * Must be rendered inside StripeProvider.
+ * CheckoutPage wraps CheckoutForm in StripeProvider
+ * so Stripe hooks are available throughout the form.
  */
-function CheckoutForm() {
+export default function CheckoutPage() {
+  return (
+    <StripeProvider>
+      <CheckoutForm />
+    </StripeProvider>
+  );
+}

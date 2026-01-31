@@ -69,9 +69,9 @@ export default function OrderConfirmationPage() {
       try {
         const response = await api.get(`/orders/${orderId}`);
         setOrder(response.data.order);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Failed to fetch order:', err);
-        setError(err.response?.data?.error || 'Failed to load order details');
+        setError((err as { response?: { data?: { error?: string } } }).response?.data?.error || 'Failed to load order details');
       } finally {
         setLoading(false);
       }
