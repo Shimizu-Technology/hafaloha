@@ -341,9 +341,9 @@ module Api
           user: current_user,
           order_type: 'retail',
           status: 'pending',
-          email: order_params[:email] || order_params[:customer_email],
-          phone: order_params[:phone] || order_params[:customer_phone],
-          name: shipping_address[:name] || order_params[:customer_name],
+          email: order_params[:customer_email] || order_params[:email],  # HAF-13: prefer canonical name
+          phone: order_params[:customer_phone] || order_params[:phone],  # HAF-13: prefer canonical name
+          name: order_params[:customer_name] || shipping_address[:name],  # HAF-13: prefer canonical name
           
           # Shipping address
           shipping_address_line1: shipping_address[:street1] || order_params[:shipping_address_line1],

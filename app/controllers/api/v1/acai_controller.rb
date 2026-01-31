@@ -161,10 +161,20 @@ module Api
           return render json: { error: 'Acai Cake ordering is currently unavailable' }, status: :unprocessable_entity
         end
 
+        # HAF-13: Normalize customer fields - accept both canonical (customer_*) and short-form names
+        resolved_name  = params[:customer_name].presence  || params[:name]
+        resolved_email = params[:customer_email].presence || params[:email]
+        resolved_phone = params[:customer_phone].presence || params[:phone]
+
         # Validate required parameters
-        required_params = [:pickup_date, :pickup_time, :crust_option_id, :name, :email, :phone]
-        missing = required_params.select { |p| params[p].blank? }
-        
+        missing = []
+        missing << 'pickup_date' if params[:pickup_date].blank?
+        missing << 'pickup_time' if params[:pickup_time].blank?
+        missing << 'crust_option_id' if params[:crust_option_id].blank?
+        missing << 'customer_name' if resolved_name.blank?
+        missing << 'customer_email' if resolved_email.blank?
+        missing << 'customer_phone' if resolved_phone.blank?
+
         if missing.any?
           return render json: { error: "Missing required fields: #{missing.join(', ')}" }, status: :unprocessable_entity
         end
@@ -253,9 +263,9 @@ module Api
         ActiveRecord::Base.transaction do
           @order = Order.new(
             order_type: 'acai',
-            customer_name: params[:name],
-            customer_email: params[:email],
-            customer_phone: params[:phone],
+            customer_name: resolved_name,
+            customer_email: resolved_email,
+            customer_phone: resolved_phone,
             user: current_user,
             status: 'pending',
             payment_status: 'pending',
