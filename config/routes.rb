@@ -183,7 +183,7 @@ Rails.application.routes.draw do
   # Webhooks
   namespace :webhooks do
     # Stripe webhook
-    # post 'stripe', to: 'stripe#create'
+    post 'stripe', to: 'stripe#create'
     
     # EasyPost webhook
     # post 'easypost', to: 'easypost#create'
