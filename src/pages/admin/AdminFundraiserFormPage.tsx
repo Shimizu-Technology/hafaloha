@@ -55,6 +55,7 @@ export default function AdminFundraiserFormPage() {
   const [loading, setLoading] = useState(isEditing);
   const [saving, setSaving] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
 
   useEffect(() => {
     if (isEditing && id) {
@@ -88,6 +89,7 @@ export default function AdminFundraiserFormPage() {
         public_message: f.public_message || '',
         thank_you_message: f.thank_you_message || '',
       });
+      if (f.slug) setSlugManuallyEdited(true);
     } catch (error) {
       toast.error('Failed to load fundraiser');
       navigate('/admin/fundraisers');
@@ -108,7 +110,7 @@ export default function AdminFundraiserFormPage() {
     setForm(prev => ({
       ...prev,
       name,
-      slug: prev.slug || generateSlug(name)
+      ...(slugManuallyEdited ? {} : { slug: generateSlug(name) })
     }));
   };
 
@@ -220,7 +222,7 @@ export default function AdminFundraiserFormPage() {
                 type="text"
                 required
                 value={form.slug}
-                onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                onChange={(e) => { setSlugManuallyEdited(true); setForm({ ...form, slug: e.target.value }); }}
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-hafalohaRed"
                 placeholder="soccer-team-spring"
               />
