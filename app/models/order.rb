@@ -22,6 +22,7 @@ class Order < ApplicationRecord
 
   # Guest orders (no user_id) must have contact email so we can reach the customer
   validates :customer_email, presence: { message: "is required for guest checkout" }, if: -> { user_id.nil? }
+  validates :customer_email, format: { with: URI::MailTo::EMAIL_REGEXP, message: "is not a valid email address" }, allow_blank: true
 
   # Scopes
   scope :retail, -> { where(order_type: 'retail') }
