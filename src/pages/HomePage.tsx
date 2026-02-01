@@ -8,11 +8,11 @@ import { homepageApi, type HomepageSection } from '../services/api';
 
 // Default fallback content
 const defaultHero = {
-  title: "Island Living Apparel for All 🌺",
+  title: "Island Living Apparel for All",
   subtitle: "Premium Chamorro pride merchandise celebrating island culture and heritage",
   button_text: "Shop Now",
   button_link: "/products",
-  background_image_url: null as string | null,
+  background_image_url: "/images/hafaloha-hero-beach.jpg" as string | null,
 };
 
 const defaultCategoryCards: Array<{
@@ -72,6 +72,8 @@ export default function HomePage() {
   // Use dynamic or fallback content
   const heroContent = hero || defaultHero;
   const cardsContent = categoryCards.length > 0 ? categoryCards : defaultCategoryCards;
+  const heroImageUrl = heroContent.background_image_url || defaultHero.background_image_url;
+
   // Animation helper — skip motion when user prefers reduced motion
   const heroMotion = (delay: number) =>
     prefersReducedMotion
@@ -86,31 +88,43 @@ export default function HomePage() {
     <div className="min-h-screen">
       {/* ============================================================ */}
       {/* HERO SECTION                                                 */}
-      {/* Near full-viewport, gradient orb background, staggered entry */}
+      {/* Beach photo + heavy dark overlay + gradient orbs for depth   */}
       {/* ============================================================ */}
-      <section className="relative bg-gradient-to-br from-warm-900 via-warm-800 to-warm-900 text-white min-h-[85vh] flex items-center overflow-hidden">
-        {/* Gradient orbs — atmospheric depth */}
+      <section className="relative bg-warm-900 text-white min-h-[85vh] flex items-center overflow-hidden">
+        {/* Beach background photo */}
+        {heroImageUrl && (
+          <img
+            src={heroImageUrl}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover"
+            aria-hidden="true"
+          />
+        )}
+
+        {/* Heavy dark overlay for text readability — 65% center, stronger edges */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/75" />
+
+        {/* Gradient orbs — atmospheric depth on top of the photo */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 -left-1/4 w-96 h-96 bg-red-500/20 rounded-full blur-3xl" />
-          <div className="absolute top-1/3 -right-1/4 w-96 h-96 bg-amber-500/15 rounded-full blur-3xl" />
+          <div className="absolute top-1/4 -left-1/4 w-96 h-96 bg-red-500/15 rounded-full blur-3xl" />
+          <div className="absolute top-1/3 -right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl" />
           <div className="absolute -bottom-1/4 left-1/3 w-80 h-80 bg-red-400/10 rounded-full blur-3xl" />
         </div>
 
-        {/* Clean gradient background — no competing imagery */}
-
-        {/* Content — always text-on-dark, no white card */}
+        {/* Content — text-on-dark with text shadows for max readability */}
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 w-full text-center">
           {/* Badge — appears first */}
           <motion.div {...heroMotion(0)}>
-            <span className="inline-block px-4 py-1.5 bg-white/10 backdrop-blur-sm border border-white/20 text-sm font-medium rounded-full mb-8 text-warm-200">
-              Håfa Adai 🌺 Island Living Apparel
+            <span className="inline-block px-4 py-1.5 bg-white/15 backdrop-blur-sm border border-white/25 text-sm font-medium rounded-full mb-8 text-white/90" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
+              Hafa Adai &mdash; Island Living Apparel
             </span>
           </motion.div>
 
           {/* Heading */}
           <motion.h1
             {...heroMotion(0.15)}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-[1.1] tracking-tight"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-[1.1] tracking-tight text-white drop-shadow-lg"
+            style={{ textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 4px 20px rgba(0,0,0,0.3)' }}
           >
             {heroContent.title || defaultHero.title}
           </motion.h1>
@@ -119,7 +133,8 @@ export default function HomePage() {
           {heroContent.subtitle && (
             <motion.p
               {...heroMotion(0.3)}
-              className="text-lg sm:text-xl mb-12 text-warm-300 max-w-2xl mx-auto leading-relaxed"
+              className="text-lg sm:text-xl mb-12 text-white/85 max-w-2xl mx-auto leading-relaxed"
+              style={{ textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}
             >
               {heroContent.subtitle}
             </motion.p>
@@ -141,7 +156,8 @@ export default function HomePage() {
             </Link>
             <Link
               to="/collections"
-              className="border-2 border-white/30 text-white hover:bg-white/10 rounded-xl text-lg px-8 py-4 inline-flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5"
+              className="border-2 border-white/40 text-white hover:bg-white/10 rounded-xl text-lg px-8 py-4 inline-flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5"
+              style={{ textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}
             >
               Browse Collections
             </Link>
@@ -241,7 +257,7 @@ export default function HomePage() {
                   The Hafaloha Story
                 </h2>
                 <p className="text-warm-600 mb-6 leading-relaxed">
-                  Håfa Adai! We&apos;re Leonard and Tara Kaae, the founders of Hafaloha. What started as just
+                  Hafa Adai! We&apos;re Leonard and Tara Kaae, the founders of Hafaloha. What started as just
                   a few designs and a dream has grown into something we&apos;re incredibly proud of.
                 </p>
                 <blockquote className="mb-8 pl-5 border-l-4 border-hafalohaGold">

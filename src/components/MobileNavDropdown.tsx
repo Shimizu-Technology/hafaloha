@@ -18,6 +18,11 @@ const featuredCategories = [
     name: "Men's",
     image: '/images/hafaloha-mens-img.webp',
     link: '/products?collection=mens',
+  },
+  {
+    name: "Kids",
+    image: '/images/hafaloha-mens-img.webp',
+    link: '/products?collection=kids',
   }
 ];
 
