@@ -1,9 +1,12 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { ProductFull, ProductVariant } from '../services/api';
 import { productsApi, formatPrice } from '../services/api';
 import { useCartStore } from '../store/cartStore';
 import Breadcrumbs from '../components/Breadcrumbs';
+import { ProductDetailSkeleton } from '../components/Skeleton';
+import FadeIn from '../components/animations/FadeIn';
 
 // ── Color swatch mapping ────────────────────────────────────────────────────
 const CSS_COLOR_MAP: Record<string, string> = {
@@ -205,21 +208,6 @@ export default function ProductDetailPage() {
     try {
       setLoading(true);
       const data = await productsApi.getProduct(productSlug);
-      console.log('🔍 Product Data:', {
-        name: data.name,
-        inventory_level: data.inventory_level,
-        product_stock_quantity: data.product_stock_quantity,
-        in_stock: data.in_stock,
-        actually_available: data.actually_available,
-        published: data.published,
-        variants: data.variants?.map(v => ({
-          id: v.id,
-          display_name: v.display_name,
-          in_stock: v.in_stock,
-          actually_available: v.actually_available,
-          stock_quantity: v.stock_quantity
-        }))
-      });
       setProduct(data);
       
       // For products with variants, select the first one
@@ -242,10 +230,9 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hafalohaRed mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading product...</p>
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+          <ProductDetailSkeleton />
         </div>
       </div>
     );
@@ -297,53 +284,18 @@ export default function ProductDetailPage() {
   const canAddToCart = hasVariants 
     ? (isProductAvailable && isVariantAvailable && selectedVariant && quantity > 0 && quantity <= maxQuantity)
     : (isProductAvailable && quantity > 0 && quantity <= maxQuantity);
-  
-  console.log('🔍 Availability Check:', {
-    hasVariants,
-    isProductAvailable,
-    isVariantAvailable,
-    maxQuantity,
-    canAddToCart,
-    inventory_level: product.inventory_level,
-    product_stock_quantity: product.product_stock_quantity,
-    selectedVariant: selectedVariant ? {
-      id: selectedVariant.id,
-      display_name: selectedVariant.display_name,
-      actually_available: selectedVariant.actually_available,
-      stock_quantity: selectedVariant.stock_quantity
-    } : null
-  });
 
   const handleAddToCart = async () => {
-    console.log('🔵 handleAddToCart called');
-    console.log('  - selectedVariant:', selectedVariant?.id);
-    console.log('  - quantity:', quantity);
-    console.log('  - canAddToCart:', canAddToCart);
-    console.log('  - isAdding:', isAdding);
+    if (!selectedVariant || !canAddToCart || isAdding) return;
     
-    if (!selectedVariant || !canAddToCart) {
-      console.log('❌ Blocked: Missing variant or cannot add');
-      return;
-    }
-    
-    if (isAdding) {
-      console.log('❌ Blocked: Already adding');
-      return;
-    }
-    
-    console.log('✅ Proceeding with addItem');
     setIsAdding(true);
     try {
       await addItem(selectedVariant.id, quantity);
-      console.log('✅ addItem completed successfully');
-      // Reset quantity after successful add
       setQuantity(1);
-    } catch (error) {
+    } catch {
       // Error is handled in the store
-      console.error('❌ Add to cart error:', error);
     } finally {
       setIsAdding(false);
-      console.log('🔵 handleAddToCart finished');
     }
   };
   
@@ -496,29 +448,41 @@ export default function ProductDetailPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
             {/* Images */}
             <div className="p-6 sm:p-8 lg:p-10 bg-gray-50/50">
-              {/* Main Image */}
-              <div className="bg-white rounded-xl overflow-hidden mb-4 shadow-sm border border-gray-100" style={{ aspectRatio: '1/1' }}>
-                {displayImages[selectedImageIndex].url ? (
-                  <img
-                    src={displayImages[selectedImageIndex].url}
-                    alt={displayImages[selectedImageIndex].alt_text}
-                    className="w-full h-full hover:scale-105 transition-transform duration-500"
-                    style={{
-                      objectFit: 'contain',
-                      backgroundColor: 'white'
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-                    <img 
-                      src="/images/hafaloha-logo.png" 
-                      alt="Hafaloha" 
-                      className="w-32 opacity-20 mb-4"
-                      style={{ objectFit: 'contain', maxHeight: '8rem' }}
+              {/* Main Image with crossfade */}
+              <div className="bg-white rounded-xl overflow-hidden mb-4 shadow-sm border border-gray-100 relative" style={{ aspectRatio: '1/1' }}>
+                <AnimatePresence mode="wait">
+                  {displayImages[selectedImageIndex].url ? (
+                    <motion.img
+                      key={displayImages[selectedImageIndex].url}
+                      src={displayImages[selectedImageIndex].url}
+                      alt={displayImages[selectedImageIndex].alt_text}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3, ease: 'easeInOut' }}
+                      className="w-full h-full hover:scale-105 transition-transform duration-500"
+                      style={{
+                        objectFit: 'contain',
+                        backgroundColor: 'white'
+                      }}
                     />
-                    <span className="text-gray-400 text-lg font-medium">No Image Available</span>
-                  </div>
-                )}
+                  ) : (
+                    <motion.div
+                      key="no-image"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100"
+                    >
+                      <img 
+                        src="/images/hafaloha-logo.png" 
+                        alt="Hafaloha" 
+                        className="w-32 opacity-20 mb-4"
+                        style={{ objectFit: 'contain', maxHeight: '8rem' }}
+                      />
+                      <span className="text-gray-400 text-lg font-medium">No Image Available</span>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
 
               {/* Thumbnail Gallery */}
@@ -549,6 +513,7 @@ export default function ProductDetailPage() {
             </div>
 
             {/* Product Info */}
+            <FadeIn direction="none" duration={0.5} immediate>
             <div className="p-6 sm:p-8 lg:p-10 flex flex-col">
               {/* Collections */}
               {product.collections.length > 0 && (
@@ -796,49 +761,60 @@ export default function ProductDetailPage() {
                 </dl>
               </div>
             </div>
+            </FadeIn>
           </div>
         </div>
         
         {/* Size Guide Modal */}
-        {showSizeGuide && sizeChartUrl && (
-          <div 
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-            style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }}
-            onClick={() => setShowSizeGuide(false)}
-          >
-            <div 
-              className="relative bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-auto"
-              onClick={(e) => e.stopPropagation()}
+        <AnimatePresence>
+          {showSizeGuide && sizeChartUrl && (
+            <motion.div 
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              style={{ backgroundColor: 'rgba(0, 0, 0, 0.75)' }}
+              onClick={() => setShowSizeGuide(false)}
             >
-              {/* Header */}
-              <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
-                <h3 className="text-xl font-bold text-gray-900">Size Guide</h3>
-                <button
-                  type="button"
-                  onClick={() => setShowSizeGuide(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-              
-              {/* Image Content */}
-              <div className="p-6">
-                <img
-                  src={sizeChartUrl}
-                  alt="Size Chart"
-                  className="w-full h-auto"
-                  style={{ maxHeight: '70vh', objectFit: 'contain' }}
-                />
-                <p className="text-sm text-gray-500 mt-4 text-center">
-                  Click outside to close
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+              <motion.div 
+                className="relative bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-auto"
+                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Header */}
+                <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
+                  <h3 className="text-xl font-bold text-gray-900">Size Guide</h3>
+                  <button
+                    type="button"
+                    onClick={() => setShowSizeGuide(false)}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                
+                {/* Image Content */}
+                <div className="p-6">
+                  <img
+                    src={sizeChartUrl}
+                    alt="Size Chart"
+                    className="w-full h-auto"
+                    style={{ maxHeight: '70vh', objectFit: 'contain' }}
+                  />
+                  <p className="text-sm text-gray-500 mt-4 text-center">
+                    Click outside to close
+                  </p>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
