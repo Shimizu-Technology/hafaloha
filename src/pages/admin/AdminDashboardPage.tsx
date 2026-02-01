@@ -3,7 +3,7 @@ import { useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, DollarSign, Clock, Package, Plus, ClipboardList, FolderOpen, Settings } from 'lucide-react';
-import { StatCard, AdminPageHeader } from '../../components/admin';
+import { StatCard } from '../../components/admin';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
@@ -42,13 +42,11 @@ export default function AdminDashboardPage() {
     try {
       const token = await getToken();
       
-      // Fetch stats
       const statsResponse = await axios.get(`${API_BASE_URL}/api/v1/admin/dashboard/stats`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setStats(statsResponse.data);
 
-      // Fetch recent orders
       const ordersResponse = await axios.get(`${API_BASE_URL}/api/v1/admin/orders?per_page=5`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -77,61 +75,44 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       {/* Welcome Header */}
-      <div className="rounded-2xl p-6 sm:p-8 shadow-lg" style={{ background: 'linear-gradient(to right, #C1191F, #d63939)' }}>
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: 'white' }}>Welcome back! 👋</h1>
-        <p style={{ color: 'rgba(255,255,255,0.85)' }}>Here's what's happening with your store today.</p>
+      <div className="rounded-2xl p-6 sm:p-8 shadow-lg bg-gradient-to-r from-hafalohaRed to-[#d63939]">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-white">Welcome back!</h1>
+        <p className="text-white/85">Here's what's happening with your store today.</p>
       </div>
       
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        {/* Total Orders */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md transition">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Total Orders</p>
-              <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-2">{stats.total_orders}</p>
-            </div>
-            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center text-2xl">📦</div>
-          </div>
-        </div>
-
-        {/* Revenue */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md transition">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Revenue</p>
-              <p className="text-2xl sm:text-3xl font-bold text-green-600 mt-2">{formatCurrency(stats.total_revenue_cents)}</p>
-            </div>
-            <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center text-2xl">💰</div>
-          </div>
-        </div>
-
-        {/* Pending Orders */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md transition">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Pending</p>
-              <p className="text-2xl sm:text-3xl font-bold text-hafalohaRed mt-2">{stats.pending_orders}</p>
-            </div>
-            <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center text-2xl">⏳</div>
-          </div>
-          {stats.pending_orders > 0 && (
-            <Link to="/admin/orders?status=pending" className="inline-block mt-3 text-xs font-medium text-hafalohaRed hover:underline">
-              View pending →
-            </Link>
-          )}
-        </div>
-
-        {/* Products */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md transition">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">Products</p>
-              <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-2">{stats.total_products}</p>
-            </div>
-            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-2xl">🛍️</div>
-          </div>
-        </div>
+        <StatCard
+          label="Total Orders"
+          value={stats.total_orders}
+          icon={ShoppingCart}
+          iconColor="bg-blue-50 text-blue-600"
+        />
+        <StatCard
+          label="Revenue"
+          value={formatCurrency(stats.total_revenue_cents)}
+          icon={DollarSign}
+          iconColor="bg-green-50 text-green-600"
+          valueColor="text-green-600"
+        />
+        <StatCard
+          label="Pending"
+          value={stats.pending_orders}
+          icon={Clock}
+          iconColor="bg-orange-50 text-orange-600"
+          valueColor="text-hafalohaRed"
+          link={
+            stats.pending_orders > 0
+              ? { text: 'View pending', to: '/admin/orders?status=pending' }
+              : undefined
+          }
+        />
+        <StatCard
+          label="Products"
+          value={stats.total_products}
+          icon={Package}
+          iconColor="bg-purple-50 text-purple-600"
+        />
       </div>
 
       {/* Quick Actions */}
@@ -176,7 +157,7 @@ export default function AdminDashboardPage() {
         <div className="p-6">
           {recentOrders.length === 0 ? (
             <div className="text-center py-12">
-              <div className="mb-4"><ClipboardList className="w-12 h-12 mx-auto text-gray-300" /></div>
+              <ClipboardList className="w-12 h-12 mx-auto text-gray-300 mb-4" />
               <p className="text-gray-500">No orders yet</p>
               <p className="text-sm text-gray-400 mt-1">Orders will appear here once customers start purchasing</p>
             </div>
@@ -210,4 +191,3 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
