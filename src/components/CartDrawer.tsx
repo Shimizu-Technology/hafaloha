@@ -259,7 +259,7 @@ export default function CartDrawer() {
 
             {/* Shipping note */}
             <p className="text-xs text-warm-500 text-center bg-warm-50 py-2 px-3 rounded-lg">
-              🚚 Shipping calculated at checkout
+              Shipping calculated at checkout
             </p>
 
             {/* Checkout Button */}

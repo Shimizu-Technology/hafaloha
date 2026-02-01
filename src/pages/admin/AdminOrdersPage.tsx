@@ -478,9 +478,9 @@ export default function AdminOrdersPage() {
             className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent hover:border-gray-300 transition text-sm"
           >
             <option value="all">All Types</option>
-            <option value="retail">🛍️ Retail</option>
+            <option value="retail">Retail</option>
             <option value="acai">Acai Cakes</option>
-            <option value="wholesale">📦 Wholesale</option>
+            <option value="wholesale">Wholesale</option>
           </select>
         </div>
       </div>
@@ -495,7 +495,7 @@ export default function AdminOrdersPage() {
         </div>
       ) : orders.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
-          <div className="text-5xl mb-4">📭</div>
+          <div className="text-5xl mb-4"></div>
           <h3 className="text-lg font-bold text-gray-900 mb-2">No orders yet</h3>
           <p className="text-gray-500">Orders will appear here once customers start placing them.</p>
         </div>
@@ -538,9 +538,9 @@ export default function AdminOrdersPage() {
                         {order.order_type === 'acai' ? (
                           <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-800 rounded">Acai</span>
                         ) : order.order_type === 'wholesale' ? (
-                          <span className="px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-800 rounded">📦 Wholesale</span>
+                          <span className="px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-800 rounded">Wholesale</span>
                         ) : (
-                          <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">🛍️ Retail</span>
+                          <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">Retail</span>
                         )}
                       </div>
                     </td>
@@ -611,9 +611,9 @@ export default function AdminOrdersPage() {
                         {order.order_type === 'acai' ? (
                           <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-800 rounded">Acai</span>
                         ) : order.order_type === 'wholesale' ? (
-                          <span className="px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-800 rounded">📦 Wholesale</span>
+                          <span className="px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-800 rounded">Wholesale</span>
                         ) : (
-                          <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">🛍️ Retail</span>
+                          <span className="px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">Retail</span>
                         )}
                       </div>
                     </div>
@@ -1069,7 +1069,7 @@ export default function AdminOrdersPage() {
               {/* Refund History - Hidden in print */}
               {selectedOrder.refunds && selectedOrder.refunds.length > 0 && (
                 <div className="print-hide">
-                  <h3 className="font-semibold text-gray-900 mb-3">💰 Refund History</h3>
+                  <h3 className="font-semibold text-gray-900 mb-3">Refund History</h3>
                   <div className="space-y-3">
                     {selectedOrder.refunds.map((refund) => (
                       <div key={refund.id} className="flex justify-between items-start p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -1112,7 +1112,7 @@ export default function AdminOrdersPage() {
                     onClick={() => resendNotification(selectedOrder.id, selectedOrder.order_type, selectedOrder.status)}
                     className="flex-1 min-w-[140px] px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-medium"
                   >
-                    🔔 Notify Customer
+                    Notify Customer
                   </button>
                 )}
                 <button
@@ -1120,7 +1120,7 @@ export default function AdminOrdersPage() {
                   onClick={() => window.print()}
                   className="flex-1 min-w-[140px] px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition font-medium"
                 >
-                  🖨️ Print Packing Slip
+                  Print Packing Slip
                 </button>
                 <button
                   type="button"
@@ -1140,7 +1140,7 @@ export default function AdminOrdersPage() {
                     }}
                     className="flex-1 min-w-[140px] px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium"
                   >
-                    💰 Refund Order
+                    Refund Order
                   </button>
                 )}
               </div>
@@ -1163,7 +1163,7 @@ export default function AdminOrdersPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">📦 Ship Order</h2>
+              <h2 className="text-xl font-bold text-gray-900">Ship Order</h2>
               <p className="text-sm text-gray-500 mt-1">
                 Add tracking information and mark as shipped
               </p>
@@ -1204,7 +1204,7 @@ export default function AdminOrdersPage() {
               </div>
 
               <p className="text-sm text-gray-500">
-                💡 The customer will receive an email notification with the tracking information.
+                The customer will receive an email notification with the tracking information.
               </p>
             </div>
 
@@ -1215,7 +1215,7 @@ export default function AdminOrdersPage() {
                 disabled={saving}
                 className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {saving ? 'Shipping...' : '📦 Mark as Shipped'}
+                {saving ? 'Shipping...' : 'Mark as Shipped'}
               </button>
               <button
                 type="button"
@@ -1244,7 +1244,7 @@ export default function AdminOrdersPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">💰 Refund Order</h2>
+              <h2 className="text-xl font-bold text-gray-900">Refund Order</h2>
               <p className="text-sm text-gray-500 mt-1">
                 Order {selectedOrder.order_number} &mdash; {formatCurrency(selectedOrder.total_cents)}
               </p>
@@ -1330,7 +1330,7 @@ export default function AdminOrdersPage() {
 
               {/* Warning */}
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                <p className="text-sm text-yellow-800 font-medium">⚠️ This action cannot be undone.</p>
+                <p className="text-sm text-yellow-800 font-medium">This action cannot be undone.</p>
                 <p className="text-xs text-yellow-700 mt-1">The refund will be processed through Stripe immediately.</p>
               </div>
             </div>
@@ -1342,7 +1342,7 @@ export default function AdminOrdersPage() {
                 disabled={processingRefund || (refundType === 'partial' && (!refundAmount || parseFloat(refundAmount) <= 0))}
                 className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {processingRefund ? 'Processing...' : '💰 Process Refund'}
+                {processingRefund ? 'Processing...' : 'Process Refund'}
               </button>
               <button
                 type="button"

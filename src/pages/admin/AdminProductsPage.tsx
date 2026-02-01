@@ -291,7 +291,7 @@ export default function AdminProductsPage() {
     if (product.inventory_level === 'product') {
       const stock = product.product_stock_quantity || 0;
       return {
-        value: `${stock} 📦`,
+        value: `${stock}`,
         color: stock > 10 ? 'text-green-600' : stock > 0 ? 'text-amber-600' : 'text-red-600',
         tooltip: 'Product-level tracking',
         outOfStock: stock === 0
@@ -300,7 +300,7 @@ export default function AdminProductsPage() {
     if (product.inventory_level === 'variant') {
       const stock = product.total_variant_stock || 0;
       return {
-        value: `${stock} 🎨`,
+        value: `${stock}`,
         color: stock > 10 ? 'text-green-600' : stock > 0 ? 'text-amber-600' : 'text-red-600',
         tooltip: 'Variant-level tracking (total of all variants)',
         outOfStock: stock === 0
@@ -435,7 +435,7 @@ export default function AdminProductsPage() {
         </div>
       ) : filteredProducts.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
-          <div className="text-5xl mb-4">🔍</div>
+          <div className="mb-4"><svg className="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg></div>
           <h3 className="text-lg font-bold text-gray-900 mb-2">No products found</h3>
           <p className="text-gray-500">Try adjusting your filters or search query.</p>
         </div>
@@ -896,7 +896,7 @@ export default function AdminProductsPage() {
                         </div>
                       ) : (
                         <div className="bg-gray-100 h-48 rounded-lg flex items-center justify-center text-gray-400 text-4xl">
-                          📦
+
                         </div>
                       )}
                     </div>
@@ -962,7 +962,7 @@ export default function AdminProductsPage() {
                             {selectedProduct.inventory_level === 'product' && (
                               <>
                                 <span className="text-sm px-2 py-1 bg-blue-100 text-blue-700 rounded font-medium">
-                                  📦 Product Level
+                                  Product Level
                                 </span>
                                 <span className="text-sm text-gray-600">
                                   ({selectedProduct.product_stock_quantity || 0} total)
@@ -972,7 +972,7 @@ export default function AdminProductsPage() {
                             {selectedProduct.inventory_level === 'variant' && (
                               <>
                                 <span className="text-sm px-2 py-1 bg-purple-100 text-purple-700 rounded font-medium">
-                                  🎨 Variant Level
+                                  Variant Level
                                 </span>
                                 <span className="text-sm text-gray-600">
                                   ({selectedProduct.total_variant_stock || 0} total across variants)

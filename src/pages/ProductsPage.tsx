@@ -362,7 +362,7 @@ export default function ProductsPage() {
         {/* Products Grid */}
         {products.length === 0 ? (
           <div className="text-center py-16 bg-white rounded-xl border border-warm-100">
-            <div className="text-5xl mb-4">🔍</div>
+            <div className="mb-4"><svg className="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg></div>
             <p className="text-warm-700 text-lg font-medium mb-2">No products found</p>
             <p className="text-warm-500 mb-6">Try adjusting your search or filters</p>
             {search && (

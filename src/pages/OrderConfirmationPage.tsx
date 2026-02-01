@@ -164,7 +164,7 @@ export default function OrderConfirmationPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-          <div className="text-6xl mb-4">😔</div>
+          <div className="mb-4"><svg className="w-16 h-16 mx-auto text-warm-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.182 16.318A4.486 4.486 0 0012.016 15a4.486 4.486 0 00-3.198 1.318M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" /></svg></div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Order Not Found</h1>
           <p className="text-gray-600 mb-6">{error || 'Unable to load order details'}</p>
           <button
@@ -268,7 +268,7 @@ export default function OrderConfirmationPage() {
         {isAcaiOrder && order.acai_pickup_date && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
             <h2 className="text-xl font-bold text-gray-900 mb-4 pb-4 border-b border-gray-100 flex items-center">
-              <span className="text-2xl mr-2">📍</span> Pickup Details
+              <svg className="w-6 h-6 inline mr-2 text-gray-500" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg> Pickup Details
             </h2>
             
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
@@ -276,13 +276,13 @@ export default function OrderConfirmationPage() {
                 <div>
                   <p className="text-sm text-blue-600 font-medium mb-1">Pickup Date</p>
                   <p className="text-lg font-bold text-gray-900">
-                    📅 {formatPickupDate(order.acai_pickup_date)}
+                    {formatPickupDate(order.acai_pickup_date)}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-blue-600 font-medium mb-1">Pickup Time</p>
                   <p className="text-lg font-bold text-gray-900">
-                    🕐 {order.acai_pickup_time && formatPickupTime(order.acai_pickup_time)}
+                    {order.acai_pickup_time && formatPickupTime(order.acai_pickup_time)}
                   </p>
                 </div>
               </div>
@@ -353,7 +353,7 @@ export default function OrderConfirmationPage() {
                 {isPickupOrder ? 'Fulfillment' : 'Shipping Method'}
               </p>
               <p className="font-semibold">
-                {isPickupOrder ? '📍 Pickup' : order.shipping_method}
+                {isPickupOrder ? 'Pickup' : order.shipping_method}
               </p>
             </div>
           </div>

@@ -101,13 +101,13 @@ export default function OrderHistoryPage() {
   const getOrderTypeIcon = (orderType: string) => {
     switch (orderType) {
       case 'retail':
-        return '🛒';
+        return '•';
       case 'acai':
-        return '🍇';
+        return '•';
       case 'wholesale':
         return '♥';
       default:
-        return '📦';
+        return '•';
     }
   };
 
@@ -117,7 +117,7 @@ export default function OrderHistoryPage() {
       <div className="min-h-screen bg-warm-50 py-12">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-            <div className="text-6xl mb-4">🔐</div>
+            <div className="mb-4"><svg className="w-16 h-16 mx-auto text-warm-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg></div>
             <h1 className="text-2xl font-bold text-warm-900 mb-4">Sign In Required</h1>
             <p className="text-warm-600 mb-6">
               Please sign in to view your order history.
@@ -183,7 +183,7 @@ export default function OrderHistoryPage() {
         {/* Empty State */}
         {!isLoading && !error && orders.length === 0 && (
           <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-            <div className="text-6xl mb-4">📦</div>
+            <div className="mb-4"><svg className="w-16 h-16 mx-auto text-warm-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg></div>
             <h2 className="text-xl font-semibold text-warm-900 mb-2">No orders yet</h2>
             <p className="text-warm-600 mb-6">
               {statusFilter 

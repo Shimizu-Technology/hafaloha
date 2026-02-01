@@ -513,7 +513,7 @@ export default function ProductFormPage() {
 
         {/* Inventory Tracking */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">📦 Inventory Tracking</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Inventory Tracking</h2>
           <p className="text-sm text-gray-600 mb-4">
             Choose how to track inventory for this product
           </p>
@@ -628,7 +628,7 @@ export default function ProductFormPage() {
             {formData.inventory_level === 'variant' && (
               <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <p className="text-sm text-blue-800">
-                  💡 <strong>Variant-level tracking:</strong> After saving this product, you can configure variants and set stock quantity for each size/color combination in the Variants section below.
+                  <strong>Variant-level tracking:</strong> After saving this product, you can configure variants and set stock quantity for each size/color combination in the Variants section below.
                 </p>
               </div>
             )}
@@ -637,7 +637,7 @@ export default function ProductFormPage() {
 
         {/* Collections */}
         <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">🏷️ Collections</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Collections</h2>
           <p className="text-sm text-gray-600 mb-4">
             Assign this product to one or more collections (categories)
           </p>
@@ -689,7 +689,7 @@ export default function ProductFormPage() {
         {!isEditMode && (
           <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6 text-center">
             <p className="text-blue-800 font-medium mb-2">
-              💡 Images & Variants
+              Images & Variants
             </p>
             <p className="text-blue-700 text-sm">
               Save this product first, then you can add images and configure variants on the edit page.
@@ -799,7 +799,7 @@ export default function ProductFormPage() {
               </ul>
               <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                 <p className="text-sm text-blue-800">
-                  💡 <strong>Tip:</strong> Archiving is safer than deleting. You can restore archived products later.
+                  <strong>Tip:</strong> Archiving is safer than deleting. You can restore archived products later.
                 </p>
               </div>
             </div>

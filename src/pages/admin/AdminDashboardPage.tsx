@@ -142,13 +142,13 @@ export default function AdminDashboardPage() {
         </Link>
         <Link to="/admin/orders" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group">
           <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
-            <span className="text-xl">📋</span>
+            <span className="text-xl"></span>
           </div>
           <p className="text-sm font-medium text-gray-700">View Orders</p>
         </Link>
         <Link to="/admin/collections" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group">
           <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
-            <span className="text-xl">📂</span>
+            <span className="text-xl"></span>
           </div>
           <p className="text-sm font-medium text-gray-700">Collections</p>
         </Link>
@@ -174,7 +174,7 @@ export default function AdminDashboardPage() {
         <div className="p-6">
           {recentOrders.length === 0 ? (
             <div className="text-center py-12">
-              <div className="text-4xl mb-4">📭</div>
+              <div className="text-4xl mb-4"></div>
               <p className="text-gray-500">No orders yet</p>
               <p className="text-sm text-gray-400 mt-1">Orders will appear here once customers start purchasing</p>
             </div>

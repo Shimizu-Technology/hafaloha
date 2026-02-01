@@ -13,7 +13,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
 
   const showComingSoon = () => {
-    alert('🚧 Coming Soon!\n\nThis feature is currently being built.\n\nFor now, you can manage products, collections, and orders via the API endpoints or database directly.\n\nFull admin UI will be available in Phase 2.');
+    alert('Coming Soon!\n\nThis feature is currently being built.\n\nFor now, you can manage products, collections, and orders via the API endpoints or database directly.\n\nFull admin UI will be available in Phase 2.');
   };
 
   useEffect(() => {
@@ -196,7 +196,7 @@ export default function AdminPage() {
         {/* Coming Soon Notice */}
         <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-blue-900 mb-2">
-            🚧 Admin Features Coming Soon
+            Admin Features Coming Soon
           </h3>
           <p className="text-blue-800">
             Full admin functionality will be implemented in upcoming tasks. For now, you can access 

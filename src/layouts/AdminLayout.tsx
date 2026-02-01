@@ -76,23 +76,23 @@ export default function AdminLayout() {
 
   // Group navigation items
   const mainNavigation: NavItem[] = [
-    { name: 'Dashboard', path: '/admin', icon: '📊' },
-    { name: 'Orders', path: '/admin/orders', icon: '📦' },
-    { name: 'Products', path: '/admin/products', icon: '🛍️' },
-    { name: 'Collections', path: '/admin/collections', icon: '📂' },
-    { name: 'Inventory', path: '/admin/inventory', icon: '📋' },
+    { name: 'Dashboard', path: '/admin', icon: 'dashboard' },
+    { name: 'Orders', path: '/admin/orders', icon: 'orders' },
+    { name: 'Products', path: '/admin/products', icon: 'products' },
+    { name: 'Collections', path: '/admin/collections', icon: '' },
+    { name: 'Inventory', path: '/admin/inventory', icon: '' },
   ];
   
   const specialNavigation: NavItem[] = [
-    { name: 'Fundraisers', path: '/admin/fundraisers', icon: '🎗️' },
-    { name: 'Açaí Cakes', path: '/admin/acai', icon: '🧁' },
+    { name: 'Fundraisers', path: '/admin/fundraisers', icon: 'fundraisers' },
+    { name: 'Açaí Cakes', path: '/admin/acai', icon: 'acai' },
   ];
   
   const systemNavigation: NavItem[] = [
-    { name: 'Users', path: '/admin/users', icon: '👥' },
-    { name: 'Import', path: '/admin/import', icon: '📤' },
-    { name: 'Settings', path: '/admin/settings', icon: '⚙️' },
-    { name: 'Variant Presets', path: '/admin/settings/variant-presets', icon: '🎨' },
+    { name: 'Users', path: '/admin/users', icon: 'users' },
+    { name: 'Import', path: '/admin/import', icon: 'import' },
+    { name: 'Settings', path: '/admin/settings', icon: 'settings' },
+    { name: 'Variant Presets', path: '/admin/settings/variant-presets', icon: 'presets' },
   ];
 
   const NavSection = ({ title, items }: { title: string; items: NavItem[] }) => (

@@ -302,7 +302,7 @@ export default function AdminImportPage() {
             {/* Note about inventory */}
             <div className="mb-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-sm text-blue-800">
-                <strong>📋 Note:</strong> Inventory CSV upload will be enabled once we receive Hafaloha's inventory export format and test the implementation.
+                <strong>Note:</strong> Inventory CSV upload will be enabled once we receive Hafaloha's inventory export format and test the implementation.
               </p>
             </div>
 

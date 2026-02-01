@@ -444,7 +444,7 @@ export default function AcaiCakesPage() {
             href={`tel:${config?.settings.pickup_phone || '671-989-3444'}`}
             className="inline-block bg-hafalohaRed text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition"
           >
-            📞 Call to Order
+            Call to Order
           </a>
         </div>
       </div>
@@ -550,7 +550,7 @@ export default function AcaiCakesPage() {
           <div className="mb-6 bg-yellow-50 border-2 border-yellow-300 rounded-xl p-4 shadow-sm">
             <div className="flex items-center justify-center">
               <span className="text-yellow-800 font-medium">
-                ⚙️ Test Mode — No real payment will be charged
+                Test Mode — No real payment will be charged
               </span>
             </div>
           </div>
