@@ -2,64 +2,16 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Eye, Edit, X, MoreVertical, Archive, ArchiveRestore, Copy, Globe, GlobeLock, ArrowUpDown } from 'lucide-react';
 import toast from 'react-hot-toast';
+import {
+  Product,
+  DetailedProduct,
+  ProductFilters,
+  ProductsTable,
+  ProductDetailModal,
+} from '../../components/admin/products';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
-
-interface Product {
-  id: number;
-  name: string;
-  slug: string;
-  description: string;
-  base_price_cents: number;
-  published: boolean;
-  featured: boolean;
-  archived: boolean;
-  product_type: string;
-  primary_image_url: string | null;
-  variant_count: number;
-  total_stock: number; // Deprecated, replaced by inventory fields
-  inventory_level: 'none' | 'product' | 'variant';
-  product_stock_quantity: number | null;
-  total_variant_stock: number | null;
-  in_stock: boolean;
-  actually_available: boolean; // Computed: respects published + inventory
-}
-
-interface ProductVariant {
-  id: number;
-  size: string;
-  color: string;
-  variant_name: string;
-  display_name: string;
-  sku: string;
-  price_cents: number;
-  stock_quantity: number;
-  available: boolean;
-  actually_available: boolean;
-  low_stock: boolean;
-}
-
-interface DetailedProduct extends Product {
-  product_type: string;
-  vendor: string;
-  weight_oz: number;
-  sku_prefix: string;
-  variants: ProductVariant[];
-  images: Array<{
-    id: number;
-    url: string;
-    alt_text: string;
-    primary: boolean;
-    position: number;
-  }>;
-  collections: Array<{
-    id: number;
-    name: string;
-    slug: string;
-  }>;
-}
 
 export default function AdminProductsPage() {
   const { getToken } = useAuth();
@@ -67,198 +19,46 @@ export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<DetailedProduct | null>(null);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [loadingDetails, setLoadingDetails] = useState(false);
-  
+
   // Pagination & Filters
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPublished, setFilterPublished] = useState<'all' | 'true' | 'false' | 'archived'>('all');
-  const [filterType, setFilterType] = useState<string>('all');
+  const [filterType, setFilterType] = useState('all');
   const [productTypes, setProductTypes] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'stock' | 'created'>('name');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
-  const [actionMenuOpen, setActionMenuOpen] = useState<number | null>(null);
   const itemsPerPage = 25;
 
-  // Prevent body scroll when modal is open
+  // Lock body scroll when modal open
   useEffect(() => {
-    if (selectedProduct) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    
-    // Cleanup on unmount
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
+    document.body.style.overflow = selectedProduct ? 'hidden' : 'unset';
+    return () => { document.body.style.overflow = 'unset'; };
   }, [selectedProduct]);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  useEffect(() => { fetchProducts(); }, []);
 
+  // Reset page on filter/sort change
+  useEffect(() => { setCurrentPage(1); }, [searchQuery, filterPublished, filterType, sortBy, sortDir]);
+
+  // ── Fetch ──────────────────────────────────────────────
   const fetchProducts = async () => {
     try {
       setLoading(true);
       const token = await getToken();
-      
-      // Add show_archived=true to fetch all products (including archived)
       const response = await axios.get(`${API_BASE_URL}/api/v1/admin/products?show_archived=true`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
-      const allProducts = response.data.data;
-      setProducts(allProducts);
-      
-      // Extract unique product types for filter
-      const types = [...new Set(allProducts.map((p: Product) => p.product_type).filter(Boolean))];
-      setProductTypes(types as string[]);
+      const all = response.data.data;
+      setProducts(all);
+      setProductTypes([...new Set(all.map((p: Product) => p.product_type).filter(Boolean))] as string[]);
     } catch (err) {
       console.error('Failed to fetch products:', err);
     } finally {
       setLoading(false);
     }
   };
-
-  // Quick Actions
-  const handleTogglePublished = async (product: Product) => {
-    try {
-      const token = await getToken();
-      await axios.put(
-        `${API_BASE_URL}/api/v1/admin/products/${product.id}`,
-        { product: { published: !product.published } },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast.success(product.published ? 'Product unpublished' : 'Product published');
-      fetchProducts();
-    } catch (err) {
-      toast.error('Failed to update product');
-    }
-    setActionMenuOpen(null);
-  };
-
-  const handleArchive = async (product: Product) => {
-    try {
-      const token = await getToken();
-      await axios.post(
-        `${API_BASE_URL}/api/v1/admin/products/${product.id}/archive`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast.success('Product archived');
-      fetchProducts();
-    } catch (err) {
-      toast.error('Failed to archive product');
-    }
-    setActionMenuOpen(null);
-  };
-
-  const handleUnarchive = async (product: Product) => {
-    try {
-      const token = await getToken();
-      await axios.post(
-        `${API_BASE_URL}/api/v1/admin/products/${product.id}/unarchive`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast.success('Product restored');
-      fetchProducts();
-    } catch (err) {
-      toast.error('Failed to restore product');
-    }
-    setActionMenuOpen(null);
-  };
-
-  const handleDuplicate = async (product: Product) => {
-    try {
-      const token = await getToken();
-      await axios.post(
-        `${API_BASE_URL}/api/v1/admin/products/${product.id}/duplicate`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      toast.success('Product duplicated');
-      fetchProducts();
-    } catch (err) {
-      toast.error('Failed to duplicate product');
-    }
-    setActionMenuOpen(null);
-  };
-
-  const handleSort = (column: 'name' | 'price' | 'stock' | 'created') => {
-    if (sortBy === column) {
-      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortBy(column);
-      setSortDir('asc');
-    }
-  };
-
-  // Filter and search products
-  const filteredProducts = products.filter(product => {
-    // Search filter
-    if (searchQuery && !product.name.toLowerCase().includes(searchQuery.toLowerCase())) {
-      return false;
-    }
-    
-    // Published/Archived filter
-    if (filterPublished === 'archived') {
-      // Show only archived products
-      if (!product.archived) return false;
-    } else if (filterPublished !== 'all') {
-      // Show only non-archived products with matching published status
-      if (product.archived) return false;
-      if (product.published.toString() !== filterPublished) return false;
-    } else {
-      // "All Products" - show only non-archived
-      if (product.archived) return false;
-    }
-    
-    // Type filter
-    if (filterType !== 'all' && product.product_type !== filterType) {
-      return false;
-    }
-    
-    return true;
-  });
-
-  // Sort products
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    let comparison = 0;
-    switch (sortBy) {
-      case 'name':
-        comparison = a.name.localeCompare(b.name);
-        break;
-      case 'price':
-        comparison = a.base_price_cents - b.base_price_cents;
-        break;
-      case 'stock':
-        const stockA = a.inventory_level === 'product' ? (a.product_stock_quantity || 0) : 
-                       a.inventory_level === 'variant' ? (a.total_variant_stock || 0) : 0;
-        const stockB = b.inventory_level === 'product' ? (b.product_stock_quantity || 0) : 
-                       b.inventory_level === 'variant' ? (b.total_variant_stock || 0) : 0;
-        comparison = stockA - stockB;
-        break;
-      case 'created':
-        comparison = 0; // Would need created_at field
-        break;
-    }
-    return sortDir === 'asc' ? comparison : -comparison;
-  });
-
-  // Paginate products
-  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
-  const paginatedProducts = sortedProducts.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
-  
-  // Reset to page 1 when filters or sort change
-  useEffect(() => {
-    setCurrentPage(1);
-    setActionMenuOpen(null);
-  }, [searchQuery, filterPublished, filterType, sortBy, sortDir]);
 
   const fetchProductDetails = async (slug: string) => {
     try {
@@ -275,70 +75,102 @@ export default function AdminProductsPage() {
     }
   };
 
-  const handleViewProduct = (product: Product) => {
-    setSelectedImageIndex(0); // Reset image index when opening new product
-    fetchProductDetails(product.slug);
+  // ── Actions ────────────────────────────────────────────
+  const handleTogglePublished = async (product: Product) => {
+    try {
+      const token = await getToken();
+      await axios.put(
+        `${API_BASE_URL}/api/v1/admin/products/${product.id}`,
+        { product: { published: !product.published } },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      toast.success(product.published ? 'Product unpublished' : 'Product published');
+      fetchProducts();
+    } catch { toast.error('Failed to update product'); }
   };
 
-  const formatCurrency = (cents: number) => {
-    return `$${(cents / 100).toFixed(2)}`;
+  const handleArchive = async (product: Product) => {
+    try {
+      const token = await getToken();
+      await axios.post(`${API_BASE_URL}/api/v1/admin/products/${product.id}/archive`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success('Product archived');
+      fetchProducts();
+    } catch { toast.error('Failed to archive product'); }
   };
 
-  const getStockDisplay = (product: Product) => {
-    if (product.inventory_level === 'none') {
-      return { value: '--', color: 'text-gray-500', tooltip: 'No tracking', outOfStock: false };
-    }
-    if (product.inventory_level === 'product') {
-      const stock = product.product_stock_quantity || 0;
-      return {
-        value: `${stock}`,
-        color: stock > 10 ? 'text-green-600' : stock > 0 ? 'text-amber-600' : 'text-red-600',
-        tooltip: 'Product-level tracking',
-        outOfStock: stock === 0
-      };
-    }
-    if (product.inventory_level === 'variant') {
-      const stock = product.total_variant_stock || 0;
-      return {
-        value: `${stock}`,
-        color: stock > 10 ? 'text-green-600' : stock > 0 ? 'text-amber-600' : 'text-red-600',
-        tooltip: 'Variant-level tracking (total of all variants)',
-        outOfStock: stock === 0
-      };
-    }
-    return { value: '--', color: 'text-gray-500', tooltip: '', outOfStock: false };
+  const handleUnarchive = async (product: Product) => {
+    try {
+      const token = await getToken();
+      await axios.post(`${API_BASE_URL}/api/v1/admin/products/${product.id}/unarchive`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success('Product restored');
+      fetchProducts();
+    } catch { toast.error('Failed to restore product'); }
   };
 
-  const getVariantStatus = (variant: ProductVariant, inventoryLevel: string) => {
-    // Use the computed actually_available field for display
-    // This respects both manual 'available' flag AND stock levels
-    // Default to available if actually_available is undefined/null (e.g., newly created variants)
-    const isAvailable = variant.actually_available ?? variant.available ?? true;
-    
-    if (!isAvailable) {
-      // Check why it's unavailable
-      if (inventoryLevel === 'variant' && variant.stock_quantity <= 0) {
-        return {
-          label: 'Out of Stock',
-          className: 'bg-red-100 text-red-800'
-        };
+  const handleDuplicate = async (product: Product) => {
+    try {
+      const token = await getToken();
+      await axios.post(`${API_BASE_URL}/api/v1/admin/products/${product.id}/duplicate`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success('Product duplicated');
+      fetchProducts();
+    } catch { toast.error('Failed to duplicate product'); }
+  };
+
+  const handleSort = (column: 'name' | 'price' | 'stock' | 'created') => {
+    if (sortBy === column) {
+      setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortBy(column);
+      setSortDir('asc');
+    }
+  };
+
+  // ── Filter + Sort + Paginate ───────────────────────────
+  const filteredProducts = products.filter((product) => {
+    if (searchQuery && !product.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
+    if (filterPublished === 'archived') {
+      if (!product.archived) return false;
+    } else if (filterPublished !== 'all') {
+      if (product.archived) return false;
+      if (product.published.toString() !== filterPublished) return false;
+    } else {
+      if (product.archived) return false;
+    }
+    if (filterType !== 'all' && product.product_type !== filterType) return false;
+    return true;
+  });
+
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    let cmp = 0;
+    switch (sortBy) {
+      case 'name': cmp = a.name.localeCompare(b.name); break;
+      case 'price': cmp = a.base_price_cents - b.base_price_cents; break;
+      case 'stock': {
+        const sa = a.inventory_level === 'product' ? (a.product_stock_quantity || 0) : a.inventory_level === 'variant' ? (a.total_variant_stock || 0) : 0;
+        const sb = b.inventory_level === 'product' ? (b.product_stock_quantity || 0) : b.inventory_level === 'variant' ? (b.total_variant_stock || 0) : 0;
+        cmp = sa - sb;
+        break;
       }
-      // Manually disabled
-      return {
-        label: 'Disabled',
-        className: 'bg-gray-100 text-gray-800'
-      };
     }
-    
-    // Actually available (both enabled AND has stock if tracked)
-    return {
-      label: 'Available',
-      className: 'bg-green-100 text-green-800'
-    };
-  };
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
 
+  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
+  const paginatedProducts = sortedProducts.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
+
+  // ── Render ─────────────────────────────────────────────
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Products</h1>
@@ -346,10 +178,7 @@ export default function AdminProductsPage() {
             Showing <span className="font-semibold text-gray-700">{filteredProducts.length}</span> of {products.length} products
           </p>
         </div>
-        <button 
-          onClick={() => navigate('/admin/products/new')}
-          className="btn-primary flex items-center gap-2"
-        >
+        <button onClick={() => navigate('/admin/products/new')} className="btn-primary flex items-center gap-2">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
@@ -358,744 +187,56 @@ export default function AdminProductsPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {/* Search */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Search</label>
-            <div className="relative">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products..."
-                className="w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition text-sm"
-              />
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-          </div>
+      <ProductFilters
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        filterPublished={filterPublished}
+        onPublishedChange={setFilterPublished}
+        filterType={filterType}
+        onTypeChange={setFilterType}
+        productTypes={productTypes}
+        onClear={() => { setSearchQuery(''); setFilterPublished('all'); setFilterType('all'); }}
+      />
 
-          {/* Published Filter */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Status</label>
-            <select
-              value={filterPublished}
-              onChange={(e) => setFilterPublished(e.target.value as 'all' | 'true' | 'false' | 'archived')}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent hover:border-gray-300 transition text-sm"
-            >
-              <option value="all">All Products</option>
-              <option value="true">Published</option>
-              <option value="false">Draft</option>
-              <option value="archived">Archived</option>
-            </select>
-          </div>
-
-          {/* Type Filter */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Type</label>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent hover:border-gray-300 transition text-sm"
-            >
-              <option value="all">All Types</option>
-              {productTypes.map(type => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Clear Filters */}
-          <div className="flex items-end">
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setFilterPublished('all');
-                setFilterType('all');
-              }}
-              className="w-full px-4 py-2.5 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200 transition text-sm font-medium text-gray-600 flex items-center justify-center gap-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              Clear
-            </button>
-          </div>
-        </div>
-      </div>
-
+      {/* Content */}
       {loading ? (
         <div className="flex items-center justify-center py-16">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-hafalohaRed mx-auto mb-4"></div>
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-hafalohaRed mx-auto mb-4" />
             <p className="text-gray-500">Loading products...</p>
           </div>
         </div>
       ) : filteredProducts.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
-          <div className="mb-4"><svg className="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg></div>
           <h3 className="text-lg font-bold text-gray-900 mb-2">No products found</h3>
           <p className="text-gray-500">Try adjusting your filters or search query.</p>
         </div>
       ) : (
-        <>
-          {/* Desktop Table */}
-          <div className="hidden lg:block bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-100">
-              <thead className="bg-gray-50/80">
-                <tr>
-                  <th 
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('name')}
-                  >
-                    <div className="flex items-center gap-1">
-                      Product
-                      {sortBy === 'name' && <ArrowUpDown className="w-3 h-3" />}
-                    </div>
-                  </th>
-                  <th 
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('price')}
-                  >
-                    <div className="flex items-center gap-1">
-                      Price
-                      {sortBy === 'price' && <ArrowUpDown className="w-3 h-3" />}
-                    </div>
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Variants
-                  </th>
-                  <th 
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                    onClick={() => handleSort('stock')}
-                  >
-                    <div className="flex items-center gap-1">
-                      Stock
-                      {sortBy === 'stock' && <ArrowUpDown className="w-3 h-3" />}
-                    </div>
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        {product.primary_image_url ? (
-                          <img
-                            src={product.primary_image_url}
-                            alt={product.name}
-                            className="w-12 h-12 object-cover rounded"
-                          />
-                        ) : (
-                          <div className="w-12 h-12 bg-gray-100 border border-gray-300 rounded flex items-center justify-center">
-                            <img 
-                              src="/images/hafaloha-logo.png" 
-                              alt="Placeholder" 
-                              className="w-8 opacity-40"
-                              style={{ objectFit: 'contain', maxHeight: '2rem' }}
-                            />
-                          </div>
-                        )}
-                        <div>
-                          <p className="font-medium text-gray-900">{product.name}</p>
-                          {product.featured && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                              Featured
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatCurrency(product.base_price_cents)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {product.variant_count}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {(() => {
-                        const stockDisplay = getStockDisplay(product);
-                        return (
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`text-sm font-medium ${stockDisplay.color}`}
-                              title={stockDisplay.tooltip}
-                            >
-                              {stockDisplay.value}
-                            </span>
-                            {stockDisplay.outOfStock && (
-                              <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                                Out
-                              </span>
-                            )}
-                          </div>
-                        );
-                      })()}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        product.archived 
-                          ? 'bg-orange-100 text-orange-800'
-                          : product.published 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {product.archived ? 'Archived' : product.published ? 'Published' : 'Draft'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleViewProduct(product)}
-                          className="text-hafalohaRed hover:text-red-700 font-medium inline-flex items-center"
-                        >
-                          <Eye className="w-4 h-4 mr-1" /> View
-                        </button>
-                        <button 
-                          onClick={() => navigate(`/admin/products/${product.id}/edit`)}
-                          className="text-blue-600 hover:text-blue-900 font-medium inline-flex items-center"
-                        >
-                          <Edit className="w-4 h-4 mr-1" /> Edit
-                        </button>
-                        
-                        {/* More Actions Dropdown */}
-                        <div className="relative">
-                          <button
-                            onClick={() => setActionMenuOpen(actionMenuOpen === product.id ? null : product.id)}
-                            className="p-1 text-gray-400 hover:text-gray-600 rounded"
-                          >
-                            <MoreVertical className="w-4 h-4" />
-                          </button>
-                          
-                          {actionMenuOpen === product.id && (
-                            <>
-                              <div 
-                                className="fixed inset-0 z-10" 
-                                onClick={() => setActionMenuOpen(null)}
-                              />
-                              <div className="absolute right-0 mt-1 w-48 bg-white rounded-lg shadow-lg border z-20">
-                                <button
-                                  onClick={() => handleTogglePublished(product)}
-                                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
-                                >
-                                  {product.published ? (
-                                    <><GlobeLock className="w-4 h-4" /> Unpublish</>
-                                  ) : (
-                                    <><Globe className="w-4 h-4" /> Publish</>
-                                  )}
-                                </button>
-                                <button
-                                  onClick={() => handleDuplicate(product)}
-                                  className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
-                                >
-                                  <Copy className="w-4 h-4" /> Duplicate
-                                </button>
-                                {product.archived ? (
-                                  <button
-                                    onClick={() => handleUnarchive(product)}
-                                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-green-600"
-                                  >
-                                    <ArchiveRestore className="w-4 h-4" /> Restore
-                                  </button>
-                                ) : (
-                                  <button
-                                    onClick={() => handleArchive(product)}
-                                    className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-orange-600"
-                                  >
-                                    <Archive className="w-4 h-4" /> Archive
-                                  </button>
-                                )}
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Mobile Cards */}
-          <div className="lg:hidden space-y-4">
-            {paginatedProducts.map((product) => (
-              <div key={product.id} className="bg-white rounded-lg shadow p-4">
-                <div className="flex gap-3 mb-3">
-                  {product.primary_image_url ? (
-                    <img
-                      src={product.primary_image_url}
-                      alt={product.name}
-                      className="w-16 h-16 object-cover rounded"
-                    />
-                  ) : (
-                    <div className="w-16 h-16 bg-gray-100 border-2 border-gray-300 rounded flex items-center justify-center">
-                      <img 
-                        src="/images/hafaloha-logo.png" 
-                        alt="Placeholder" 
-                        className="w-10 opacity-40"
-                        style={{ objectFit: 'contain', maxHeight: '2.5rem' }}
-                      />
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-900">{product.name}</p>
-                    <p className="text-sm text-gray-600">{formatCurrency(product.base_price_cents)}</p>
-                  </div>
-                  <span className={`px-2 py-1 h-fit text-xs font-semibold rounded-full ${
-                    product.archived 
-                      ? 'bg-orange-100 text-orange-800'
-                      : product.published 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {product.archived ? 'Archived' : product.published ? 'Published' : 'Draft'}
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-sm mb-3">
-                  <div>
-                    <span className="text-gray-600">Variants:</span>
-                    <span className="ml-1 font-medium">{product.variant_count}</span>
-                  </div>
-                  <div>
-                    <span className="text-gray-600">Stock:</span>
-                    {(() => {
-                      const stockDisplay = getStockDisplay(product);
-                      return (
-                        <span className="inline-flex items-center gap-2">
-                          <span className={`ml-1 font-medium ${stockDisplay.color}`} title={stockDisplay.tooltip}>
-                            {stockDisplay.value}
-                          </span>
-                          {stockDisplay.outOfStock && (
-                            <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                              Out
-                            </span>
-                          )}
-                        </span>
-                      );
-                    })()}
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleViewProduct(product)}
-                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-center inline-flex items-center justify-center"
-                  >
-                    <Eye className="w-4 h-4 mr-1" /> View
-                  </button>
-                  <button 
-                    onClick={() => navigate(`/admin/products/${product.id}/edit`)}
-                    className="flex-1 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition inline-flex items-center justify-center"
-                  >
-                    <Edit className="w-4 h-4 mr-1" /> Edit
-                  </button>
-                  
-                  {/* Quick Actions */}
-                  <div className="relative">
-                    <button
-                      onClick={() => setActionMenuOpen(actionMenuOpen === product.id ? null : product.id)}
-                      className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
-                    >
-                      <MoreVertical className="w-5 h-5" />
-                    </button>
-                    
-                    {actionMenuOpen === product.id && (
-                      <>
-                        <div 
-                          className="fixed inset-0 z-10" 
-                          onClick={() => setActionMenuOpen(null)}
-                        />
-                        <div className="absolute right-0 bottom-full mb-1 w-48 bg-white rounded-lg shadow-lg border z-20">
-                          <button
-                            onClick={() => handleTogglePublished(product)}
-                            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
-                          >
-                            {product.published ? (
-                              <><GlobeLock className="w-4 h-4" /> Unpublish</>
-                            ) : (
-                              <><Globe className="w-4 h-4" /> Publish</>
-                            )}
-                          </button>
-                          <button
-                            onClick={() => handleDuplicate(product)}
-                            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2"
-                          >
-                            <Copy className="w-4 h-4" /> Duplicate
-                          </button>
-                          {product.archived ? (
-                            <button
-                              onClick={() => handleUnarchive(product)}
-                              className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-green-600"
-                            >
-                              <ArchiveRestore className="w-4 h-4" /> Restore
-                            </button>
-                          ) : (
-                            <button
-                              onClick={() => handleArchive(product)}
-                              className="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 flex items-center gap-2 text-orange-600"
-                            >
-                              <Archive className="w-4 h-4" /> Archive
-                            </button>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white px-6 py-4 rounded-lg shadow">
-              <p className="text-sm text-gray-700">
-                Showing <span className="font-medium">{(currentPage - 1) * itemsPerPage + 1}</span> to{' '}
-                <span className="font-medium">
-                  {Math.min(currentPage * itemsPerPage, sortedProducts.length)}
-                </span>{' '}
-                of <span className="font-medium">{sortedProducts.length}</span> results
-              </p>
-              
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                >
-                  Previous
-                </button>
-                
-                <div className="flex gap-1">
-                  {[...Array(totalPages)].map((_, i) => {
-                    const page = i + 1;
-                    // Show first, last, current, and pages around current
-                    if (
-                      page === 1 ||
-                      page === totalPages ||
-                      (page >= currentPage - 1 && page <= currentPage + 1)
-                    ) {
-                      return (
-                        <button
-                          key={page}
-                          onClick={() => setCurrentPage(page)}
-                          className={`px-3 py-2 rounded-lg transition ${
-                            currentPage === page
-                              ? 'bg-hafalohaRed text-white'
-                              : 'border border-gray-300 hover:bg-gray-50'
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      );
-                    } else if (page === currentPage - 2 || page === currentPage + 2) {
-                      return <span key={page} className="px-2 py-2">...</span>;
-                    }
-                    return null;
-                  })}
-                </div>
-                
-                <button
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  className="px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          )}
-        </>
+        <ProductsTable
+          products={paginatedProducts}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalFiltered={sortedProducts.length}
+          itemsPerPage={itemsPerPage}
+          sortBy={sortBy}
+          sortDir={sortDir}
+          onSort={handleSort}
+          onPageChange={setCurrentPage}
+          onView={(p) => fetchProductDetails(p.slug)}
+          onTogglePublished={handleTogglePublished}
+          onArchive={handleArchive}
+          onUnarchive={handleUnarchive}
+          onDuplicate={handleDuplicate}
+        />
       )}
 
-      {/* Product Details Modal */}
+      {/* Product Detail Modal */}
       {selectedProduct && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm bg-black/10" 
-          onClick={() => setSelectedProduct(null)}
-        >
-          <div 
-            className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl" 
-            onClick={(e) => e.stopPropagation()}
-          >
-            {loadingDetails ? (
-              <div className="p-8 text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hafalohaRed mx-auto"></div>
-                <p className="mt-4 text-gray-600">Loading product details...</p>
-              </div>
-            ) : (
-              <>
-                {/* Header */}
-                <div className="flex justify-between items-center p-6 border-b border-gray-200">
-                  <h2 className="text-2xl font-bold text-gray-900">{selectedProduct.name}</h2>
-                  <button 
-                    onClick={() => setSelectedProduct(null)}
-                    className="text-gray-400 hover:text-gray-600 transition"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
-
-                <div className="p-6 space-y-6">
-                  {/* Product Info Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Images */}
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Product Images</h3>
-                      {selectedProduct.images && selectedProduct.images.length > 0 ? (
-                        <div className="space-y-3">
-                          {/* Main Image */}
-                          <div className="bg-white rounded-lg overflow-hidden border border-gray-200" style={{ aspectRatio: '1/1' }}>
-                            <img
-                              src={selectedProduct.images[selectedImageIndex]?.url || selectedProduct.images[0]?.url}
-                              alt={selectedProduct.images[selectedImageIndex]?.alt_text || selectedProduct.name}
-                              className="w-full h-full"
-                              style={{
-                                objectFit: 'contain',
-                                backgroundColor: 'white'
-                              }}
-                            />
-                          </div>
-                          
-                          {/* Thumbnail Gallery */}
-                          {selectedProduct.images.length > 1 && (
-                            <div className="grid grid-cols-4 gap-2">
-                              {selectedProduct.images.map((image, index) => (
-                                <button
-                                  key={image.id}
-                                  onClick={() => setSelectedImageIndex(index)}
-                                  className={`bg-white rounded-lg overflow-hidden border-2 transition ${
-                                    selectedImageIndex === index ? 'border-hafalohaRed' : 'border-gray-200 hover:border-gray-300'
-                                  }`}
-                                  style={{ aspectRatio: '1/1' }}
-                                >
-                                  <img
-                                    src={image.url}
-                                    alt={image.alt_text || selectedProduct.name}
-                                    className="w-full h-full"
-                                    style={{
-                                      objectFit: 'contain',
-                                      backgroundColor: 'white'
-                                    }}
-                                  />
-                                </button>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="bg-gray-100 h-48 rounded-lg flex items-center justify-center text-gray-400 text-4xl">
-
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Basic Info */}
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Product Details</h3>
-                      <dl className="space-y-2 text-sm">
-                        <div>
-                          <dt className="text-gray-600">Base Price:</dt>
-                          <dd className="text-gray-900 font-semibold text-lg">{formatCurrency(selectedProduct.base_price_cents)}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-gray-600">Status:</dt>
-                          <dd>
-                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              selectedProduct.archived
-                                ? 'bg-orange-100 text-orange-800'
-                                : selectedProduct.published 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-gray-100 text-gray-800'
-                            }`}>
-                              {selectedProduct.archived ? 'Archived' : selectedProduct.published ? 'Published' : 'Draft'}
-                            </span>
-                            {selectedProduct.featured && (
-                              <span className="ml-2 px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                Featured
-                              </span>
-                            )}
-                          </dd>
-                        </div>
-                        <div>
-                          <dt className="text-gray-600">Type:</dt>
-                          <dd className="text-gray-900">{selectedProduct.product_type || 'N/A'}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-gray-600">Vendor:</dt>
-                          <dd className="text-gray-900">{selectedProduct.vendor || 'N/A'}</dd>
-                        </div>
-                        <div>
-                          <dt className="text-gray-600">Weight:</dt>
-                          <dd className="text-gray-900">{selectedProduct.weight_oz} oz</dd>
-                        </div>
-                        <div>
-                          <dt className="text-gray-600">In Stock:</dt>
-                          <dd className={`font-semibold ${selectedProduct.in_stock ? 'text-green-600' : 'text-red-600'}`}>
-                            {selectedProduct.in_stock ? 'Yes' : 'No'}
-                            {selectedProduct.inventory_level === 'product' && selectedProduct.product_stock_quantity != null && (
-                              <span className="ml-2 text-sm font-normal">
-                                ({selectedProduct.product_stock_quantity} available)
-                              </span>
-                            )}
-                          </dd>
-                        </div>
-                        <div>
-                          <dt className="text-gray-600">Inventory Tracking:</dt>
-                          <dd className="flex items-center gap-2">
-                            {selectedProduct.inventory_level === 'none' && (
-                              <span className="text-sm px-2 py-1 bg-gray-100 text-gray-700 rounded">
-                                ❌ None
-                              </span>
-                            )}
-                            {selectedProduct.inventory_level === 'product' && (
-                              <>
-                                <span className="text-sm px-2 py-1 bg-blue-100 text-blue-700 rounded font-medium">
-                                  Product Level
-                                </span>
-                                <span className="text-sm text-gray-600">
-                                  ({selectedProduct.product_stock_quantity || 0} total)
-                                </span>
-                              </>
-                            )}
-                            {selectedProduct.inventory_level === 'variant' && (
-                              <>
-                                <span className="text-sm px-2 py-1 bg-purple-100 text-purple-700 rounded font-medium">
-                                  Variant Level
-                                </span>
-                                <span className="text-sm text-gray-600">
-                                  ({selectedProduct.total_variant_stock || 0} total across variants)
-                                </span>
-                              </>
-                            )}
-                          </dd>
-                        </div>
-                      </dl>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Description</h3>
-                    {selectedProduct.description ? (
-                      <div 
-                        className="text-gray-700 prose prose-sm max-w-none"
-                        dangerouslySetInnerHTML={{ __html: selectedProduct.description }}
-                      />
-                    ) : (
-                      <p className="text-gray-500 italic">No description available.</p>
-                    )}
-                  </div>
-
-                  {/* Collections */}
-                  {selectedProduct.collections.length > 0 && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">Collections</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {selectedProduct.collections.map((collection) => (
-                          <span
-                            key={collection.id}
-                            className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
-                          >
-                            {collection.name}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Variants - Only show if variants exist */}
-                  {selectedProduct.variants && selectedProduct.variants.length > 0 && (
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Variants ({selectedProduct.variants.length})</h3>
-                      <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">SKU</th>
-                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Option</th>
-                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
-                              {/* Always show stock column now, but will show "--" for non-variant tracking */}
-                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Stock</th>
-                              <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {selectedProduct.variants.map((variant) => (
-                              <tr key={variant.id}>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{variant.sku}</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{variant.display_name}</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm text-gray-900">{formatCurrency(variant.price_cents)}</td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm">
-                                  {selectedProduct.inventory_level === 'variant' ? (
-                                    <span className={`font-medium ${
-                                      variant.stock_quantity > 10 ? 'text-green-600' : 
-                                      variant.stock_quantity > 0 ? 'text-amber-600' : 
-                                      'text-red-600'
-                                    }`}>
-                                      {variant.stock_quantity}
-                                      {variant.stock_quantity === 0 && (
-                                        <span className="ml-1 text-xs px-1.5 py-0.5 bg-red-100 text-red-800 rounded">
-                                          Out
-                                        </span>
-                                      )}
-                                    </span>
-                                  ) : (
-                                    <span className="text-gray-400">--</span>
-                                  )}
-                                </td>
-                                <td className="px-4 py-2 whitespace-nowrap text-sm">
-                                  {(() => {
-                                    const status = getVariantStatus(variant, selectedProduct.inventory_level);
-                                    return (
-                                      <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${status.className}`}>
-                                        {status.label}
-                                      </span>
-                                    );
-                                  })()}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-3 pt-4 border-t border-gray-200">
-                    <button
-                      onClick={() => {
-                        setSelectedProduct(null);
-                        navigate(`/admin/products/${selectedProduct.id}/edit`);
-                      }}
-                      className="flex-1 px-6 py-3 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 font-medium inline-flex items-center justify-center"
-                    >
-                      <Edit className="w-5 h-5 mr-2" /> Edit Product
-                    </button>
-                    <button
-                      onClick={() => setSelectedProduct(null)}
-                      className="px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
-                    >
-                      Close
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
+        <ProductDetailModal
+          product={selectedProduct}
+          loading={loadingDetails}
+          onClose={() => setSelectedProduct(null)}
+        />
       )}
     </div>
   );
