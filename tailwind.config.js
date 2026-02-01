@@ -15,7 +15,8 @@ export default {
         'hafaloha-dark': '#1a1a2e',
       },
       fontFamily: {
-        'display': ['Georgia', 'serif'],
+        'sans': ['DM Sans', 'Inter', 'system-ui', 'sans-serif'],
+        'display': ['Satoshi', 'DM Sans', 'system-ui', 'sans-serif'],
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',
