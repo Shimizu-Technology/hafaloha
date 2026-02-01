@@ -383,7 +383,7 @@ export default function AdminCollectionsPage() {
             </p>
             {selectedCollection.product_count > 0 && (
               <p className="text-sm text-amber-600 mb-4">
-                ⚠️ This collection has {selectedCollection.product_count} product{selectedCollection.product_count !== 1 ? 's' : ''}. They will not be deleted, but will be removed from this collection.
+                This collection has {selectedCollection.product_count} product{selectedCollection.product_count !== 1 ? 's' : ''}. They will not be deleted, but will be removed from this collection.
               </p>
             )}
             <div className="flex justify-end gap-3">

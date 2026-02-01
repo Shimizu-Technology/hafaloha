@@ -18,6 +18,11 @@ const featuredCategories = [
     name: "Men's",
     image: '/images/hafaloha-mens-img.webp',
     link: '/products?collection=mens',
+  },
+  {
+    name: "Kids",
+    image: '/images/hafaloha-mens-img.webp',
+    link: '/products?collection=kids',
   }
 ];
 
@@ -50,7 +55,7 @@ export default function MobileNavDropdown({ onItemClick, darkMode = false }: Mob
         className={`w-full flex items-center justify-between font-semibold py-2 ${
           darkMode 
             ? 'text-white hover:text-hafalohaGold' 
-            : 'text-gray-700 hover:text-hafalohaRed'
+            : 'text-warm-700 hover:text-hafalohaRed'
         }`}
       >
         <span>Shop</span>
@@ -76,7 +81,7 @@ export default function MobileNavDropdown({ onItemClick, darkMode = false }: Mob
                 className="group relative overflow-hidden rounded-lg"
                 onClick={onItemClick}
               >
-                <div className="aspect-square bg-gray-100 overflow-hidden">
+                <div className="aspect-square bg-warm-100 overflow-hidden">
                   <img 
                     src={category.image} 
                     alt={category.name}
@@ -99,7 +104,7 @@ export default function MobileNavDropdown({ onItemClick, darkMode = false }: Mob
               className={`flex items-center gap-2 py-2 font-medium ${
                 darkMode 
                   ? 'text-white/90 hover:text-hafalohaGold' 
-                  : 'text-gray-700 hover:text-hafalohaRed'
+                  : 'text-warm-700 hover:text-hafalohaRed'
               }`}
               onClick={onItemClick}
             >
@@ -111,7 +116,7 @@ export default function MobileNavDropdown({ onItemClick, darkMode = false }: Mob
 
             {/* Collections */}
             {loading ? (
-              <div className={`text-sm py-2 ${darkMode ? 'text-white/50' : 'text-gray-400'}`}>Loading collections...</div>
+              <div className={`text-sm py-2 ${darkMode ? 'text-white/50' : 'text-warm-400'}`}>Loading collections...</div>
             ) : (
               collections.slice(0, 6).map((collection) => (
                 <Link
@@ -120,14 +125,14 @@ export default function MobileNavDropdown({ onItemClick, darkMode = false }: Mob
                   className={`flex items-center gap-2 py-2 ${
                     darkMode 
                       ? 'text-white/70 hover:text-hafalohaGold' 
-                      : 'text-gray-600 hover:text-hafalohaRed'
+                      : 'text-warm-600 hover:text-hafalohaRed'
                   }`}
                   onClick={onItemClick}
                 >
                   <span className="text-hafalohaGold text-xs">●</span>
                   {collection.name}
                   {collection.product_count > 0 && (
-                    <span className={`ml-auto text-xs ${darkMode ? 'text-white/40' : 'text-gray-400'}`}>
+                    <span className={`ml-auto text-xs ${darkMode ? 'text-white/40' : 'text-warm-400'}`}>
                       {collection.product_count}
                     </span>
                   )}

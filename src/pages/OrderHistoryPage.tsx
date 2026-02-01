@@ -94,35 +94,35 @@ export default function OrderHistoryPage() {
       case 'cancelled':
         return 'bg-red-100 text-red-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-warm-100 text-warm-800';
     }
   };
 
   const getOrderTypeIcon = (orderType: string) => {
     switch (orderType) {
       case 'retail':
-        return '🛒';
+        return '•';
       case 'acai':
-        return '🍇';
+        return '•';
       case 'wholesale':
-        return '❤️';
+        return '♥';
       default:
-        return '📦';
+        return '•';
     }
   };
 
   // Show sign-in prompt if not authenticated
   if (isLoaded && !isSignedIn) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
+      <div className="min-h-screen bg-warm-50 py-12">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-            <div className="text-6xl mb-4">🔐</div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">Sign In Required</h1>
-            <p className="text-gray-600 mb-6">
+            <div className="mb-4"><svg className="w-16 h-16 mx-auto text-warm-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg></div>
+            <h1 className="text-2xl font-bold text-warm-900 mb-4">Sign In Required</h1>
+            <p className="text-warm-600 mb-6">
               Please sign in to view your order history.
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-warm-500">
               If you placed an order as a guest, you can view it using the confirmation link in your email.
             </p>
           </div>
@@ -132,23 +132,23 @@ export default function OrderHistoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-warm-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Your Orders</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-3xl font-bold text-warm-900">Your Orders</h1>
+          <p className="mt-2 text-warm-600">
             View and track your order history
           </p>
         </div>
 
         {/* Filter */}
         <div className="mb-6 flex flex-wrap gap-4 items-center">
-          <label className="text-sm font-medium text-gray-700">Filter by status:</label>
+          <label className="text-sm font-medium text-warm-700">Filter by status:</label>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-md border-gray-300 shadow-sm focus:border-hafalohaRed focus:ring-hafalohaRed text-sm"
+            className="rounded-md border-warm-300 shadow-sm focus:border-hafalohaRed focus:ring-hafalohaRed text-sm"
           >
             <option value="">All Orders</option>
             <option value="pending">Pending</option>
@@ -163,7 +163,7 @@ export default function OrderHistoryPage() {
         {isLoading && (
           <div className="text-center py-12">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-hafalohaRed border-t-transparent"></div>
-            <p className="mt-4 text-gray-600">Loading your orders...</p>
+            <p className="mt-4 text-warm-600">Loading your orders...</p>
           </div>
         )}
 
@@ -183,9 +183,9 @@ export default function OrderHistoryPage() {
         {/* Empty State */}
         {!isLoading && !error && orders.length === 0 && (
           <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-            <div className="text-6xl mb-4">📦</div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">No orders yet</h2>
-            <p className="text-gray-600 mb-6">
+            <div className="mb-4"><svg className="w-16 h-16 mx-auto text-warm-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg></div>
+            <h2 className="text-xl font-semibold text-warm-900 mb-2">No orders yet</h2>
+            <p className="text-warm-600 mb-6">
               {statusFilter 
                 ? `You don't have any ${statusFilter} orders.`
                 : "You haven't placed any orders yet. Start shopping!"}
@@ -205,7 +205,7 @@ export default function OrderHistoryPage() {
             {orders.map((order) => (
               <div
                 key={order.id}
-                className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition"
+                className="bg-white rounded-lg shadow-sm border border-warm-200 overflow-hidden hover:shadow-md transition"
               >
                 <div className="p-4 sm:p-6">
                   {/* Order Header */}
@@ -213,11 +213,11 @@ export default function OrderHistoryPage() {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-lg">{getOrderTypeIcon(order.order_type)}</span>
-                        <h3 className="font-semibold text-gray-900">
+                        <h3 className="font-semibold text-warm-900">
                           Order {order.order_number}
                         </h3>
                       </div>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-warm-500">
                         Placed on {order.created_at_display}
                       </p>
                     </div>
@@ -225,26 +225,26 @@ export default function OrderHistoryPage() {
                       <span className={`inline-flex px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
                         {order.status_display}
                       </span>
-                      <p className="mt-1 text-lg font-semibold text-gray-900">
+                      <p className="mt-1 text-lg font-semibold text-warm-900">
                         {order.total_formatted}
                       </p>
                     </div>
                   </div>
 
                   {/* Items Preview */}
-                  <div className="border-t border-gray-100 pt-4">
-                    <p className="text-sm text-gray-600 mb-2">
+                  <div className="border-t border-warm-100 pt-4">
+                    <p className="text-sm text-warm-600 mb-2">
                       {order.item_count} {order.item_count === 1 ? 'item' : 'items'}
                     </p>
                     <div className="space-y-1">
                       {order.items_preview.map((item, idx) => (
-                        <p key={idx} className="text-sm text-gray-700">
+                        <p key={idx} className="text-sm text-warm-700">
                           {item.quantity}x {item.product_name}
                           {item.variant_name && ` - ${item.variant_name}`}
                         </p>
                       ))}
                       {order.item_count > 3 && (
-                        <p className="text-sm text-gray-500 italic">
+                        <p className="text-sm text-warm-500 italic">
                           + {order.item_count - 3} more items
                         </p>
                       )}
@@ -267,7 +267,7 @@ export default function OrderHistoryPage() {
                   <div className="mt-4 flex flex-wrap gap-3">
                     <Link
                       to={`/orders/${order.id}`}
-                      className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition"
+                      className="inline-flex items-center px-4 py-2 bg-warm-100 text-warm-700 text-sm font-medium rounded-lg hover:bg-warm-200 transition"
                     >
                       View Details
                     </Link>
@@ -292,17 +292,17 @@ export default function OrderHistoryPage() {
             <button
               onClick={() => fetchOrders(pagination.current_page - 1)}
               disabled={pagination.current_page === 1}
-              className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-white border border-warm-300 rounded-lg text-sm font-medium text-warm-700 hover:bg-warm-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Previous
             </button>
-            <span className="px-4 py-2 text-sm text-gray-600">
+            <span className="px-4 py-2 text-sm text-warm-600">
               Page {pagination.current_page} of {pagination.total_pages}
             </span>
             <button
               onClick={() => fetchOrders(pagination.current_page + 1)}
               disabled={pagination.current_page === pagination.total_pages}
-              className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-white border border-warm-300 rounded-lg text-sm font-medium text-warm-700 hover:bg-warm-50 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
             </button>
@@ -311,7 +311,7 @@ export default function OrderHistoryPage() {
 
         {/* Footer Note */}
         {!isLoading && orders.length > 0 && (
-          <div className="mt-8 text-center text-sm text-gray-500">
+          <div className="mt-8 text-center text-sm text-warm-500">
             <p>
               Need help with an order?{' '}
               <Link to="/contact" className="text-hafalohaRed hover:underline">

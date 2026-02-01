@@ -20,7 +20,7 @@ export default function CartIcon({ darkMode = false }: CartIconProps) {
       className={`relative p-2 transition ${
         darkMode 
           ? 'text-white hover:text-hafalohaGold' 
-          : 'text-gray-700 hover:text-hafalohaRed'
+          : 'text-warm-700 hover:text-hafalohaRed'
       }`}
       aria-label={`Shopping cart with ${count} item${count !== 1 ? 's' : ''}`}
     >

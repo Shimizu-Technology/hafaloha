@@ -128,14 +128,14 @@ export default function ProductsPage() {
   // Show empty state instead of error when no products exist
   if (error && products.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-warm-50">
         {/* Header */}
         <div className="bg-white shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
-            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl sm:text-4xl font-bold text-warm-900 mb-2">
               Shop <span className="text-hafalohaRed">Hafaloha</span>
             </h1>
-            <p className="text-gray-600 text-sm sm:text-base">
+            <p className="text-warm-600 text-sm sm:text-base">
               Chamorro pride. Island style. Premium quality.
             </p>
           </div>
@@ -143,9 +143,9 @@ export default function ProductsPage() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
           <div className="max-w-md mx-auto">
-            <div className="text-6xl mb-6">🌺</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Coming Soon!</h2>
-            <p className="text-gray-600 mb-8">
+            <div className="mb-6"><svg className="w-16 h-16 mx-auto text-hafalohaRed" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" /></svg></div>
+            <h2 className="text-2xl font-bold text-warm-900 mb-4">Coming Soon!</h2>
+            <p className="text-warm-600 mb-8">
               We're preparing our collection of premium Chamorro pride apparel. 
               Check back soon for amazing island-inspired designs!
             </p>
@@ -167,10 +167,10 @@ export default function ProductsPage() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="bg-warm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
           <FadeIn>
             <div className="text-center">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 tracking-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-warm-900 mb-3 tracking-tight">
                 Shop Hafaloha
               </h1>
               <p className="text-warm-500 text-base sm:text-lg max-w-2xl mx-auto">
@@ -183,7 +183,7 @@ export default function ProductsPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Search and Filter Bar */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6 mb-6">
+        <div className="bg-white rounded-xl shadow-sm border border-warm-100 p-4 sm:p-6 mb-6">
           {/* Search Bar */}
           <div className="mb-4">
             <div className="relative max-w-2xl mx-auto">
@@ -192,10 +192,10 @@ export default function ProductsPage() {
                 placeholder="Search products..."
                 value={search}
                 onChange={(e) => handleSearch(e.target.value)}
-                className="w-full px-4 py-3 pl-11 text-sm sm:text-base bg-gray-50 border border-gray-200 rounded-full focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
+                className="w-full px-4 py-3 pl-11 text-sm sm:text-base bg-warm-50 border border-warm-200 rounded-full focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
               />
               <svg
-                className="absolute left-4 top-3.5 h-5 w-5 text-gray-400"
+                className="absolute left-4 top-3.5 h-5 w-5 text-warm-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -214,11 +214,11 @@ export default function ProductsPage() {
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {/* Collection Filter */}
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Collection</label>
+              <label className="block text-xs font-semibold text-warm-500 uppercase tracking-wider mb-1.5">Collection</label>
               <select
                 value={collection}
                 onChange={(e) => handleFilterChange('collection', e.target.value)}
-                className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent hover:border-gray-300 transition"
+                className="w-full px-3 py-2.5 text-sm bg-warm-50 border border-warm-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent hover:border-warm-300 transition"
               >
                 <option value="">All Collections</option>
                 {collections.map((c) => (
@@ -231,11 +231,11 @@ export default function ProductsPage() {
 
             {/* Product Type Filter */}
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Product Type</label>
+              <label className="block text-xs font-semibold text-warm-500 uppercase tracking-wider mb-1.5">Product Type</label>
               <select
                 value={productType}
                 onChange={(e) => handleFilterChange('type', e.target.value)}
-                className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent hover:border-gray-300 transition"
+                className="w-full px-3 py-2.5 text-sm bg-warm-50 border border-warm-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent hover:border-warm-300 transition"
               >
                 <option value="">All Types</option>
                 <option value="T-Shirt">T-Shirt</option>
@@ -252,11 +252,11 @@ export default function ProductsPage() {
 
             {/* Sort Options */}
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Sort By</label>
+              <label className="block text-xs font-semibold text-warm-500 uppercase tracking-wider mb-1.5">Sort By</label>
               <select
                 value={sort}
                 onChange={(e) => handleFilterChange('sort', e.target.value)}
-                className="w-full px-3 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent hover:border-gray-300 transition"
+                className="w-full px-3 py-2.5 text-sm bg-warm-50 border border-warm-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent hover:border-warm-300 transition"
               >
                 <option value="">Featured</option>
                 <option value="price_asc">Price: Low to High</option>
@@ -272,7 +272,7 @@ export default function ProductsPage() {
               <button
                 onClick={clearFilters}
                 disabled={!search && !collection && !productType && !sort}
-                className="w-full px-4 py-2.5 text-sm font-semibold text-gray-600 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                className="w-full px-4 py-2.5 text-sm font-semibold text-warm-600 bg-warm-100 border border-warm-200 rounded-lg hover:bg-warm-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -285,13 +285,13 @@ export default function ProductsPage() {
           {/* Active Filters Display */}
           {(search || collection || productType || sort) && (
             <div className="mt-4 flex flex-wrap gap-2">
-              <span className="text-sm text-gray-600 font-medium">Active filters:</span>
+              <span className="text-sm text-warm-600 font-medium">Active filters:</span>
               {search && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-900 text-white text-sm rounded-full">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-warm-900 text-white text-sm rounded-full">
                   Search: "{search}"
                   <button
                     onClick={() => handleSearch('')}
-                    className="hover:bg-gray-700 rounded-full p-0.5"
+                    className="hover:bg-warm-700 rounded-full p-0.5"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -300,11 +300,11 @@ export default function ProductsPage() {
                 </span>
               )}
               {collection && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-900 text-white text-sm rounded-full">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-warm-900 text-white text-sm rounded-full">
                   {collections.find(c => c.slug === collection)?.name}
                   <button
                     onClick={() => handleFilterChange('collection', '')}
-                    className="hover:bg-gray-700 rounded-full p-0.5"
+                    className="hover:bg-warm-700 rounded-full p-0.5"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -313,11 +313,11 @@ export default function ProductsPage() {
                 </span>
               )}
               {productType && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-900 text-white text-sm rounded-full">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-warm-900 text-white text-sm rounded-full">
                   {productType}
                   <button
                     onClick={() => handleFilterChange('type', '')}
-                    className="hover:bg-gray-700 rounded-full p-0.5"
+                    className="hover:bg-warm-700 rounded-full p-0.5"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -326,11 +326,11 @@ export default function ProductsPage() {
                 </span>
               )}
               {sort && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gray-900 text-white text-sm rounded-full">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-warm-900 text-white text-sm rounded-full">
                   Sort: {sort === 'price_asc' ? 'Price ↑' : sort === 'price_desc' ? 'Price ↓' : sort === 'newest' ? 'Newest' : sort === 'name_asc' ? 'A-Z' : 'Z-A'}
                   <button
                     onClick={() => handleFilterChange('sort', '')}
-                    className="hover:bg-gray-700 rounded-full p-0.5"
+                    className="hover:bg-warm-700 rounded-full p-0.5"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -344,16 +344,16 @@ export default function ProductsPage() {
 
         {/* Results Count */}
         <div className="flex items-center justify-between mb-6">
-          <p className="text-gray-600 text-sm sm:text-base">
-            <span className="font-semibold text-gray-900">{meta.total}</span> products
+          <p className="text-warm-600 text-sm sm:text-base">
+            <span className="font-semibold text-warm-900">{meta.total}</span> products
             {(search || collection || productType) && (
-              <span className="ml-1 text-gray-400">
+              <span className="ml-1 text-warm-400">
                 (filtered)
               </span>
             )}
           </p>
           {totalPages > 1 && (
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-warm-500">
               Page {page} of {totalPages}
             </p>
           )}
@@ -361,10 +361,10 @@ export default function ProductsPage() {
 
         {/* Products Grid */}
         {products.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-xl border border-gray-100">
-            <div className="text-5xl mb-4">🔍</div>
-            <p className="text-gray-700 text-lg font-medium mb-2">No products found</p>
-            <p className="text-gray-500 mb-6">Try adjusting your search or filters</p>
+          <div className="text-center py-16 bg-white rounded-xl border border-warm-100">
+            <div className="mb-4"><svg className="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg></div>
+            <p className="text-warm-700 text-lg font-medium mb-2">No products found</p>
+            <p className="text-warm-500 mb-6">Try adjusting your search or filters</p>
             {search && (
               <button
                 onClick={() => handleSearch('')}
@@ -390,7 +390,7 @@ export default function ProductsPage() {
                 <button
                   onClick={() => handlePageChange(page - 1)}
                   disabled={page === 1}
-                  className="flex items-center gap-1 px-4 py-2.5 text-sm font-medium bg-white border border-gray-200 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-300 transition"
+                  className="flex items-center gap-1 px-4 py-2.5 text-sm font-medium bg-white border border-warm-200 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-warm-50 hover:border-warm-300 transition"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -418,7 +418,7 @@ export default function ProductsPage() {
                         className={`min-w-[40px] px-3 py-2 text-sm font-medium rounded-lg transition ${
                           page === pageNum
                             ? 'bg-hafalohaRed text-white shadow-md'
-                            : 'bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+                            : 'bg-white border border-warm-200 hover:bg-warm-50 hover:border-warm-300'
                         }`}
                       >
                         {pageNum}
@@ -430,7 +430,7 @@ export default function ProductsPage() {
                 <button
                   onClick={() => handlePageChange(page + 1)}
                   disabled={page === totalPages}
-                  className="flex items-center gap-1 px-4 py-2.5 text-sm font-medium bg-white border border-gray-200 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 hover:border-gray-300 transition"
+                  className="flex items-center gap-1 px-4 py-2.5 text-sm font-medium bg-white border border-warm-200 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-warm-50 hover:border-warm-300 transition"
                 >
                   <span className="hidden sm:inline">Next</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

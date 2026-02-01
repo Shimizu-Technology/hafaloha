@@ -167,8 +167,8 @@ export default function AdminUsersPage() {
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
           >
             <option value="all">All Roles</option>
-            <option value="admin">👑 Admins Only</option>
-            <option value="customer">👤 Customers Only</option>
+            <option value="admin">Admins Only</option>
+            <option value="customer">Customers Only</option>
           </select>
         </div>
       </div>
@@ -180,7 +180,7 @@ export default function AdminUsersPage() {
         </div>
       ) : users.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-12 text-center">
-          <div className="text-6xl mb-4">👥</div>
+          <div className="mb-4"><svg className="w-16 h-16 mx-auto text-gray-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" /></svg></div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">No users found</h3>
           <p className="text-gray-600">
             {searchQuery || roleFilter !== 'all' 
@@ -230,11 +230,11 @@ export default function AdminUsersPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       {user.is_admin ? (
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                          👑 Admin
+                          Admin
                         </span>
                       ) : (
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                          👤 Customer
+                          Customer
                         </span>
                       )}
                     </td>
@@ -284,11 +284,11 @@ export default function AdminUsersPage() {
                   </div>
                   {user.is_admin ? (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                      👑 Admin
+                      Admin
                     </span>
                   ) : (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                      👤 Customer
+                      Customer
                     </span>
                   )}
                 </div>
@@ -322,7 +322,7 @@ export default function AdminUsersPage() {
 
       {/* Help Text */}
       <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="font-semibold text-blue-900 mb-2">💡 How User Sync Works</h4>
+        <h4 className="font-semibold text-blue-900 mb-2">How User Sync Works</h4>
         <p className="text-sm text-blue-800">
           Users are synced from Clerk when they first sign in and visit the site. 
           If someone created a Clerk account but isn't showing up here, ask them to visit the site while logged in.

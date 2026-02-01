@@ -419,7 +419,7 @@ export default function VariantManager({ productId, basePriceCents, inventoryLev
       <div className="border-2 border-gray-200 rounded-lg p-6 bg-gray-50">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">
-          🎨 Variant Options
+          Variant Options
         </h3>
           {!presetsLoading && presets.length > 0 && (
             <span className="text-sm text-gray-500">
@@ -567,7 +567,7 @@ export default function VariantManager({ productId, basePriceCents, inventoryLev
                 )}
               </span>
               {totalVariants > 50 && (
-                <span className="text-amber-600 text-sm">⚠️ Large number of variants</span>
+                <span className="text-amber-600 text-sm">Large number of variants</span>
               )}
             </div>
           </div>
@@ -601,7 +601,7 @@ export default function VariantManager({ productId, basePriceCents, inventoryLev
 
         {variants.length > 0 && (
           <p className="text-xs text-gray-600 mt-2 text-center">
-            💡 Existing combinations will be skipped. Only new variants will be created.
+            Existing combinations will be skipped. Only new variants will be created.
           </p>
         )}
       </div>
@@ -611,7 +611,7 @@ export default function VariantManager({ productId, basePriceCents, inventoryLev
         <div className="border-2 border-gray-200 rounded-lg overflow-hidden">
           <div className="bg-gray-100 px-6 py-4 border-b border-gray-200">
             <h3 className="text-lg font-semibold text-gray-900">
-              📦 Variants ({variants.length})
+              Variants ({variants.length})
             </h3>
           </div>
           
@@ -656,7 +656,7 @@ export default function VariantManager({ productId, basePriceCents, inventoryLev
                           </span>
                           {variant.stock_status === 'low_stock' && (
                             <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-100 text-amber-800">
-                              ⚠️ Low
+                              Low
                             </span>
                           )}
                           {variant.stock_status === 'out_of_stock' && (
@@ -678,7 +678,7 @@ export default function VariantManager({ productId, basePriceCents, inventoryLev
                       >
                         {(variant.actually_available ?? variant.available ?? true) ? '✓ Available' : (
                           inventoryLevel === 'variant' && variant.stock_quantity === 0 
-                            ? '⚠️ Out of Stock' 
+                            ? 'Out of Stock' 
                             : '✗ Disabled'
                         )}
                       </button>

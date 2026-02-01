@@ -91,19 +91,19 @@ export default function CartDrawer() {
         </div>
 
         {/* Cart Items */}
-        <div className="flex-1 overflow-y-auto p-5 bg-gray-50">
+        <div className="flex-1 overflow-y-auto p-5 bg-warm-50">
           {isLoading ? (
             <div className="flex items-center justify-center h-32">
               <div className="text-center">
                 <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-hafalohaRed mx-auto mb-3"></div>
-                <p className="text-sm text-gray-500">Loading cart...</p>
+                <p className="text-sm text-warm-500">Loading cart...</p>
               </div>
             </div>
           ) : !cart || cart.items.length === 0 ? (
             <div className="text-center py-16">
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-20 h-20 bg-warm-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg
-                  className="w-10 h-10 text-gray-400"
+                  className="w-10 h-10 text-warm-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -116,8 +116,8 @@ export default function CartDrawer() {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-bold text-gray-900">Your cart is empty</h3>
-              <p className="mt-2 text-gray-500 max-w-xs mx-auto">
+              <h3 className="text-lg font-bold text-warm-900">Your cart is empty</h3>
+              <p className="mt-2 text-warm-500 max-w-xs mx-auto">
                 Discover our collection of authentic Chamorro pride merchandise!
               </p>
               <button
@@ -132,7 +132,7 @@ export default function CartDrawer() {
               {cart.items.map((item: CartItem) => (
                 <div
                   key={item.id}
-                  className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition"
+                  className="bg-white rounded-xl shadow-sm border border-warm-100 p-4 hover:shadow-md transition"
                 >
                   <div className="flex gap-4">
                     {/* Product Image */}
@@ -152,10 +152,10 @@ export default function CartDrawer() {
 
                     {/* Product Info */}
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-semibold text-gray-900 line-clamp-2">
+                      <h3 className="text-sm font-semibold text-warm-900 line-clamp-2">
                         {item.product.name}
                       </h3>
-                      <p className="text-xs text-gray-500 mt-0.5">
+                      <p className="text-xs text-warm-500 mt-0.5">
                         {item.product_variant.display_name}
                       </p>
                       
@@ -172,11 +172,11 @@ export default function CartDrawer() {
 
                     {/* Price */}
                     <div className="text-right">
-                      <p className="text-base font-bold text-gray-900">
+                      <p className="text-base font-bold text-warm-900">
                         ${((item.product_variant.price_cents * item.quantity) / 100).toFixed(2)}
                       </p>
                       {item.quantity > 1 && (
-                        <p className="text-xs text-gray-400">
+                        <p className="text-xs text-warm-400">
                           ${(item.product_variant.price_cents / 100).toFixed(2)} each
                         </p>
                       )}
@@ -184,24 +184,24 @@ export default function CartDrawer() {
                   </div>
 
                   {/* Bottom Row: Quantity Controls + Remove */}
-                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-warm-100">
                     {/* Quantity Controls */}
-                    <div className="flex items-center bg-gray-100 rounded-full">
+                    <div className="flex items-center bg-warm-100 rounded-full">
                       <button
                         onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                        className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-hafalohaRed hover:bg-gray-200 rounded-full transition disabled:opacity-50"
+                        className="w-8 h-8 flex items-center justify-center text-warm-600 hover:text-hafalohaRed hover:bg-warm-200 rounded-full transition disabled:opacity-50"
                         disabled={item.quantity <= 1 || isLoading}
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                         </svg>
                       </button>
-                      <span className="w-10 text-center text-sm font-semibold text-gray-900">
+                      <span className="w-10 text-center text-sm font-semibold text-warm-900">
                         {item.quantity}
                       </span>
                       <button
                         onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                        className="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-hafalohaRed hover:bg-gray-200 rounded-full transition disabled:opacity-50"
+                        className="w-8 h-8 flex items-center justify-center text-warm-600 hover:text-hafalohaRed hover:bg-warm-200 rounded-full transition disabled:opacity-50"
                         disabled={
                           isLoading ||
                           (item.product.inventory_level !== 'none' && 
@@ -217,7 +217,7 @@ export default function CartDrawer() {
                     {/* Remove Button */}
                     <button
                       onClick={() => handleRemoveItem(item.id)}
-                      className="text-xs font-medium text-gray-400 hover:text-red-600 transition flex items-center gap-1"
+                      className="text-xs font-medium text-warm-400 hover:text-red-600 transition flex items-center gap-1"
                       disabled={isLoading}
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -233,7 +233,7 @@ export default function CartDrawer() {
               {cart.items.length > 1 && (
                 <button
                   onClick={handleClearCart}
-                  className="w-full text-sm text-gray-500 hover:text-red-600 transition py-3 flex items-center justify-center gap-2"
+                  className="w-full text-sm text-warm-500 hover:text-red-600 transition py-3 flex items-center justify-center gap-2"
                   disabled={isLoading}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -248,18 +248,18 @@ export default function CartDrawer() {
 
         {/* Footer */}
         {cart && cart.items.length > 0 && (
-          <div className="border-t border-gray-200 bg-white p-5 space-y-4">
+          <div className="border-t border-warm-200 bg-white p-5 space-y-4">
             {/* Subtotal */}
             <div className="flex justify-between items-center">
-              <span className="text-gray-600">Subtotal</span>
-              <span className="text-2xl font-bold text-gray-900">
+              <span className="text-warm-600">Subtotal</span>
+              <span className="text-2xl font-bold text-warm-900">
                 ${subtotal().toFixed(2)}
               </span>
             </div>
 
             {/* Shipping note */}
-            <p className="text-xs text-gray-500 text-center bg-gray-50 py-2 px-3 rounded-lg">
-              🚚 Shipping calculated at checkout
+            <p className="text-xs text-warm-500 text-center bg-warm-50 py-2 px-3 rounded-lg">
+              Shipping calculated at checkout
             </p>
 
             {/* Checkout Button */}
@@ -280,20 +280,20 @@ export default function CartDrawer() {
             {/* Continue Shopping */}
             <button
               onClick={closeCart}
-              className="w-full text-sm font-medium text-gray-500 hover:text-hafalohaRed transition py-2"
+              className="w-full text-sm font-medium text-warm-500 hover:text-hafalohaRed transition py-2"
             >
               ← Continue Shopping
             </button>
 
             {/* Trust badges */}
-            <div className="flex items-center justify-center gap-4 pt-2 border-t border-gray-100">
-              <div className="flex items-center gap-1 text-xs text-gray-400">
+            <div className="flex items-center justify-center gap-4 pt-2 border-t border-warm-100">
+              <div className="flex items-center gap-1 text-xs text-warm-400">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                 </svg>
                 Secure
               </div>
-              <div className="flex items-center gap-1 text-xs text-gray-400">
+              <div className="flex items-center gap-1 text-xs text-warm-400">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                 </svg>

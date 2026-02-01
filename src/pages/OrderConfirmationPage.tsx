@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import api from '../services/api';
 
 interface OrderItem {
@@ -163,7 +164,7 @@ export default function OrderConfirmationPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-          <div className="text-6xl mb-4">😔</div>
+          <div className="mb-4"><svg className="w-16 h-16 mx-auto text-warm-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.182 16.318A4.486 4.486 0 0012.016 15a4.486 4.486 0 00-3.198 1.318M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z" /></svg></div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Order Not Found</h1>
           <p className="text-gray-600 mb-6">{error || 'Unable to load order details'}</p>
           <button
@@ -220,20 +221,30 @@ export default function OrderConfirmationPage() {
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 print:bg-white print:py-0">
         <div className="max-w-3xl mx-auto">
           {/* Success Header */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 sm:p-10 mb-6 text-center print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid relative overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 sm:p-10 mb-6 text-center print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid relative overflow-hidden">
           {/* Decorative background */}
           <div className="absolute inset-0 bg-linear-to-br from-green-50 via-white to-green-50 opacity-50"></div>
           
           <div className="relative">
-            {/* Success icon */}
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Animated Success icon */}
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
+              className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
+            >
+              <motion.svg
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.4, delay: 0.5, ease: "easeOut" }}
+                className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
+              </motion.svg>
+            </motion.div>
             
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-              {isAcaiOrder ? '🍰 Açaí Cake Order Confirmed!' : 'Order Confirmed!'}
+              {isAcaiOrder ? 'Açaí Cake Order Confirmed!' : 'Order Confirmed!'}
             </h1>
             <p className="text-gray-600 mb-6">
               Thank you for your order, <span className="font-semibold">{order.customer_name}</span>!
@@ -255,9 +266,9 @@ export default function OrderConfirmationPage() {
 
         {/* Acai Pickup Details */}
         {isAcaiOrder && order.acai_pickup_date && (
-          <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 border-b pb-2 flex items-center">
-              <span className="text-2xl mr-2">📍</span> Pickup Details
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 pb-4 border-b border-gray-100 flex items-center">
+              <svg className="w-6 h-6 inline mr-2 text-gray-500" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" /></svg> Pickup Details
             </h2>
             
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
@@ -265,13 +276,13 @@ export default function OrderConfirmationPage() {
                 <div>
                   <p className="text-sm text-blue-600 font-medium mb-1">Pickup Date</p>
                   <p className="text-lg font-bold text-gray-900">
-                    📅 {formatPickupDate(order.acai_pickup_date)}
+                    {formatPickupDate(order.acai_pickup_date)}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-blue-600 font-medium mb-1">Pickup Time</p>
                   <p className="text-lg font-bold text-gray-900">
-                    🕐 {order.acai_pickup_time && formatPickupTime(order.acai_pickup_time)}
+                    {order.acai_pickup_time && formatPickupTime(order.acai_pickup_time)}
                   </p>
                 </div>
               </div>
@@ -342,7 +353,7 @@ export default function OrderConfirmationPage() {
                 {isPickupOrder ? 'Fulfillment' : 'Shipping Method'}
               </p>
               <p className="font-semibold">
-                {isPickupOrder ? '📍 Pickup' : order.shipping_method}
+                {isPickupOrder ? 'Pickup' : order.shipping_method}
               </p>
             </div>
           </div>
@@ -437,13 +448,15 @@ export default function OrderConfirmationPage() {
                   );
                 })}
               </div>
-              {/* Progress bar */}
-              <div className="h-1 bg-gray-200 rounded-full mt-2">
-                <div 
-                  className="h-1 bg-green-500 rounded-full transition-all duration-500"
-                  style={{ 
+              {/* Animated Progress bar */}
+              <div className="h-1.5 bg-gray-200 rounded-full mt-2 overflow-hidden">
+                <motion.div
+                  className="h-1.5 bg-green-500 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ 
                     width: `${((['pending', 'processing', 'shipped', 'delivered'].indexOf(order.status) + 1) / 4) * 100}%` 
                   }}
+                  transition={{ duration: 1, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
                 />
               </div>
             </div>
@@ -489,8 +502,8 @@ export default function OrderConfirmationPage() {
 
         {/* Shipping Address - Only for non-pickup orders */}
         {!isPickupOrder && order.shipping_address_line1 && (
-          <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 border-b pb-2">Shipping Address</h2>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 pb-4 border-b border-gray-100">Shipping Address</h2>
             <div className="text-gray-700">
               <p className="font-semibold">{order.customer_name}</p>
               <p>{order.shipping_address_line1}</p>

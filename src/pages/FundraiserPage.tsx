@@ -165,8 +165,8 @@ export default function FundraiserPage() {
   if (error || !fundraiser) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">Fundraiser Not Found</h1>
-        <p className="text-gray-600 mb-4">{error}</p>
+        <h1 className="text-2xl font-bold text-warm-900 mb-2">Fundraiser Not Found</h1>
+        <p className="text-warm-600 mb-4">{error}</p>
         <Link to="/" className="text-hafalohaRed hover:underline">
           Return to Home
         </Link>
@@ -175,7 +175,7 @@ export default function FundraiserPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-warm-50">
       {/* Hero */}
       <div 
         className="relative bg-cover bg-center h-64 md:h-80"
@@ -189,7 +189,7 @@ export default function FundraiserPage() {
           <div className="text-center text-white px-4">
             <h1 className="text-3xl md:text-5xl font-bold mb-2">{fundraiser.name}</h1>
             {!fundraiser.can_order && (
-              <span className="inline-block px-4 py-2 bg-gray-800/80 rounded-full text-sm">
+              <span className="inline-block px-4 py-2 bg-warm-800/80 rounded-full text-sm">
                 This fundraiser has ended
               </span>
             )}
@@ -205,14 +205,14 @@ export default function FundraiserPage() {
             {fundraiser.description && (
               <div className="bg-white rounded-lg shadow p-6">
                 <h2 className="text-xl font-semibold mb-4">About This Fundraiser</h2>
-                <p className="text-gray-700 whitespace-pre-wrap">{fundraiser.description}</p>
+                <p className="text-warm-700 whitespace-pre-wrap">{fundraiser.description}</p>
               </div>
             )}
 
             {/* Public Message */}
             {fundraiser.public_message && (
               <div className="bg-hafalohaGold/10 border border-hafalohaGold rounded-lg p-6">
-                <p className="text-gray-800">{fundraiser.public_message}</p>
+                <p className="text-warm-800">{fundraiser.public_message}</p>
               </div>
             )}
 
@@ -220,7 +220,7 @@ export default function FundraiserPage() {
             <div>
               <h2 className="text-2xl font-bold mb-4">Products</h2>
               {products.length === 0 ? (
-                <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
+                <div className="bg-white rounded-lg shadow p-8 text-center text-warm-500">
                   <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />
                   <p>No products available</p>
                 </div>
@@ -248,23 +248,23 @@ export default function FundraiserPage() {
                 <div className="text-3xl font-bold text-hafalohaRed mb-1">
                   {formatPrice(fundraiser.raised_amount_cents || 0)}
                 </div>
-                <p className="text-sm text-gray-600 mb-3">
+                <p className="text-sm text-warm-600 mb-3">
                   raised of {formatPrice(fundraiser.goal_amount_cents)} goal
                 </p>
-                <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-3 bg-warm-200 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-hafalohaGold rounded-full transition-all"
                     style={{ width: `${Math.min(fundraiser.progress_percentage, 100)}%` }}
                   />
                 </div>
-                <p className="text-sm text-gray-600 mt-2">{fundraiser.progress_percentage.toFixed(0)}%</p>
+                <p className="text-sm text-warm-600 mt-2">{fundraiser.progress_percentage.toFixed(0)}%</p>
               </div>
             )}
 
             {/* Dates */}
             {(fundraiser.start_date || fundraiser.end_date) && (
               <div className="bg-white rounded-lg shadow p-6">
-                <div className="flex items-center gap-2 text-gray-700">
+                <div className="flex items-center gap-2 text-warm-700">
                   <Calendar className="w-5 h-5" />
                   <span>
                     {fundraiser.start_date} {fundraiser.end_date && `- ${fundraiser.end_date}`}
@@ -277,12 +277,12 @@ export default function FundraiserPage() {
             {fundraiser.pickup_location && (
               <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="font-semibold mb-3">Pickup Information</h3>
-                <div className="flex items-start gap-2 text-gray-700 mb-2">
+                <div className="flex items-start gap-2 text-warm-700 mb-2">
                   <MapPin className="w-5 h-5 mt-0.5 flex-shrink-0" />
                   <span>{fundraiser.pickup_location}</span>
                 </div>
                 {fundraiser.pickup_instructions && (
-                  <p className="text-sm text-gray-600 pl-7">{fundraiser.pickup_instructions}</p>
+                  <p className="text-sm text-warm-600 pl-7">{fundraiser.pickup_instructions}</p>
                 )}
               </div>
             )}
@@ -292,7 +292,7 @@ export default function FundraiserPage() {
               <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="font-semibold mb-3">Contact</h3>
                 {fundraiser.contact_name && (
-                  <p className="text-gray-700 mb-2">{fundraiser.contact_name}</p>
+                  <p className="text-warm-700 mb-2">{fundraiser.contact_name}</p>
                 )}
                 {fundraiser.contact_email && (
                   <a href={`mailto:${fundraiser.contact_email}`} className="flex items-center gap-2 text-hafalohaRed hover:underline mb-2">
@@ -384,7 +384,7 @@ function ProductCard({
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <div className="flex flex-col sm:flex-row">
         {/* Image */}
-        <div className="w-full sm:w-40 h-40 bg-gray-100 flex-shrink-0">
+        <div className="w-full sm:w-40 h-40 bg-warm-100 flex-shrink-0">
           {product.image_url ? (
             <img
               src={product.image_url}
@@ -393,7 +393,7 @@ function ProductCard({
               loading="lazy"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center text-gray-400">
+            <div className="w-full h-full flex items-center justify-center text-warm-400">
               <Package className="w-12 h-12" />
             </div>
           )}
@@ -411,7 +411,7 @@ function ProductCard({
           </div>
 
           {product.description && (
-            <p className="text-gray-600 text-sm mt-2 line-clamp-2">{product.description}</p>
+            <p className="text-warm-600 text-sm mt-2 line-clamp-2">{product.description}</p>
           )}
 
           {/* Variant Selection */}
@@ -437,7 +437,7 @@ function ProductCard({
             <button
               onClick={() => selectedVariant && onAddToCart(product, selectedVariant)}
               disabled={!selectedVariant || !product.in_stock}
-              className="mt-3 w-full sm:w-auto px-6 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+              className="mt-3 w-full sm:w-auto px-6 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 disabled:bg-warm-300 disabled:cursor-not-allowed transition"
             >
               {!product.in_stock ? 'Out of Stock' : 'Add to Cart'}
             </button>
@@ -477,13 +477,13 @@ function CartModal({
       <div className="bg-white w-full sm:max-w-lg sm:rounded-lg max-h-[80vh] flex flex-col">
         <div className="p-4 border-b flex justify-between items-center">
           <h2 className="text-xl font-bold">Your Order</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">✕</button>
+          <button onClick={onClose} className="p-2 hover:bg-warm-100 rounded-lg">✕</button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {participant && (
             <div className="bg-hafalohaGold/10 border border-hafalohaGold rounded-lg p-3">
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-warm-700">
                 Supporting: <span className="font-semibold">{participant.display_name}</span>
               </p>
             </div>
@@ -493,27 +493,27 @@ function CartModal({
             <div key={`${item.fundraiser_product_id}-${item.variant_id}`} className="flex items-center gap-4 border-b pb-4">
               <div className="flex-1 min-w-0">
                 <h4 className="font-medium truncate">{item.name}</h4>
-                <p className="text-sm text-gray-600">{item.variant_name}</p>
+                <p className="text-sm text-warm-600">{item.variant_name}</p>
                 <p className="font-semibold text-hafalohaRed">{formatPrice(item.price_cents)}</p>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => onUpdateQuantity(item.fundraiser_product_id, item.variant_id, -1)}
-                  className="p-1 border rounded hover:bg-gray-100"
+                  className="p-1 border rounded hover:bg-warm-100"
                 >
                   <Minus className="w-4 h-4" />
                 </button>
                 <span className="w-8 text-center font-medium">{item.quantity}</span>
                 <button
                   onClick={() => onUpdateQuantity(item.fundraiser_product_id, item.variant_id, 1)}
-                  className="p-1 border rounded hover:bg-gray-100"
+                  className="p-1 border rounded hover:bg-warm-100"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
               <button
                 onClick={() => onRemove(item.fundraiser_product_id, item.variant_id)}
-                className="p-2 text-gray-400 hover:text-red-600"
+                className="p-2 text-warm-400 hover:text-red-600"
               >
                 <Trash2 className="w-5 h-5" />
               </button>

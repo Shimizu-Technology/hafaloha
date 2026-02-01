@@ -65,16 +65,10 @@ export const useCartStore = create<CartStore>()(
       
       // Add item to cart
       addItem: async (variantId: number, quantity: number = 1) => {
-        console.log('🟢 cartStore.addItem called');
-        console.log('  - variantId:', variantId);
-        console.log('  - quantity:', quantity);
-        console.log('  - sessionId:', get().sessionId);
-        
         set({ isLoading: true });
         try {
           const sessionId = get().sessionId;
-          console.log('📤 Making API call to /cart/items');
-          const response = await api.post(
+          await api.post(
             '/cart/items',
             { product_variant_id: variantId, quantity },
             {
@@ -83,15 +77,9 @@ export const useCartStore = create<CartStore>()(
               },
             }
           );
-          console.log('📥 API response:', response.data);
           
           // Refresh cart after adding
-          console.log('🔄 Fetching updated cart...');
           await get().fetchCart();
-          console.log('✅ Cart refreshed');
-          
-          // Show success message (you can add toast notification here)
-          console.log('Item added to cart:', response.data.message);
           
           set({ isLoading: false, isOpen: true }); // Open cart drawer
         } catch (error: any) {
