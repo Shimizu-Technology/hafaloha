@@ -77,7 +77,7 @@ export default function AdminDashboardPage() {
       {/* Welcome Header */}
       <div className="rounded-2xl p-6 sm:p-8 shadow-lg bg-hafalohaRed">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-white">Welcome back!</h1>
-        <p className="text-white/85">Here's what's happening with your store today.</p>
+        <p className="text-white">Here's what's happening with your store today.</p>
       </div>
       
       {/* Stats Grid */}
