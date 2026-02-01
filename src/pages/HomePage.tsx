@@ -72,8 +72,6 @@ export default function HomePage() {
   // Use dynamic or fallback content
   const heroContent = hero || defaultHero;
   const cardsContent = categoryCards.length > 0 ? categoryCards : defaultCategoryCards;
-  const hasHeroImage = !!heroContent.background_image_url;
-
   // Animation helper — skip motion when user prefers reduced motion
   const heroMotion = (delay: number) =>
     prefersReducedMotion
@@ -98,13 +96,7 @@ export default function HomePage() {
           <div className="absolute -bottom-1/4 left-1/3 w-80 h-80 bg-red-400/10 rounded-full blur-3xl" />
         </div>
 
-        {/* Optional background image overlay (if API provides one) */}
-        {hasHeroImage && (
-          <div
-            className="absolute inset-0 bg-cover bg-center opacity-20"
-            style={{ backgroundImage: `url('${heroContent.background_image_url}')` }}
-          />
-        )}
+        {/* Clean gradient background — no competing imagery */}
 
         {/* Content — always text-on-dark, no white card */}
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 w-full text-center">
@@ -154,47 +146,6 @@ export default function HomePage() {
               Browse Collections
             </Link>
           </motion.div>
-        </div>
-      </section>
-
-      {/* ============================================================ */}
-      {/* FEATURED PRODUCTS                                            */}
-      {/* ============================================================ */}
-      <section className="bg-white">
-        <FeaturedProducts />
-      </section>
-
-      {/* ============================================================ */}
-      {/* WHY HAFALOHA — brand values strip                            */}
-      {/* ============================================================ */}
-      <section className="border-y border-warm-100 py-14 sm:py-16 relative">
-        {/* Gold accent line at top */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-hafalohaGold rounded-full -translate-y-1/2" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <FadeIn>
-            <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-              <StaggerItem>
-                <div className="text-2xl mb-2">🌺</div>
-                <h3 className="font-semibold text-warm-900 mb-1">Island Pride</h3>
-                <p className="text-sm text-warm-500">Chamorro &amp; Hawaiian heritage</p>
-              </StaggerItem>
-              <StaggerItem>
-                <div className="text-2xl mb-2">✨</div>
-                <h3 className="font-semibold text-warm-900 mb-1">Premium Quality</h3>
-                <p className="text-sm text-warm-500">Built to last</p>
-              </StaggerItem>
-              <StaggerItem>
-                <div className="text-2xl mb-2">🤙</div>
-                <h3 className="font-semibold text-warm-900 mb-1">Community First</h3>
-                <p className="text-sm text-warm-500">Supporting our island family</p>
-              </StaggerItem>
-              <StaggerItem>
-                <div className="text-2xl mb-2">📦</div>
-                <h3 className="font-semibold text-warm-900 mb-1">Ships Worldwide</h3>
-                <p className="text-sm text-warm-500">From Guam to your door</p>
-              </StaggerItem>
-            </StaggerContainer>
-          </FadeIn>
         </div>
       </section>
 
@@ -254,6 +205,13 @@ export default function HomePage() {
       )}
 
       {/* ============================================================ */}
+      {/* FEATURED PRODUCTS                                            */}
+      {/* ============================================================ */}
+      <section className="bg-white">
+        <FeaturedProducts />
+      </section>
+
+      {/* ============================================================ */}
       {/* FOUNDER / STORY SECTION — asymmetric editorial split         */}
       {/* ============================================================ */}
       <section className="bg-white py-20 sm:py-28">
@@ -306,76 +264,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ============================================================ */}
-      {/* NEWSLETTER CTA — gradient bg, email signup + social          */}
-      {/* ============================================================ */}
-      <FadeIn>
-        <section className="relative py-20 sm:py-28 overflow-hidden">
-          {/* Gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-warm-900 via-warm-800 to-warm-900" />
-          {/* Subtle orbs */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute top-1/2 -left-1/4 w-80 h-80 bg-red-500/10 rounded-full blur-3xl" />
-            <div className="absolute -top-1/4 right-1/4 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl" />
-          </div>
-
-          <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 text-white tracking-tight">
-              Join the Hafaloha Family
-            </h2>
-            <p className="text-warm-300 mb-8 max-w-xl mx-auto leading-relaxed">
-              Be first to know about new drops, island events, and exclusive deals.
-              Join 2,000+ island lovers. 🌴
-            </p>
-
-            {/* Newsletter form */}
-            <form
-              onSubmit={(e) => e.preventDefault()}
-              className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto mb-10"
-            >
-              <input
-                type="email"
-                placeholder="Enter your email"
-                className="flex-1 px-5 py-3.5 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-warm-400 focus:outline-none focus:ring-2 focus:ring-hafalohaGold/50 focus:border-white/40 transition-all"
-                aria-label="Email address"
-              />
-              <button
-                type="submit"
-                className="px-6 py-3.5 bg-hafalohaGold text-warm-900 font-semibold rounded-xl hover:bg-amber-400 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-amber-500/25 shrink-0"
-              >
-                Subscribe
-              </button>
-            </form>
-
-            {/* Social links */}
-            <div className="flex items-center justify-center gap-6">
-              <span className="text-sm text-warm-400">Follow us</span>
-              <a
-                href="https://www.facebook.com/hafaloha"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-11 h-11 bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 hover:scale-110 rounded-full flex items-center justify-center text-white transition-all duration-300"
-                aria-label="Facebook"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
-                </svg>
-              </a>
-              <a
-                href="https://www.instagram.com/hafaloha"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-11 h-11 bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 hover:scale-110 rounded-full flex items-center justify-center text-white transition-all duration-300"
-                aria-label="Instagram"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                </svg>
-              </a>
-            </div>
-          </div>
-        </section>
-      </FadeIn>
     </div>
   );
 }
