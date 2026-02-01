@@ -38,6 +38,8 @@ import { Toaster } from 'react-hot-toast';
 import CartIcon from './components/CartIcon'; // Import CartIcon
 import CartDrawer from './components/CartDrawer'; // Import CartDrawer
 import ScrollToTop from './components/ScrollToTop'; // Import ScrollToTop
+import SmoothScroll from './components/SmoothScroll'; // Import SmoothScroll
+import { AnimatePresence, motion } from 'framer-motion'; // Page transitions
 import NavDropdown from './components/NavDropdown'; // Import NavDropdown
 import MobileNavDropdown from './components/MobileNavDropdown'; // Import MobileNavDropdown
 import { useCartStore } from './store/cartStore'; // Import cart store
@@ -150,6 +152,7 @@ function AppContent() {
 
   return (
     <>
+      <SmoothScroll>
       <ScrollToTop />
       <Toaster 
         position="top-right"
@@ -397,8 +400,9 @@ function AppContent() {
         </nav>
         )}
 
-        {/* Routes */}
-        <Routes>
+        {/* Routes with page transitions */}
+        <AnimatePresence mode="wait">
+        <Routes key={location.pathname}>
           <Route path="/" element={<HomePage />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/products/:slug" element={<ProductDetailPage />} />
@@ -438,6 +442,7 @@ function AppContent() {
           
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        </AnimatePresence>
 
         {/* Footer - Hidden when printing and on admin pages */}
         {!isAdminPage && (
@@ -567,6 +572,7 @@ function AppContent() {
         </footer>
         )}
       </div>
+      </SmoothScroll>
     </>
   );
 }
