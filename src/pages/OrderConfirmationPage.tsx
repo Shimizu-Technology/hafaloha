@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import api from '../services/api';
 
 interface OrderItem {
@@ -220,17 +221,27 @@ export default function OrderConfirmationPage() {
       <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 print:bg-white print:py-0">
         <div className="max-w-3xl mx-auto">
           {/* Success Header */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 sm:p-10 mb-6 text-center print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid relative overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 sm:p-10 mb-6 text-center print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid relative overflow-hidden">
           {/* Decorative background */}
           <div className="absolute inset-0 bg-linear-to-br from-green-50 via-white to-green-50 opacity-50"></div>
           
           <div className="relative">
-            {/* Success icon */}
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Animated Success icon */}
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20, delay: 0.2 }}
+              className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6"
+            >
+              <motion.svg
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.4, delay: 0.5, ease: "easeOut" }}
+                className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+              >
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
+              </motion.svg>
+            </motion.div>
             
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
               {isAcaiOrder ? '🍰 Açaí Cake Order Confirmed!' : 'Order Confirmed!'}
@@ -255,8 +266,8 @@ export default function OrderConfirmationPage() {
 
         {/* Acai Pickup Details */}
         {isAcaiOrder && order.acai_pickup_date && (
-          <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 border-b pb-2 flex items-center">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 pb-4 border-b border-gray-100 flex items-center">
               <span className="text-2xl mr-2">📍</span> Pickup Details
             </h2>
             
@@ -437,13 +448,15 @@ export default function OrderConfirmationPage() {
                   );
                 })}
               </div>
-              {/* Progress bar */}
-              <div className="h-1 bg-gray-200 rounded-full mt-2">
-                <div 
-                  className="h-1 bg-green-500 rounded-full transition-all duration-500"
-                  style={{ 
+              {/* Animated Progress bar */}
+              <div className="h-1.5 bg-gray-200 rounded-full mt-2 overflow-hidden">
+                <motion.div
+                  className="h-1.5 bg-green-500 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ 
                     width: `${((['pending', 'processing', 'shipped', 'delivered'].indexOf(order.status) + 1) / 4) * 100}%` 
                   }}
+                  transition={{ duration: 1, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
                 />
               </div>
             </div>
@@ -489,8 +502,8 @@ export default function OrderConfirmationPage() {
 
         {/* Shipping Address - Only for non-pickup orders */}
         {!isPickupOrder && order.shipping_address_line1 && (
-          <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 border-b pb-2">Shipping Address</h2>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
+            <h2 className="text-xl font-bold text-gray-900 mb-4 pb-4 border-b border-gray-100">Shipping Address</h2>
             <div className="text-gray-700">
               <p className="font-semibold">{order.customer_name}</p>
               <p>{order.shipping_address_line1}</p>

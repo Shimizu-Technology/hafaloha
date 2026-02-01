@@ -4,6 +4,7 @@ import { useAuth } from '@clerk/clerk-react';
 import { useCartStore } from '../store/cartStore';
 import { configApi, ordersApi, shippingApi, paymentIntentsApi, formatPrice } from '../services/api';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
+import { motion, AnimatePresence } from 'framer-motion';
 import StripeProvider from '../components/payment/StripeProvider';
 import PaymentForm from '../components/payment/PaymentForm';
 import type { ShippingAddress, ShippingMethod, AppConfig } from '../types/order';
@@ -410,45 +411,70 @@ function CheckoutForm() {
                       setDeliveryMethod('pickup');
                       setShippingMethod(null);
                     }}
-                    className={`p-4 border-2 rounded-lg transition ${
+                    className={`p-5 border-2 rounded-xl transition-all ${
                       deliveryMethod === 'pickup'
-                        ? 'border-hafalohaRed bg-red-50'
-                        : 'border-gray-300 hover:border-gray-400'
+                        ? 'border-hafalohaRed bg-red-50 ring-4 ring-hafalohaRed/10'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="text-left">
-                        <p className="font-semibold text-gray-900">Pickup</p>
-                        <p className="text-sm text-gray-600 mt-1">Free - Pickup at office</p>
+                        <p className="font-bold text-gray-900">Pickup</p>
+                        <p className="text-sm text-gray-500 mt-1">Free — Pickup at store</p>
                       </div>
-                      {deliveryMethod === 'pickup' && (
-                        <svg className="w-6 h-6 text-hafalohaRed" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
-                      )}
+                      <svg className={`w-6 h-6 ${deliveryMethod === 'pickup' ? 'text-hafalohaRed' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
                     </div>
                   </button>
                 </div>
                 
-                {deliveryMethod === 'pickup' && (
-                  <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-800">
-                      <strong>Pickup Location:</strong><br />
-                      121 E. Marine Corps Dr, Suite 1-103 & Suite 1-104<br />
-                      Hagåtña, Guam 96910<br />
-                      +1 (671) 472-7733
-                    </p>
-                    <p className="text-sm text-blue-700 mt-2">
-                      You'll receive an email when your order is ready for pickup.
-                    </p>
-                  </div>
-                )}
+                <AnimatePresence mode="wait">
+                  {deliveryMethod === 'pickup' && (
+                    <motion.div
+                      key="pickup-info"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.25, ease: 'easeInOut' }}
+                      className="overflow-hidden"
+                    >
+                      <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-sm text-blue-800">
+                          <strong>Pickup Location:</strong><br />
+                          121 E. Marine Corps Dr, Suite 1-103 & Suite 1-104<br />
+                          Hagåtña, Guam 96910<br />
+                          +1 (671) 472-7733
+                        </p>
+                        <p className="text-sm text-blue-700 mt-2">
+                          You'll receive an email when your order is ready for pickup.
+                        </p>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
               
               {/* Shipping Address - Only show if shipping selected */}
+              <AnimatePresence mode="wait">
               {deliveryMethod === 'shipping' && (
-                <div className="bg-white rounded-lg shadow p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Shipping Address</h2>
+                <motion.div
+                  key="shipping-form"
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.25, ease: 'easeInOut' }}
+                >
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 bg-hafalohaCream rounded-full flex items-center justify-center">
+                      <svg className="w-5 h-5 text-hafalohaRed" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                    <h2 className="text-xl font-bold text-gray-900">Shipping Address</h2>
+                  </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
                     <label htmlFor="street1" className="block text-sm font-medium text-gray-700 mb-1">
@@ -562,10 +588,10 @@ function CheckoutForm() {
                           key={index}
                           type="button"
                           onClick={() => setShippingMethod(rate)}
-                          className={`w-full p-4 border-2 rounded-lg text-left transition ${
+                          className={`w-full p-4 border-2 rounded-xl text-left transition-all ${
                             shippingMethod?.carrier === rate.carrier && shippingMethod?.service === rate.service
-                              ? 'border-hafalohaRed bg-red-50'
-                              : 'border-gray-300 hover:border-gray-400'
+                              ? 'border-hafalohaRed bg-red-50 ring-4 ring-hafalohaRed/10'
+                              : 'border-gray-200 hover:border-gray-300'
                           }`}
                         >
                           <div className="flex justify-between items-center">
@@ -585,7 +611,9 @@ function CheckoutForm() {
                   </div>
                 )}
               </div>
+              </motion.div>
               )}
+              </AnimatePresence>
               
               {/* Payment Section */}
               <PaymentForm
@@ -628,8 +656,8 @@ function CheckoutForm() {
           
           {/* Right Column - Order Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow p-6 sticky top-4">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">Order Summary</h2>
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 sticky top-24">
+              <h2 className="text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
               
               {/* Items */}
               <div className="space-y-4 mb-4 max-h-64 overflow-y-auto">

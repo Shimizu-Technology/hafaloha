@@ -205,21 +205,6 @@ export default function ProductDetailPage() {
     try {
       setLoading(true);
       const data = await productsApi.getProduct(productSlug);
-      console.log('🔍 Product Data:', {
-        name: data.name,
-        inventory_level: data.inventory_level,
-        product_stock_quantity: data.product_stock_quantity,
-        in_stock: data.in_stock,
-        actually_available: data.actually_available,
-        published: data.published,
-        variants: data.variants?.map(v => ({
-          id: v.id,
-          display_name: v.display_name,
-          in_stock: v.in_stock,
-          actually_available: v.actually_available,
-          stock_quantity: v.stock_quantity
-        }))
-      });
       setProduct(data);
       
       // For products with variants, select the first one
@@ -298,52 +283,25 @@ export default function ProductDetailPage() {
     ? (isProductAvailable && isVariantAvailable && selectedVariant && quantity > 0 && quantity <= maxQuantity)
     : (isProductAvailable && quantity > 0 && quantity <= maxQuantity);
   
-  console.log('🔍 Availability Check:', {
-    hasVariants,
-    isProductAvailable,
-    isVariantAvailable,
-    maxQuantity,
-    canAddToCart,
-    inventory_level: product.inventory_level,
-    product_stock_quantity: product.product_stock_quantity,
-    selectedVariant: selectedVariant ? {
-      id: selectedVariant.id,
-      display_name: selectedVariant.display_name,
-      actually_available: selectedVariant.actually_available,
-      stock_quantity: selectedVariant.stock_quantity
-    } : null
-  });
-
   const handleAddToCart = async () => {
-    console.log('🔵 handleAddToCart called');
-    console.log('  - selectedVariant:', selectedVariant?.id);
-    console.log('  - quantity:', quantity);
-    console.log('  - canAddToCart:', canAddToCart);
-    console.log('  - isAdding:', isAdding);
-    
     if (!selectedVariant || !canAddToCart) {
-      console.log('❌ Blocked: Missing variant or cannot add');
       return;
     }
     
     if (isAdding) {
-      console.log('❌ Blocked: Already adding');
       return;
     }
     
-    console.log('✅ Proceeding with addItem');
     setIsAdding(true);
     try {
       await addItem(selectedVariant.id, quantity);
-      console.log('✅ addItem completed successfully');
       // Reset quantity after successful add
       setQuantity(1);
     } catch (error) {
       // Error is handled in the store
-      console.error('❌ Add to cart error:', error);
+      console.error('Add to cart error:', error);
     } finally {
       setIsAdding(false);
-      console.log('🔵 handleAddToCart finished');
     }
   };
   
