@@ -17,12 +17,12 @@ export default function AboutPage() {
       <div className="bg-warm">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24">
           <FadeIn direction="none">
-            <h1 className="text-4xl sm:text-5xl font-bold text-center mb-6 text-gray-900 tracking-tight">
+            <h1 className="text-4xl sm:text-5xl font-bold text-center mb-6 text-warm-900 tracking-tight">
               Our Story
             </h1>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <p className="text-lg sm:text-xl text-center max-w-2xl mx-auto text-gray-600">
+            <p className="text-lg sm:text-xl text-center max-w-2xl mx-auto text-warm-600">
               Celebrating Chamorro and Hawaiian cultures through island living apparel and lifestyle
             </p>
           </FadeIn>
@@ -35,14 +35,14 @@ export default function AboutPage() {
         {/* About Hafaloha Section */}
         <FadeIn>
           <div className="mb-12">
-            <h2 className="text-3xl font-bold mb-6 text-gray-900 tracking-tight">About Hafaloha</h2>
+            <h2 className="text-3xl font-bold mb-6 text-warm-900 tracking-tight">About Hafaloha</h2>
             <div className="prose prose-lg max-w-none">
-              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+              <p className="text-lg text-warm-700 mb-6 leading-relaxed">
                 The name “Hafaloha” represents the Chamorro and Hawaiian cultures which are intertwined 
                 in the Kaae family — Tara Kaae being from Guam, and Len being from Hawaii. Just like the 
                 Kaae family, Guam and Hawaii are both beautiful cultural melting pots.
               </p>
-              <p className="text-lg text-gray-700 leading-relaxed">
+              <p className="text-lg text-warm-700 leading-relaxed">
                 Our apparel is designed to reflect the beauty of island living, and to bring the warm 
                 spirit of the islands to everyone wearing our clothing, no matter where they live. And 
                 our desserts — all cool — will refresh you on a hot day with the sweet taste of the islands.
@@ -56,13 +56,13 @@ export default function AboutPage() {
           {/* Håfa Adai */}
           <StaggerItem>
             <div className="rounded-lg p-8 bg-warm">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Håfa Adai!</h3>
-              <p className="text-gray-600 leading-relaxed mb-4">
+              <h3 className="text-xl font-semibold text-warm-900 mb-4">Håfa Adai!</h3>
+              <p className="text-warm-600 leading-relaxed mb-4">
                 “Håfa Adai” is a greeting used by the Chamorro people of the Mariana Islands 
                 (Guam, Rota, Tinian and Saipan). It invokes the familial spirit, warm affection, 
                 and “what is mine is yours” communal mindset of the Mariana Islands and its people.
               </p>
-              <p className="text-gray-500 italic text-sm">
+              <p className="text-warm-500 italic text-sm">
                 “Hello” and “Hi” are friendly, but there is no greeting here quite like “Håfa Adai.”
               </p>
             </div>
@@ -71,13 +71,13 @@ export default function AboutPage() {
           {/* Aloha */}
           <StaggerItem>
             <div className="rounded-lg p-8 bg-warm">
-              <h3 className="text-xl font-semibold text-gray-900 mb-4">Aloha!</h3>
-              <p className="text-gray-600 leading-relaxed mb-4">
+              <h3 className="text-xl font-semibold text-warm-900 mb-4">Aloha!</h3>
+              <p className="text-warm-600 leading-relaxed mb-4">
                 “Aloha” is a salutation used by the natives of the Hawaiian Islands. It is often 
                 thought to have a dual meaning of “hello” and “goodbye,” but it also used at times 
                 to say “I love you.”
               </p>
-              <p className="text-gray-600 italic text-sm">
+              <p className="text-warm-600 italic text-sm">
                 “Aloha” is more than just a simple greeting. In Hawaiian, it has a deeper significance, 
                 including qualities like energy, life, and joy.
               </p>
@@ -88,15 +88,15 @@ export default function AboutPage() {
         {/* Our Hope Philosophy */}
         <FadeIn>
           <div className="mb-16">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-900 tracking-tight">Our Hope</h2>
+            <h2 className="text-2xl font-semibold mb-6 text-warm-900 tracking-tight">Our Hope</h2>
             <div className="prose prose-lg max-w-none">
-              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+              <p className="text-lg text-warm-700 mb-6 leading-relaxed">
                 Our desire is that the “Håfa Adai” mindset and “Aloha” spirit (as described above) would 
                 be combined in you. Our apparel is designed to reflect the beauty of island living, and to 
                 bring the warm mood of the islands to everyone wearing our apparel, no matter where they live. 
                 And our cool desserts will refresh you on a hot day with the sweet taste of the islands.
               </p>
-              <p className="text-lg text-gray-700 leading-relaxed">
+              <p className="text-lg text-warm-700 leading-relaxed">
                 But “Hafaloha” is more than just our products or our brand, it is a lifestyle and a way of life. 
                 Our hope is that your entire experience with us — from the island feel you get from wearing our 
                 clothing, to savoring our refreshing sweet treats, to visiting our store and interacting with 
@@ -112,27 +112,27 @@ export default function AboutPage() {
         {/* Founder Story */}
         <FadeIn>
           <div className="mb-16">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-900 tracking-tight">Meet the Founders</h2>
+            <h2 className="text-2xl font-semibold mb-6 text-warm-900 tracking-tight">Meet the Founders</h2>
             <div className="max-w-3xl mx-auto">
-              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+              <p className="text-lg text-warm-700 mb-6 leading-relaxed">
                 Håfa Adai! We’re Leonard Kaae Jr. and Tara Kaae, the founders of Hafaloha. What started as 
                 just a few designs and a dream has grown into something we’re incredibly proud of. The first 
                 merch drops were folded, packed, and shipped from home—a small hustle built on creativity 
                 and community love.
               </p>
-              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+              <p className="text-lg text-warm-700 mb-6 leading-relaxed">
                 From there, the grind didn’t stop. We took that same energy and expanded into shave ice, 
                 opening up a small shop that quickly became a local favorite. Over time, the menu grew, 
                 but the heart stayed the same: make good stuff, treat people right, and always bring the 
                 Håfa Adai spirit and the essence of Aloha.
               </p>
-              <p className="text-lg text-gray-700 mb-6 leading-relaxed">
+              <p className="text-lg text-warm-700 mb-6 leading-relaxed">
                 Now, years later, the brand has grown, the team has expanded, and the vision continues to 
                 evolve. The founders are still hands-on, side by side with the crew every day. Every 
                 product we create is a love letter to the islands—celebrating our roots while sharing our 
                 culture with the world.
               </p>
-              <p className="text-lg text-gray-700 leading-relaxed">
+              <p className="text-lg text-warm-700 leading-relaxed">
                 Thank you for supporting Hafaloha and for being part of our island family. Whether you’re
                 from Guam, Hawaii, or anywhere else in the world, we’re honored to share our culture with you.
               </p>
@@ -143,7 +143,7 @@ export default function AboutPage() {
         {/* Founder Photo & Team Info Section */}
         <div className="mb-16">
           <FadeIn>
-            <h2 className="text-2xl font-semibold mb-8 text-gray-900 tracking-tight">Meet the Team</h2>
+            <h2 className="text-2xl font-semibold mb-8 text-warm-900 tracking-tight">Meet the Team</h2>
           </FadeIn>
           
           {/* Founders Photo */}
@@ -162,10 +162,10 @@ export default function AboutPage() {
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-3xl mx-auto">
             {/* Tara */}
             <StaggerItem>
-              <div className="border border-gray-200 rounded-lg p-6 text-center">
-                <h3 className="text-xl font-semibold text-gray-900 mb-1">Tara Kaae</h3>
+              <div className="border border-warm-200 rounded-lg p-6 text-center">
+                <h3 className="text-xl font-semibold text-warm-900 mb-1">Tara Kaae</h3>
                 <p className="text-hafalohaRed font-medium mb-4">VP & General Manager</p>
-                <div className="space-y-2 text-sm text-gray-600">
+                <div className="space-y-2 text-sm text-warm-600">
                   <p><span className="font-medium">Favorite Food:</span> Spicy Salmon Poke Bowl</p>
                   <p><span className="font-medium">Favorite Dessert:</span> Acai smoothie with oat milk, extra peanut butter and VPP</p>
                   <p><span className="font-medium">Favorite Merch:</span> Any of our XXL umbrellas</p>
@@ -175,10 +175,10 @@ export default function AboutPage() {
 
             {/* Leonard */}
             <StaggerItem>
-              <div className="border border-gray-200 rounded-lg p-6 text-center">
-                <h3 className="text-xl font-semibold text-gray-900 mb-1">Leonard Kaae Jr.</h3>
+              <div className="border border-warm-200 rounded-lg p-6 text-center">
+                <h3 className="text-xl font-semibold text-warm-900 mb-1">Leonard Kaae Jr.</h3>
                 <p className="text-hafalohaRed font-medium mb-4">CEO & President</p>
-                <div className="space-y-2 text-sm text-gray-600">
+                <div className="space-y-2 text-sm text-warm-600">
                   <p><span className="font-medium">Favorite Food:</span> Mochiko Plate</p>
                   <p><span className="font-medium">Favorite Dessert:</span> Lilikoi, Guava and Pineapple Shave Ice</p>
                   <p><span className="font-medium">Favorite Merch:</span> Lei Style T-Shirts</p>
@@ -191,8 +191,8 @@ export default function AboutPage() {
         {/* Instagram Feed Placeholder */}
         <FadeIn>
           <div className="rounded-lg p-8 mb-16 bg-warm">
-            <h2 className="text-2xl font-semibold mb-4 text-center text-gray-900 tracking-tight">Follow Our Journey</h2>
-            <p className="text-center text-gray-600 mb-8">
+            <h2 className="text-2xl font-semibold mb-4 text-center text-warm-900 tracking-tight">Follow Our Journey</h2>
+            <p className="text-center text-warm-600 mb-8">
               Stay connected with us on Instagram for behind-the-scenes content and new releases.
             </p>
             <div className="flex justify-center mb-8">
@@ -200,7 +200,7 @@ export default function AboutPage() {
                 href="https://www.instagram.com/hafaloha" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="group inline-flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition font-medium"
+                className="group inline-flex items-center gap-2 bg-warm-900 text-white px-6 py-3 rounded-lg hover:bg-warm-800 transition font-medium"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
@@ -213,15 +213,15 @@ export default function AboutPage() {
               {[1, 2, 3, 4].map((i) => (
                 <div 
                   key={i}
-                  className="aspect-square bg-white rounded-lg flex items-center justify-center border border-gray-100"
+                  className="aspect-square bg-white rounded-lg flex items-center justify-center border border-warm-100"
                 >
-                  <svg className="w-10 h-10 text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-10 h-10 text-warm-300" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                   </svg>
                 </div>
               ))}
             </div>
-            <p className="text-center text-sm text-gray-500 mt-6">
+            <p className="text-center text-sm text-warm-500 mt-6">
               Instagram feed integration coming soon!
             </p>
           </div>
@@ -230,29 +230,29 @@ export default function AboutPage() {
         {/* Values Section */}
         <div className="mb-16">
           <FadeIn>
-            <h2 className="text-2xl font-semibold mb-8 text-gray-900 tracking-tight">Our Values</h2>
+            <h2 className="text-2xl font-semibold mb-8 text-warm-900 tracking-tight">Our Values</h2>
           </FadeIn>
           <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <StaggerItem>
               <div className="text-center p-6 rounded-lg bg-warm">
-                <h3 className="text-lg font-medium mb-2 text-gray-900">Island Pride</h3>
-                <p className="text-gray-600 text-sm">
+                <h3 className="text-lg font-medium mb-2 text-warm-900">Island Pride</h3>
+                <p className="text-warm-600 text-sm">
                   Celebrating Chamorro and Hawaiian heritage through every product we create
                 </p>
               </div>
             </StaggerItem>
             <StaggerItem>
               <div className="text-center p-6 rounded-lg bg-warm">
-                <h3 className="text-lg font-medium mb-2 text-gray-900">Premium Quality</h3>
-                <p className="text-gray-600 text-sm">
+                <h3 className="text-lg font-medium mb-2 text-warm-900">Premium Quality</h3>
+                <p className="text-warm-600 text-sm">
                   Using only the finest materials and designs that stand the test of time
                 </p>
               </div>
             </StaggerItem>
             <StaggerItem>
               <div className="text-center p-6 rounded-lg bg-warm">
-                <h3 className="text-lg font-medium mb-2 text-gray-900">Community First</h3>
-                <p className="text-gray-600 text-sm">
+                <h3 className="text-lg font-medium mb-2 text-warm-900">Community First</h3>
+                <p className="text-warm-600 text-sm">
                   Building connections and supporting our island family, near and far
                 </p>
               </div>
@@ -263,13 +263,13 @@ export default function AboutPage() {
         {/* Call to Action */}
         <FadeIn>
           <div className="text-center py-8">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-900 tracking-tight">Ready to Experience Hafaloha?</h2>
-            <p className="mb-6 max-w-xl mx-auto text-gray-600">
+            <h2 className="text-2xl font-semibold mb-4 text-warm-900 tracking-tight">Ready to Experience Hafaloha?</h2>
+            <p className="mb-6 max-w-xl mx-auto text-warm-600">
               Explore our collection of authentic Chamorro pride merchandise and bring the island spirit to your life.
             </p>
             <a
               href="/products"
-              className="group inline-flex items-center gap-2 bg-gray-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition"
+              className="group inline-flex items-center gap-2 bg-warm-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-warm-800 transition"
             >
               Shop Now
               <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -126,7 +126,7 @@ export default function CollectionDetailPage() {
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <FadeIn>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">{collection.name}</h1>
+            <h1 className="text-4xl font-bold text-warm-900 mb-4">{collection.name}</h1>
             {collection.description && (
               <p className="text-lg text-warm-500 mb-4">{collection.description}</p>
             )}
@@ -148,7 +148,7 @@ export default function CollectionDetailPage() {
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                className="w-full px-4 py-2 border border-warm-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
               />
             </form>
 
@@ -159,7 +159,7 @@ export default function CollectionDetailPage() {
                 setProductType(e.target.value);
                 setCurrentPage(1);
               }}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+              className="px-4 py-2 border border-warm-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
             >
               <option value="">All Types</option>
               <option value="Apparel">Apparel</option>
@@ -172,7 +172,7 @@ export default function CollectionDetailPage() {
             {(searchQuery || productType) && (
               <button
                 onClick={handleClearFilters}
-                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                className="px-6 py-2 bg-warm-200 text-warm-700 rounded-lg hover:bg-warm-300 transition"
               >
                 Clear Filters
               </button>
@@ -189,7 +189,7 @@ export default function CollectionDetailPage() {
           </div>
         ) : products.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">No products found in this collection.</p>
+            <p className="text-warm-600 mb-4">No products found in this collection.</p>
             <button
               onClick={handleClearFilters}
               className="px-6 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition"
@@ -214,17 +214,17 @@ export default function CollectionDetailPage() {
                 <button
                   onClick={() => setCurrentPage(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="px-4 py-2 bg-white border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+                  className="px-4 py-2 bg-white border border-warm-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-warm-50 transition"
                 >
                   Previous
                 </button>
-                <span className="px-4 py-2 text-gray-700">
+                <span className="px-4 py-2 text-warm-700">
                   Page {currentPage} of {totalPages}
                 </span>
                 <button
                   onClick={() => setCurrentPage(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="px-4 py-2 bg-white border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition"
+                  className="px-4 py-2 bg-white border border-warm-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-warm-50 transition"
                 >
                   Next
                 </button>

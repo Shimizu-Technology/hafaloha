@@ -55,7 +55,7 @@ export default function FeaturedProducts() {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24">
-        <h2 className="text-3xl font-bold text-center mb-8 sm:mb-12 text-gray-900 tracking-tight">
+        <h2 className="text-3xl font-bold text-center mb-8 sm:mb-12 text-warm-900 tracking-tight">
           Featured Products
         </h2>
         <ProductGridSkeleton count={8} />
@@ -71,10 +71,10 @@ export default function FeaturedProducts() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24">
       <FadeIn>
         <div className="text-center mb-10 sm:mb-14">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-warm-900 tracking-tight">
             Featured Products
           </h2>
-          <p className="text-base text-gray-500 max-w-2xl mx-auto">
+          <p className="text-base text-warm-500 max-w-2xl mx-auto">
             Discover our hand-picked selection of premium island living apparel
           </p>
         </div>
@@ -94,7 +94,7 @@ export default function FeaturedProducts() {
                 className="group flex flex-col"
               >
                 {/* Image */}
-                <div className="relative bg-gray-50 overflow-hidden rounded-lg" style={{ aspectRatio: '1/1' }}>
+                <div className="relative bg-warm-50 overflow-hidden rounded-lg" style={{ aspectRatio: '1/1' }}>
                   {product.primary_image_url ? (
                     <img
                       src={product.primary_image_url}
@@ -104,7 +104,7 @@ export default function FeaturedProducts() {
                       loading="lazy"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-50">
+                    <div className="w-full h-full flex items-center justify-center bg-warm-50">
                       <img
                         src="/images/hafaloha-logo.png"
                         alt="Hafaloha"
@@ -124,7 +124,7 @@ export default function FeaturedProducts() {
                 {/* Content */}
                 <div className="pt-4 flex flex-col grow">
                   {/* Product Name */}
-                  <h3 className="font-medium text-sm sm:text-base text-gray-900 mb-2 line-clamp-2 group-hover:text-hafalohaRed transition">
+                  <h3 className="font-medium text-sm sm:text-base text-warm-900 mb-2 line-clamp-2 group-hover:text-hafalohaRed transition">
                     {product.name}
                   </h3>
 
@@ -132,15 +132,15 @@ export default function FeaturedProducts() {
                   <div className="mt-auto">
                     {isOnSale ? (
                       <div className="flex items-center gap-2">
-                        <span className="text-base font-medium text-gray-900">
+                        <span className="text-base font-medium text-warm-900">
                           {formatPrice(product.sale_price_cents!)}
                         </span>
-                        <span className="text-sm text-gray-400 line-through">
+                        <span className="text-sm text-warm-400 line-through">
                           {formatPrice(product.base_price_cents)}
                         </span>
                       </div>
                     ) : (
-                      <span className="text-base font-medium text-gray-900">
+                      <span className="text-base font-medium text-warm-900">
                         {formatPrice(product.base_price_cents)}
                       </span>
                     )}
@@ -157,7 +157,7 @@ export default function FeaturedProducts() {
         <div className="text-center">
           <Link
             to="/products"
-            className="group inline-flex items-center gap-2 text-base px-8 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition font-medium"
+            className="group inline-flex items-center gap-2 text-base px-8 py-3 bg-warm-900 text-white rounded-lg hover:bg-warm-800 transition font-medium"
           >
             View All Products
             <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">

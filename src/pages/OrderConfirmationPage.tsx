@@ -150,10 +150,10 @@ export default function OrderConfirmationPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-warm-50 flex items-center justify-center px-4">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-hafalohaRed border-t-transparent mb-4"></div>
-          <p className="text-gray-600">Loading your order...</p>
+          <p className="text-warm-600">Loading your order...</p>
         </div>
       </div>
     );
@@ -161,11 +161,11 @@ export default function OrderConfirmationPage() {
 
   if (error || !order) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-warm-50 flex items-center justify-center px-4">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
           <div className="text-6xl mb-4">😔</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Order Not Found</h1>
-          <p className="text-gray-600 mb-6">{error || 'Unable to load order details'}</p>
+          <h1 className="text-2xl font-bold text-warm-900 mb-2">Order Not Found</h1>
+          <p className="text-warm-600 mb-6">{error || 'Unable to load order details'}</p>
           <button
             onClick={() => navigate('/products')}
             className="bg-hafalohaRed text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition"
@@ -217,7 +217,7 @@ export default function OrderConfirmationPage() {
           }
         }
       `}</style>
-      <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 print:bg-white print:py-0">
+      <div className="min-h-screen bg-warm-50 py-8 px-4 sm:px-6 lg:px-8 print:bg-white print:py-0">
         <div className="max-w-3xl mx-auto">
           {/* Success Header */}
           <div className="bg-white rounded-2xl shadow-lg p-8 sm:p-10 mb-6 text-center print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid relative overflow-hidden">
@@ -232,19 +232,19 @@ export default function OrderConfirmationPage() {
               </svg>
             </div>
             
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-warm-900 mb-2">
               {isAcaiOrder ? '🍰 Açaí Cake Order Confirmed!' : 'Order Confirmed!'}
             </h1>
-            <p className="text-gray-600 mb-6">
+            <p className="text-warm-600 mb-6">
               Thank you for your order, <span className="font-semibold">{order.customer_name}</span>!
             </p>
             
-            <div className="bg-gray-100 border border-gray-200 rounded-xl p-5 inline-block">
-              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Order Number</p>
-              <p className="text-2xl font-bold font-mono text-gray-900">{order.order_number}</p>
+            <div className="bg-warm-100 border border-warm-200 rounded-xl p-5 inline-block">
+              <p className="text-xs text-warm-500 uppercase tracking-wider mb-1">Order Number</p>
+              <p className="text-2xl font-bold font-mono text-warm-900">{order.order_number}</p>
             </div>
             
-            <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-600">
+            <div className="mt-6 flex items-center justify-center gap-2 text-sm text-warm-600">
               <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
@@ -256,7 +256,7 @@ export default function OrderConfirmationPage() {
         {/* Acai Pickup Details */}
         {isAcaiOrder && order.acai_pickup_date && (
           <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 border-b pb-2 flex items-center">
+            <h2 className="text-xl font-bold text-warm-900 mb-4 border-b pb-2 flex items-center">
               <span className="text-2xl mr-2">📍</span> Pickup Details
             </h2>
             
@@ -264,13 +264,13 @@ export default function OrderConfirmationPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-blue-600 font-medium mb-1">Pickup Date</p>
-                  <p className="text-lg font-bold text-gray-900">
+                  <p className="text-lg font-bold text-warm-900">
                     📅 {formatPickupDate(order.acai_pickup_date)}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-blue-600 font-medium mb-1">Pickup Time</p>
-                  <p className="text-lg font-bold text-gray-900">
+                  <p className="text-lg font-bold text-warm-900">
                     🕐 {order.acai_pickup_time && formatPickupTime(order.acai_pickup_time)}
                   </p>
                 </div>
@@ -279,13 +279,13 @@ export default function OrderConfirmationPage() {
 
             <div className="space-y-4">
               <div>
-                <p className="text-sm text-gray-600 font-medium mb-1">Location</p>
-                <p className="font-semibold text-gray-900">{order.pickup_location}</p>
+                <p className="text-sm text-warm-600 font-medium mb-1">Location</p>
+                <p className="font-semibold text-warm-900">{order.pickup_location}</p>
               </div>
               
               {order.pickup_phone && (
                 <div>
-                  <p className="text-sm text-gray-600 font-medium mb-1">Phone</p>
+                  <p className="text-sm text-warm-600 font-medium mb-1">Phone</p>
                   <a href={`tel:${order.pickup_phone}`} className="font-semibold text-hafalohaRed hover:underline">
                     {order.pickup_phone}
                   </a>
@@ -294,15 +294,15 @@ export default function OrderConfirmationPage() {
 
               {order.acai_crust_type && (
                 <div>
-                  <p className="text-sm text-gray-600 font-medium mb-1">Base/Crust</p>
-                  <p className="font-semibold text-gray-900">{order.acai_crust_type}</p>
+                  <p className="text-sm text-warm-600 font-medium mb-1">Base/Crust</p>
+                  <p className="font-semibold text-warm-900">{order.acai_crust_type}</p>
                 </div>
               )}
 
               {order.acai_include_placard && order.acai_placard_text && (
                 <div>
-                  <p className="text-sm text-gray-600 font-medium mb-1">Message Placard</p>
-                  <p className="font-semibold text-gray-900 italic">"{order.acai_placard_text}"</p>
+                  <p className="text-sm text-warm-600 font-medium mb-1">Message Placard</p>
+                  <p className="font-semibold text-warm-900 italic">"{order.acai_placard_text}"</p>
                 </div>
               )}
             </div>
@@ -310,8 +310,8 @@ export default function OrderConfirmationPage() {
         )}
 
         {/* Order Details */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
-          <h2 className="text-xl font-bold text-gray-900 mb-4 pb-4 border-b border-gray-100 flex items-center">
+        <div className="bg-white rounded-xl shadow-sm border border-warm-100 p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
+          <h2 className="text-xl font-bold text-warm-900 mb-4 pb-4 border-b border-warm-100 flex items-center">
             <svg className="w-6 h-6 text-hafalohaRed mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
@@ -320,11 +320,11 @@ export default function OrderConfirmationPage() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <div>
-              <p className="text-sm text-gray-600">Order Date</p>
+              <p className="text-sm text-warm-600">Order Date</p>
               <p className="font-semibold">{formatDate(order.created_at)}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Payment Status</p>
+              <p className="text-sm text-warm-600">Payment Status</p>
               <p className="font-semibold capitalize">
                 {order.payment_status === 'paid' ? (
                   <span className="text-green-600">✓ Paid</span>
@@ -334,11 +334,11 @@ export default function OrderConfirmationPage() {
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">Order Status</p>
+              <p className="text-sm text-warm-600">Order Status</p>
               <p className="font-semibold capitalize">{order.status}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-warm-600">
                 {isPickupOrder ? 'Fulfillment' : 'Shipping Method'}
               </p>
               <p className="font-semibold">
@@ -349,23 +349,23 @@ export default function OrderConfirmationPage() {
 
           {/* Items */}
           <div className="mb-6">
-            <h3 className="font-semibold text-gray-900 mb-3">Items Ordered</h3>
+            <h3 className="font-semibold text-warm-900 mb-3">Items Ordered</h3>
             <div className="border rounded-lg overflow-hidden">
               {order.order_items.map((item) => (
                 <div
                   key={item.id}
-                  className="flex justify-between items-center p-4 border-b last:border-b-0 hover:bg-gray-50"
+                  className="flex justify-between items-center p-4 border-b last:border-b-0 hover:bg-warm-50"
                 >
                   <div className="flex-1">
-                    <p className="font-semibold text-gray-900">{item.product_name}</p>
+                    <p className="font-semibold text-warm-900">{item.product_name}</p>
                     {item.variant_name && (
-                      <p className="text-sm text-gray-600">{item.variant_name}</p>
+                      <p className="text-sm text-warm-600">{item.variant_name}</p>
                     )}
-                    <p className="text-sm text-gray-500">SKU: {item.product_sku}</p>
+                    <p className="text-sm text-warm-500">SKU: {item.product_sku}</p>
                   </div>
                   <div className="text-right ml-4">
-                    <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
-                    <p className="font-semibold text-gray-900">{formatPrice(item.total_price_cents)}</p>
+                    <p className="text-sm text-warm-600">Qty: {item.quantity}</p>
+                    <p className="font-semibold text-warm-900">{formatPrice(item.total_price_cents)}</p>
                   </div>
                 </div>
               ))}
@@ -375,18 +375,18 @@ export default function OrderConfirmationPage() {
           {/* Totals */}
           <div className="border-t pt-4 space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-gray-600">Subtotal</span>
+              <span className="text-warm-600">Subtotal</span>
               <span className="font-semibold">{formatPrice(order.subtotal_cents)}</span>
             </div>
             {!isPickupOrder && (
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Shipping</span>
+                <span className="text-warm-600">Shipping</span>
                 <span className="font-semibold">{formatPrice(order.shipping_cost_cents)}</span>
               </div>
             )}
             {order.tax_cents > 0 && (
               <div className="flex justify-between text-sm">
-                <span className="text-gray-600">Tax</span>
+                <span className="text-warm-600">Tax</span>
                 <span className="font-semibold">{formatPrice(order.tax_cents)}</span>
               </div>
             )}
@@ -399,8 +399,8 @@ export default function OrderConfirmationPage() {
 
         {/* Order Tracking - For shipped retail orders */}
         {order.order_type === 'retail' && (order.status === 'shipped' || order.can_track) && (
-          <div id="tracking" className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 pb-4 border-b border-gray-100 flex items-center">
+          <div id="tracking" className="bg-white rounded-xl shadow-sm border border-warm-100 p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
+            <h2 className="text-xl font-bold text-warm-900 mb-4 pb-4 border-b border-warm-100 flex items-center">
               <svg className="w-6 h-6 text-purple-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
               </svg>
@@ -420,7 +420,7 @@ export default function OrderConfirmationPage() {
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${
                         isComplete 
                           ? 'bg-green-500 text-white' 
-                          : 'bg-gray-200 text-gray-500'
+                          : 'bg-warm-200 text-warm-500'
                       } ${isCurrent ? 'ring-2 ring-green-300' : ''}`}>
                         {isComplete ? (
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -430,7 +430,7 @@ export default function OrderConfirmationPage() {
                           <span className="text-xs">{idx + 1}</span>
                         )}
                       </div>
-                      <span className={`text-xs text-center ${isCurrent ? 'font-bold text-green-600' : 'text-gray-500'}`}>
+                      <span className={`text-xs text-center ${isCurrent ? 'font-bold text-green-600' : 'text-warm-500'}`}>
                         {step.charAt(0).toUpperCase() + step.slice(1)}
                       </span>
                     </div>
@@ -438,7 +438,7 @@ export default function OrderConfirmationPage() {
                 })}
               </div>
               {/* Progress bar */}
-              <div className="h-1 bg-gray-200 rounded-full mt-2">
+              <div className="h-1 bg-warm-200 rounded-full mt-2">
                 <div 
                   className="h-1 bg-green-500 rounded-full transition-all duration-500"
                   style={{ 
@@ -454,9 +454,9 @@ export default function OrderConfirmationPage() {
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div>
                     <p className="text-sm text-purple-600 font-medium mb-1">Tracking Number</p>
-                    <p className="text-lg font-mono font-bold text-gray-900">{order.tracking_number}</p>
+                    <p className="text-lg font-mono font-bold text-warm-900">{order.tracking_number}</p>
                     {order.shipping_method && (
-                      <p className="text-sm text-gray-600 mt-1">via {order.shipping_method}</p>
+                      <p className="text-sm text-warm-600 mt-1">via {order.shipping_method}</p>
                     )}
                   </div>
                   {order.tracking_url && (
@@ -475,8 +475,8 @@ export default function OrderConfirmationPage() {
                 </div>
               </div>
             ) : (
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
-                <p className="text-gray-600">
+              <div className="bg-warm-50 border border-warm-200 rounded-lg p-4 text-center">
+                <p className="text-warm-600">
                   {order.status === 'pending' && 'Your order is being prepared. Tracking will be available once shipped.'}
                   {order.status === 'processing' && 'Your order is being processed. Tracking information coming soon.'}
                   {order.status === 'shipped' && 'Shipped! Tracking info will be updated shortly.'}
@@ -490,8 +490,8 @@ export default function OrderConfirmationPage() {
         {/* Shipping Address - Only for non-pickup orders */}
         {!isPickupOrder && order.shipping_address_line1 && (
           <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 mb-6 print:shadow-none print:border print:p-4 print:mb-4 print:break-inside-avoid">
-            <h2 className="text-xl font-bold text-gray-900 mb-4 border-b pb-2">Shipping Address</h2>
-            <div className="text-gray-700">
+            <h2 className="text-xl font-bold text-warm-900 mb-4 border-b pb-2">Shipping Address</h2>
+            <div className="text-warm-700">
               <p className="font-semibold">{order.customer_name}</p>
               <p>{order.shipping_address_line1}</p>
               {order.shipping_address_line2 && <p>{order.shipping_address_line2}</p>}
@@ -500,7 +500,7 @@ export default function OrderConfirmationPage() {
               </p>
               <p>{order.shipping_country}</p>
             </div>
-            <div className="mt-4 text-sm text-gray-600">
+            <div className="mt-4 text-sm text-warm-600">
               <p>Phone: {order.customer_phone}</p>
               <p>Email: {order.customer_email}</p>
             </div>
@@ -532,7 +532,7 @@ export default function OrderConfirmationPage() {
         {/* Help Text - Hidden when printing */}
         <div className="mt-8 text-center print:hidden">
           <div className="bg-hafalohaCream rounded-xl p-6">
-            <p className="text-gray-700 mb-2 font-medium">
+            <p className="text-warm-700 mb-2 font-medium">
               Questions about your order?
             </p>
             <a 

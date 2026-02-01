@@ -242,10 +242,10 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-warm-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hafalohaRed mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading product...</p>
+          <p className="text-warm-600">Loading product...</p>
         </div>
       </div>
     );
@@ -253,7 +253,7 @@ export default function ProductDetailPage() {
 
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-warm-50 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error || 'Product not found'}</p>
           <Link to="/products" className="text-hafalohaRed hover:underline">
@@ -378,8 +378,8 @@ export default function ProductDetailPage() {
                 isSelected
                   ? 'border-hafalohaRed ring-2 ring-hafalohaRed/30 scale-110'
                   : isAvailable && variantInStock
-                    ? 'border-gray-300 hover:border-hafalohaRed hover:scale-105'
-                    : 'border-gray-200 opacity-40 cursor-not-allowed'
+                    ? 'border-warm-300 hover:border-hafalohaRed hover:scale-105'
+                    : 'border-warm-200 opacity-40 cursor-not-allowed'
               }`}
             >
               {cssColor ? (
@@ -392,14 +392,14 @@ export default function ProductDetailPage() {
                 />
               ) : (
                 /* Unknown colour — show first letter on a neutral swatch */
-                <span className="absolute inset-1 rounded-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center text-xs font-bold text-gray-600">
+                <span className="absolute inset-1 rounded-full bg-gradient-to-br from-warm-200 to-warm-300 flex items-center justify-center text-xs font-bold text-warm-600">
                   {value.charAt(0).toUpperCase()}
                 </span>
               )}
               {/* Diagonal strike-through for out-of-stock */}
               {!variantInStock && isAvailable && (
                 <span className="absolute inset-0 flex items-center justify-center">
-                  <span className="block w-full h-0.5 bg-gray-400 rotate-45" />
+                  <span className="block w-full h-0.5 bg-warm-400 rotate-45" />
                 </span>
               )}
             </button>
@@ -442,21 +442,21 @@ export default function ProductDetailPage() {
                 isSelected
                   ? 'border-hafalohaRed bg-red-50 text-hafalohaRed font-semibold'
                   : isAvailable && variantInStock
-                    ? 'border-gray-300 hover:border-hafalohaRed text-gray-700'
+                    ? 'border-warm-300 hover:border-hafalohaRed text-warm-700'
                     : isAvailable && !variantInStock
-                      ? 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-                      : 'border-gray-200 bg-gray-50 text-gray-300 cursor-not-allowed'
+                      ? 'border-warm-200 bg-warm-50 text-warm-400 cursor-not-allowed'
+                      : 'border-warm-200 bg-warm-50 text-warm-300 cursor-not-allowed'
               }`}
             >
               <span className="text-sm font-medium">{value}</span>
               {priceDiff !== null && priceDiff !== 0 && (
-                <span className={`block text-xs ${priceDiff > 0 ? 'text-gray-500' : 'text-green-600'}`}>
+                <span className={`block text-xs ${priceDiff > 0 ? 'text-warm-500' : 'text-green-600'}`}>
                   {priceDiff > 0 ? '+' : '−'}
                   {formatPrice(Math.abs(priceDiff))}
                 </span>
               )}
               {!variantInStock && isAvailable && (
-                <span className="block text-xs text-gray-400">Out of Stock</span>
+                <span className="block text-xs text-warm-400">Out of Stock</span>
               )}
               {variantInStock && showStockWarning && (
                 <span className="block text-xs text-orange-600">
@@ -473,7 +473,7 @@ export default function ProductDetailPage() {
   // ── JSX ─────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-warm-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Breadcrumbs */}
         <Breadcrumbs
@@ -492,12 +492,12 @@ export default function ProductDetailPage() {
           }
         />
 
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100">
+        <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-warm-100">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
             {/* Images */}
-            <div className="p-6 sm:p-8 lg:p-10 bg-gray-50/50">
+            <div className="p-6 sm:p-8 lg:p-10 bg-warm-50/50">
               {/* Main Image */}
-              <div className="bg-white rounded-xl overflow-hidden mb-4 shadow-sm border border-gray-100" style={{ aspectRatio: '1/1' }}>
+              <div className="bg-white rounded-xl overflow-hidden mb-4 shadow-sm border border-warm-100" style={{ aspectRatio: '1/1' }}>
                 {displayImages[selectedImageIndex].url ? (
                   <img
                     src={displayImages[selectedImageIndex].url}
@@ -509,14 +509,14 @@ export default function ProductDetailPage() {
                     }}
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-warm-50 to-warm-100">
                     <img 
                       src="/images/hafaloha-logo.png" 
                       alt="Hafaloha" 
                       className="w-32 opacity-20 mb-4"
                       style={{ objectFit: 'contain', maxHeight: '8rem' }}
                     />
-                    <span className="text-gray-400 text-lg font-medium">No Image Available</span>
+                    <span className="text-warm-400 text-lg font-medium">No Image Available</span>
                   </div>
                 )}
               </div>
@@ -529,7 +529,7 @@ export default function ProductDetailPage() {
                       key={image.id}
                       onClick={() => setSelectedImageIndex(index)}
                       className={`bg-white rounded-lg overflow-hidden border-2 transition-all hover:scale-105 shadow-sm ${
-                        selectedImageIndex === index ? 'border-hafalohaRed ring-2 ring-hafalohaRed/20' : 'border-gray-200 hover:border-gray-300'
+                        selectedImageIndex === index ? 'border-hafalohaRed ring-2 ring-hafalohaRed/20' : 'border-warm-200 hover:border-warm-300'
                       }`}
                       style={{ aspectRatio: '1/1' }}
                     >
@@ -558,7 +558,7 @@ export default function ProductDetailPage() {
                       <Link
                         key={collection.id}
                         to={`/collections/${collection.slug}`}
-                        className="inline-flex items-center text-xs font-semibold bg-hafalohaCream text-gray-700 px-3 py-1 rounded-full hover:bg-hafalohaGold/30 transition"
+                        className="inline-flex items-center text-xs font-semibold bg-hafalohaCream text-warm-700 px-3 py-1 rounded-full hover:bg-hafalohaGold/30 transition"
                       >
                         {collection.name}
                       </Link>
@@ -568,13 +568,13 @@ export default function ProductDetailPage() {
               )}
 
               {/* Name & Price */}
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3">{product.name}</h1>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-warm-900 mb-3">{product.name}</h1>
               <div className="flex items-baseline gap-3 mb-6">
                 <span className="text-3xl sm:text-4xl font-bold text-hafalohaRed">
                   {formatPrice(displayPrice)}
                 </span>
                 {product.sale_price_cents && product.sale_price_cents < product.base_price_cents && (
-                  <span className="text-xl text-gray-400 line-through">
+                  <span className="text-xl text-warm-400 line-through">
                     {formatPrice(product.base_price_cents)}
                   </span>
                 )}
@@ -583,7 +583,7 @@ export default function ProductDetailPage() {
               {/* Description */}
               <div className="mb-8">
                 <div 
-                  className="prose prose-sm text-gray-700 mb-4"
+                  className="prose prose-sm text-warm-700 mb-4"
                   dangerouslySetInnerHTML={{ __html: product.description }}
                 />
                 
@@ -608,10 +608,10 @@ export default function ProductDetailPage() {
                 <div className="mb-8 space-y-5">
                   {Array.from(optionTypes.entries()).map(([optionKey, values]) => (
                     <div key={optionKey}>
-                      <label className="block text-sm font-semibold text-gray-900 mb-2">
+                      <label className="block text-sm font-semibold text-warm-900 mb-2">
                         {formatOptionLabel(optionKey)}
                         {selectedOptions[optionKey] && (
-                          <span className="ml-2 font-normal text-gray-600">
+                          <span className="ml-2 font-normal text-warm-600">
                             — {selectedOptions[optionKey]}
                           </span>
                         )}
@@ -636,7 +636,7 @@ export default function ProductDetailPage() {
                 /* Legacy flat variant grid (backward compatibility) */
                 product.variants.length > 0 && (
                   <div className="mb-8">
-                    <label className="block text-sm font-semibold text-gray-900 mb-3">
+                    <label className="block text-sm font-semibold text-warm-900 mb-3">
                       Select Option:
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -656,8 +656,8 @@ export default function ProductDetailPage() {
                               selectedVariant?.id === variant.id
                                 ? 'border-hafalohaRed bg-red-50 text-hafalohaRed'
                                 : variantAvailable
-                                ? 'border-gray-300 hover:border-hafalohaRed'
-                                : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
+                                ? 'border-warm-300 hover:border-hafalohaRed'
+                                : 'border-warm-200 bg-warm-50 text-warm-400 cursor-not-allowed'
                             }`}
                           >
                             <div className="text-sm font-medium">{variant.display_name}</div>
@@ -678,13 +678,13 @@ export default function ProductDetailPage() {
               {/* Quantity Selector */}
               {isVariantAvailable && selectedVariant && (
                 <div className="mb-6">
-                  <label className="block text-sm font-semibold text-gray-900 mb-3">
+                  <label className="block text-sm font-semibold text-warm-900 mb-3">
                     Quantity:
                   </label>
                   <div className="flex items-center gap-4">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-10 h-10 flex items-center justify-center border-2 border-gray-300 rounded-lg hover:border-hafalohaRed transition"
+                      className="w-10 h-10 flex items-center justify-center border-2 border-warm-300 rounded-lg hover:border-hafalohaRed transition"
                       disabled={quantity <= 1}
                     >
                       −
@@ -696,20 +696,20 @@ export default function ProductDetailPage() {
                         const val = parseInt(e.target.value) || 1;
                         setQuantity(Math.min(Math.max(1, val), maxQuantity));
                       }}
-                      className="w-20 text-center text-lg font-semibold border-2 border-gray-300 rounded-lg py-2"
+                      className="w-20 text-center text-lg font-semibold border-2 border-warm-300 rounded-lg py-2"
                       style={{ textAlign: 'center' }}
                       min={1}
                       max={maxQuantity}
                     />
                     <button
                       onClick={() => setQuantity(Math.min(maxQuantity, quantity + 1))}
-                      className="w-10 h-10 flex items-center justify-center border-2 border-gray-300 rounded-lg hover:border-hafalohaRed transition"
+                      className="w-10 h-10 flex items-center justify-center border-2 border-warm-300 rounded-lg hover:border-hafalohaRed transition"
                       disabled={quantity >= maxQuantity}
                     >
                       +
                     </button>
                     {product.inventory_level !== 'none' && maxQuantity > 0 && (
-                      <span className="text-sm text-gray-600">
+                      <span className="text-sm text-warm-600">
                         {maxQuantity} available
                       </span>
                     )}
@@ -724,7 +724,7 @@ export default function ProductDetailPage() {
                   className={`w-full py-4 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center gap-3 ${
                     canAddToCart && !isAdding
                       ? 'btn-primary shadow-lg hover:shadow-xl'
-                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-warm-200 text-warm-400 cursor-not-allowed'
                   }`}
                   disabled={!canAddToCart || isAdding}
                 >
@@ -753,14 +753,14 @@ export default function ProductDetailPage() {
                 </button>
 
                 {/* Trust Badges */}
-                <div className="flex items-center justify-center gap-6 mt-6 pt-6 border-t border-gray-100">
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                <div className="flex items-center justify-center gap-6 mt-6 pt-6 border-t border-warm-100">
+                  <div className="flex items-center gap-2 text-sm text-warm-500">
                     <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                     </svg>
                     Secure Checkout
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <div className="flex items-center gap-2 text-sm text-warm-500">
                     <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
@@ -770,25 +770,25 @@ export default function ProductDetailPage() {
               </div>
 
               {/* Product Details */}
-              <div className="mt-8 pt-6 border-t border-gray-100">
-                <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Product Details</h3>
+              <div className="mt-8 pt-6 border-t border-warm-100">
+                <h3 className="text-sm font-semibold text-warm-500 uppercase tracking-wider mb-4">Product Details</h3>
                 <dl className="space-y-3">
                   {product.vendor && (
                     <div className="flex items-center">
-                      <dt className="text-gray-500 w-28 text-sm">Vendor</dt>
-                      <dd className="text-gray-900 font-medium text-sm">{product.vendor}</dd>
+                      <dt className="text-warm-500 w-28 text-sm">Vendor</dt>
+                      <dd className="text-warm-900 font-medium text-sm">{product.vendor}</dd>
                     </div>
                   )}
                   {selectedVariant && (
                     <>
                       <div className="flex items-center">
-                        <dt className="text-gray-500 w-28 text-sm">SKU</dt>
-                        <dd className="text-gray-900 font-mono text-sm bg-gray-50 px-2 py-0.5 rounded">{selectedVariant.sku}</dd>
+                        <dt className="text-warm-500 w-28 text-sm">SKU</dt>
+                        <dd className="text-warm-900 font-mono text-sm bg-warm-50 px-2 py-0.5 rounded">{selectedVariant.sku}</dd>
                       </div>
                       {selectedVariant.weight_oz && (
                         <div className="flex items-center">
-                          <dt className="text-gray-500 w-28 text-sm">Weight</dt>
-                          <dd className="text-gray-900 text-sm">{selectedVariant.weight_oz} oz</dd>
+                          <dt className="text-warm-500 w-28 text-sm">Weight</dt>
+                          <dd className="text-warm-900 text-sm">{selectedVariant.weight_oz} oz</dd>
                         </div>
                       )}
                     </>
@@ -812,11 +812,11 @@ export default function ProductDetailPage() {
             >
               {/* Header */}
               <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
-                <h3 className="text-xl font-bold text-gray-900">Size Guide</h3>
+                <h3 className="text-xl font-bold text-warm-900">Size Guide</h3>
                 <button
                   type="button"
                   onClick={() => setShowSizeGuide(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className="text-warm-400 hover:text-warm-600 transition-colors"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -832,7 +832,7 @@ export default function ProductDetailPage() {
                   className="w-full h-auto"
                   style={{ maxHeight: '70vh', objectFit: 'contain' }}
                 />
-                <p className="text-sm text-gray-500 mt-4 text-center">
+                <p className="text-sm text-warm-500 mt-4 text-center">
                   Click outside to close
                 </p>
               </div>

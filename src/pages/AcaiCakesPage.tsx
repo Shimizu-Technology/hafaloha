@@ -54,7 +54,7 @@ const StepCard = memo(function StepCard({
           ? 'border-hafalohaRed shadow-lg bg-white' 
           : isComplete 
             ? 'border-green-200 bg-green-50/50 hover:border-green-300 cursor-pointer' 
-            : 'border-gray-100 bg-gray-50/50'
+            : 'border-warm-100 bg-warm-50/50'
       }`}
     >
       {/* Step Header */}
@@ -72,7 +72,7 @@ const StepCard = memo(function StepCard({
             ? 'bg-green-500 text-white' 
             : isActive 
               ? 'bg-hafalohaRed text-white shadow-md' 
-              : 'bg-gray-200 text-gray-500'
+              : 'bg-warm-200 text-warm-500'
         }`}>
           {isComplete && !isActive ? (
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,21 +86,21 @@ const StepCard = memo(function StepCard({
         {/* Step Title & Summary */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className={`font-semibold ${isActive ? 'text-gray-900' : 'text-gray-700'}`}>
+            <span className={`font-semibold ${isActive ? 'text-warm-900' : 'text-warm-700'}`}>
               {step.title}
             </span>
             {step.optional && (
-              <span className="text-xs text-gray-400 font-normal">(Optional)</span>
+              <span className="text-xs text-warm-400 font-normal">(Optional)</span>
             )}
           </div>
           {!isActive && summary && (
-            <p className="text-sm text-gray-500 truncate mt-0.5">{summary}</p>
+            <p className="text-sm text-warm-500 truncate mt-0.5">{summary}</p>
           )}
         </div>
 
         {/* Expand/Collapse Icon */}
         <div className={`shrink-0 transition-transform ${isActive ? 'rotate-180' : ''}`}>
-          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-warm-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
         </div>
@@ -421,10 +421,10 @@ export default function AcaiCakesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-warm-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hafalohaRed mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-warm-600">Loading...</p>
         </div>
       </div>
     );
@@ -432,11 +432,11 @@ export default function AcaiCakesPage() {
 
   if (!config || !config.settings.active) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-warm-50 flex items-center justify-center px-4">
         <div className="text-center max-w-md">
           <div className="text-6xl mb-4">🍰</div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Acai Cakes Coming Soon!</h1>
-          <p className="text-gray-600 mb-6">
+          <h1 className="text-2xl font-bold text-warm-900 mb-2">Acai Cakes Coming Soon!</h1>
+          <p className="text-warm-600 mb-6">
             We're not currently accepting Acai Cake orders online. 
             Please call us to place an order!
           </p>
@@ -492,14 +492,14 @@ export default function AcaiCakesPage() {
                   <span className="inline-block text-sm font-medium text-hafalohaRed uppercase tracking-wider mb-2">
                     Order Fresh
                   </span>
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 text-gray-900">
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 text-warm-900">
                     {config.settings.name}
                   </h1>
                   <p className="text-3xl font-bold mb-3 text-hafalohaRed">
                     {config.settings.formatted_price}
                   </p>
                   {config.settings.description && (
-                    <p className="max-w-xl whitespace-pre-line text-gray-600 leading-relaxed text-sm">
+                    <p className="max-w-xl whitespace-pre-line text-warm-600 leading-relaxed text-sm">
                       {config.settings.description}
                     </p>
                   )}
@@ -510,14 +510,14 @@ export default function AcaiCakesPage() {
                 <span className="inline-block text-sm font-medium text-hafalohaRed uppercase tracking-wider mb-2">
                   Order Fresh
                 </span>
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 text-gray-900">
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 text-warm-900">
                   {config.settings.name}
                 </h1>
                 <p className="text-3xl font-bold mb-3 text-hafalohaRed">
                   {config.settings.formatted_price}
                 </p>
                 {config.settings.description && (
-                  <p className="max-w-xl mx-auto whitespace-pre-line text-gray-600 leading-relaxed text-sm">
+                  <p className="max-w-xl mx-auto whitespace-pre-line text-warm-600 leading-relaxed text-sm">
                     {config.settings.description}
                   </p>
                 )}
@@ -528,16 +528,16 @@ export default function AcaiCakesPage() {
       </div>
 
       {/* Progress Bar */}
-      <div className="sticky top-0 z-20 bg-white border-b border-gray-100 shadow-sm">
+      <div className="sticky top-0 z-20 bg-white border-b border-warm-100 shadow-sm">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center gap-3">
-            <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div className="flex-1 h-2 bg-warm-100 rounded-full overflow-hidden">
               <div 
                 className="h-full bg-hafalohaRed rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
-            <span className="text-sm font-medium text-gray-500 whitespace-nowrap">
+            <span className="text-sm font-medium text-warm-500 whitespace-nowrap">
               {completedStepsCount}/{steps.length}
             </span>
           </div>
@@ -560,7 +560,7 @@ export default function AcaiCakesPage() {
           {/* Step 1: Select Date */}
           <StepCard {...getStepCardProps(steps.find(s => s.id === 'date')!)}>
             {availableDates.length === 0 ? (
-              <p className="text-gray-500 italic">No available pickup dates at this time.</p>
+              <p className="text-warm-500 italic">No available pickup dates at this time.</p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                 {availableDates.slice(0, 12).map((dateInfo) => {
@@ -575,11 +575,11 @@ export default function AcaiCakesPage() {
                       className={`p-3 rounded-xl border-2 transition text-center ${
                         isSelected
                           ? 'border-hafalohaRed bg-red-50 shadow-sm'
-                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                          : 'border-warm-200 hover:border-warm-300 hover:bg-warm-50'
                       }`}
                     >
-                      <div className="text-xs text-gray-500 uppercase tracking-wide">{dateInfo.day_name}</div>
-                      <div className="text-lg font-bold text-gray-900 mt-1">
+                      <div className="text-xs text-warm-500 uppercase tracking-wide">{dateInfo.day_name}</div>
+                      <div className="text-lg font-bold text-warm-900 mt-1">
                         {date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </div>
                       <div className="text-xs text-green-600 mt-1 font-medium">
@@ -595,13 +595,13 @@ export default function AcaiCakesPage() {
           {/* Step 2: Select Time */}
           <StepCard {...getStepCardProps(steps.find(s => s.id === 'time')!)}>
             {!selectedDate ? (
-              <p className="text-gray-500 italic">Please select a date first.</p>
+              <p className="text-warm-500 italic">Please select a date first.</p>
             ) : loadingSlots ? (
               <div className="text-center py-6">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-hafalohaRed mx-auto"></div>
               </div>
             ) : timeSlots.length === 0 ? (
-              <p className="text-gray-500 italic">No time slots available for this date.</p>
+              <p className="text-warm-500 italic">No time slots available for this date.</p>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {timeSlots.map((slot) => {
@@ -615,15 +615,15 @@ export default function AcaiCakesPage() {
                       onClick={() => handleTimeSelect(slot.slot_value)}
                       className={`p-3 rounded-xl border-2 transition ${
                         !slot.available
-                          ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+                          ? 'border-warm-200 bg-warm-100 text-warm-400 cursor-not-allowed'
                           : isSelected
-                          ? 'border-hafalohaRed bg-red-50 text-gray-900 shadow-sm'
-                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-900'
+                          ? 'border-hafalohaRed bg-red-50 text-warm-900 shadow-sm'
+                          : 'border-warm-200 hover:border-warm-300 hover:bg-warm-50 text-warm-900'
                       }`}
                     >
                       <div className="font-semibold">{slot.time}</div>
                       {!slot.available && (
-                        <div className="text-xs text-gray-400">Fully booked</div>
+                        <div className="text-xs text-warm-400">Fully booked</div>
                       )}
                     </button>
                   );
@@ -646,20 +646,20 @@ export default function AcaiCakesPage() {
                     className={`w-full p-4 rounded-xl border-2 transition text-left flex items-center gap-4 ${
                       isSelected
                         ? 'border-hafalohaRed bg-red-50 shadow-sm'
-                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                        : 'border-warm-200 hover:border-warm-300 hover:bg-warm-50'
                     }`}
                   >
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                      isSelected ? 'border-hafalohaRed bg-hafalohaRed' : 'border-gray-300'
+                      isSelected ? 'border-hafalohaRed bg-hafalohaRed' : 'border-warm-300'
                     }`}>
                       {isSelected && (
                         <div className="w-2 h-2 bg-white rounded-full" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-gray-900">{crust.name}</div>
+                      <div className="font-semibold text-warm-900">{crust.name}</div>
                       {crust.description && (
-                        <div className="text-sm text-gray-500 mt-0.5">{crust.description}</div>
+                        <div className="text-sm text-warm-500 mt-0.5">{crust.description}</div>
                       )}
                     </div>
                     <div className={`font-medium shrink-0 ${crust.price_cents > 0 ? 'text-hafalohaRed' : 'text-green-600'}`}>
@@ -677,15 +677,15 @@ export default function AcaiCakesPage() {
               <button
                 type="button"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="w-14 h-14 rounded-full border-2 border-gray-300 flex items-center justify-center text-2xl font-bold hover:border-hafalohaRed hover:text-hafalohaRed transition"
+                className="w-14 h-14 rounded-full border-2 border-warm-300 flex items-center justify-center text-2xl font-bold hover:border-hafalohaRed hover:text-hafalohaRed transition"
               >
                 −
               </button>
-              <span className="text-4xl font-bold text-gray-900 w-20 text-center">{quantity}</span>
+              <span className="text-4xl font-bold text-warm-900 w-20 text-center">{quantity}</span>
               <button
                 type="button"
                 onClick={() => setQuantity(Math.min(10, quantity + 1))}
-                className="w-14 h-14 rounded-full border-2 border-gray-300 flex items-center justify-center text-2xl font-bold hover:border-hafalohaRed hover:text-hafalohaRed transition"
+                className="w-14 h-14 rounded-full border-2 border-warm-300 flex items-center justify-center text-2xl font-bold hover:border-hafalohaRed hover:text-hafalohaRed transition"
               >
                 +
               </button>
@@ -712,7 +712,7 @@ export default function AcaiCakesPage() {
           {config.settings.placard_enabled && config.placard_options.length > 0 && (
             <StepCard {...getStepCardProps(steps.find(s => s.id === 'placard')!)}>
               <div className="space-y-4">
-                <label className="flex items-center gap-3 cursor-pointer p-3 rounded-xl border-2 border-gray-200 hover:border-gray-300 transition">
+                <label className="flex items-center gap-3 cursor-pointer p-3 rounded-xl border-2 border-warm-200 hover:border-warm-300 transition">
                   <input
                     type="checkbox"
                     checked={includePlacard}
@@ -723,9 +723,9 @@ export default function AcaiCakesPage() {
                         setPlacardText('');
                       }
                     }}
-                    className="w-5 h-5 text-hafalohaRed border-gray-300 rounded focus:ring-hafalohaRed"
+                    className="w-5 h-5 text-hafalohaRed border-warm-300 rounded focus:ring-hafalohaRed"
                   />
-                  <span className="text-gray-700 font-medium">
+                  <span className="text-warm-700 font-medium">
                     Yes, add a message placard
                   </span>
                 </label>
@@ -751,12 +751,12 @@ export default function AcaiCakesPage() {
                             className={`p-3 rounded-xl border-2 transition text-left ${
                               isSelected
                                 ? 'border-hafalohaRed bg-red-50'
-                                : 'border-gray-200 hover:border-gray-300'
+                                : 'border-warm-200 hover:border-warm-300'
                             }`}
                           >
                             <div className="flex justify-between items-start">
-                              <div className="font-medium text-gray-900">{placard.name}</div>
-                              <div className="text-sm text-gray-600">{placard.formatted_price}</div>
+                              <div className="font-medium text-warm-900">{placard.name}</div>
+                              <div className="text-sm text-warm-600">{placard.formatted_price}</div>
                             </div>
                           </button>
                         );
@@ -765,7 +765,7 @@ export default function AcaiCakesPage() {
 
                     {selectedPlacardOption && (
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="block text-sm font-medium text-warm-700 mb-1">
                           {isCustomPlacard ? 'Your Custom Message *' : 'Personalize Your Message (Optional)'}
                         </label>
                         <input
@@ -774,9 +774,9 @@ export default function AcaiCakesPage() {
                           onChange={(e) => setPlacardText(e.target.value)}
                           placeholder={isCustomPlacard ? 'Enter your custom message' : `e.g., ${selectedPlacardOptionDetails?.name} to Mom!`}
                           maxLength={50}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                          className="w-full px-4 py-3 border border-warm-300 rounded-xl focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
                         />
-                        <p className="text-xs text-gray-500 mt-1">{placardText.length}/50 characters</p>
+                        <p className="text-xs text-warm-500 mt-1">{placardText.length}/50 characters</p>
                       </div>
                     )}
                   </div>
@@ -802,45 +802,45 @@ export default function AcaiCakesPage() {
           <StepCard {...getStepCardProps(steps.find(s => s.id === 'contact')!)}>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                <label className="block text-sm font-medium text-warm-700 mb-1">Full Name *</label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                  className="w-full px-4 py-3 border border-warm-300 rounded-xl focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
                   placeholder="John Doe"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                <label className="block text-sm font-medium text-warm-700 mb-1">Email *</label>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                  className="w-full px-4 py-3 border border-warm-300 rounded-xl focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
                   placeholder="you@email.com"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
+                <label className="block text-sm font-medium text-warm-700 mb-1">Phone *</label>
                 <input
                   type="tel"
                   required
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                  className="w-full px-4 py-3 border border-warm-300 rounded-xl focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
                   placeholder="(671) 123-4567"
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Special Instructions (Optional)</label>
+                <label className="block text-sm font-medium text-warm-700 mb-1">Special Instructions (Optional)</label>
                 <textarea
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                  className="w-full px-4 py-3 border border-warm-300 rounded-xl focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
                   placeholder="Any special requests..."
                 />
               </div>
@@ -848,9 +848,9 @@ export default function AcaiCakesPage() {
           </StepCard>
 
           {/* Order Summary - Always Visible */}
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-5 sm:p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-              <svg className="w-5 h-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white rounded-2xl shadow-lg border border-warm-200 p-5 sm:p-6">
+            <h2 className="text-lg font-bold text-warm-900 mb-4 flex items-center">
+              <svg className="w-5 h-5 text-warm-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
               Order Summary
@@ -858,34 +858,34 @@ export default function AcaiCakesPage() {
             
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-gray-600">{config.settings.name} × {quantity}</span>
-                <span className="text-gray-900 font-medium">{formatPrice(config.settings.base_price_cents * quantity)}</span>
+                <span className="text-warm-600">{config.settings.name} × {quantity}</span>
+                <span className="text-warm-900 font-medium">{formatPrice(config.settings.base_price_cents * quantity)}</span>
               </div>
               
               {selectedCrustOption && selectedCrustOption.price_cents > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-gray-600">{selectedCrustOption.name} × {quantity}</span>
-                  <span className="text-gray-900 font-medium">{formatPrice(selectedCrustOption.price_cents * quantity)}</span>
+                  <span className="text-warm-600">{selectedCrustOption.name} × {quantity}</span>
+                  <span className="text-warm-900 font-medium">{formatPrice(selectedCrustOption.price_cents * quantity)}</span>
                 </div>
               )}
               
               {includePlacard && selectedPlacardOptionDetails && selectedPlacardOptionDetails.price_cents > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-gray-600">{selectedPlacardOptionDetails.name} × {quantity}</span>
-                  <span className="text-gray-900 font-medium">{formatPrice(selectedPlacardOptionDetails.price_cents * quantity)}</span>
+                  <span className="text-warm-600">{selectedPlacardOptionDetails.name} × {quantity}</span>
+                  <span className="text-warm-900 font-medium">{formatPrice(selectedPlacardOptionDetails.price_cents * quantity)}</span>
                 </div>
               )}
               
-              <div className="border-t border-gray-200 pt-3 mt-3">
+              <div className="border-t border-warm-200 pt-3 mt-3">
                 <div className="flex justify-between text-lg font-bold">
-                  <span className="text-gray-900">Total</span>
+                  <span className="text-warm-900">Total</span>
                   <span className="text-hafalohaRed">{formatPrice(calculateTotal())}</span>
                 </div>
               </div>
             </div>
 
             {selectedDate && selectedSlot && (
-              <div className="mt-4 p-3 bg-blue-50 rounded-xl text-xs text-gray-700 border border-blue-100">
+              <div className="mt-4 p-3 bg-blue-50 rounded-xl text-xs text-warm-700 border border-blue-100">
                 <div className="flex items-center gap-2 mb-1">
                   <svg className="w-3.5 h-3.5 text-hafalohaRed" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -933,7 +933,7 @@ export default function AcaiCakesPage() {
 
           {/* Phone Order Alternative */}
           <div className="text-center py-4">
-            <p className="text-gray-500 text-sm mb-1">Prefer to order by phone?</p>
+            <p className="text-warm-500 text-sm mb-1">Prefer to order by phone?</p>
             <a 
               href={`tel:${config.settings.pickup_phone}`}
               className="inline-flex items-center gap-2 text-hafalohaRed font-semibold hover:text-red-700 transition text-sm"

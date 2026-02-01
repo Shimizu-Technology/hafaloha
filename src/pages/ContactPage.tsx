@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import FadeIn from '../components/animations/FadeIn';
 import { StaggerContainer, StaggerItem } from '../components/animations/StaggerContainer';
 import Breadcrumbs from '../components/Breadcrumbs';
@@ -37,12 +36,12 @@ export default function ContactPage() {
       <div className="bg-warm">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24">
           <FadeIn direction="none">
-            <h1 className="text-4xl sm:text-5xl font-bold text-center mb-6 text-gray-900 tracking-tight">
+            <h1 className="text-4xl sm:text-5xl font-bold text-center mb-6 text-warm-900 tracking-tight">
               Contact Us
             </h1>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <p className="text-lg sm:text-xl text-center max-w-2xl mx-auto text-gray-600">
+            <p className="text-lg sm:text-xl text-center max-w-2xl mx-auto text-warm-600">
               We'd love to hear from you! Reach out with questions, feedback, or just to say Håfa Adai.
             </p>
           </FadeIn>
@@ -58,8 +57,8 @@ export default function ContactPage() {
               {submitted ? (
                 <div className="rounded-lg p-8 bg-warm text-center">
                   <div className="text-5xl mb-4">🤙</div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Mahalo for reaching out!</h2>
-                  <p className="text-gray-600 mb-6">
+                  <h2 className="text-2xl font-bold text-warm-900 mb-2">Mahalo for reaching out!</h2>
+                  <p className="text-warm-600 mb-6">
                     We've received your message and will get back to you as soon as possible.
                   </p>
                   <button
@@ -73,7 +72,7 @@ export default function ContactPage() {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="name" className="block text-sm font-medium text-warm-700 mb-2">
                         Your Name
                       </label>
                       <input
@@ -83,12 +82,12 @@ export default function ContactPage() {
                         required
                         value={formData.name}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-hafalohaRed/20 focus:border-hafalohaRed transition text-gray-900"
+                        className="w-full px-4 py-3 rounded-lg border border-warm-200 focus:outline-none focus:ring-2 focus:ring-hafalohaRed/20 focus:border-hafalohaRed transition text-warm-900"
                         placeholder="John Doe"
                       />
                     </div>
                     <div>
-                      <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                      <label htmlFor="email" className="block text-sm font-medium text-warm-700 mb-2">
                         Email Address
                       </label>
                       <input
@@ -98,13 +97,13 @@ export default function ContactPage() {
                         required
                         value={formData.email}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-hafalohaRed/20 focus:border-hafalohaRed transition text-gray-900"
+                        className="w-full px-4 py-3 rounded-lg border border-warm-200 focus:outline-none focus:ring-2 focus:ring-hafalohaRed/20 focus:border-hafalohaRed transition text-warm-900"
                         placeholder="you@example.com"
                       />
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="subject" className="block text-sm font-medium text-warm-700 mb-2">
                       Subject
                     </label>
                     <select
@@ -113,7 +112,7 @@ export default function ContactPage() {
                       required
                       value={formData.subject}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-hafalohaRed/20 focus:border-hafalohaRed transition text-gray-900 bg-white"
+                      className="w-full px-4 py-3 rounded-lg border border-warm-200 focus:outline-none focus:ring-2 focus:ring-hafalohaRed/20 focus:border-hafalohaRed transition text-warm-900 bg-white"
                     >
                       <option value="">Select a subject...</option>
                       <option value="general">General Inquiry</option>
@@ -125,7 +124,7 @@ export default function ContactPage() {
                     </select>
                   </div>
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                    <label htmlFor="message" className="block text-sm font-medium text-warm-700 mb-2">
                       Message
                     </label>
                     <textarea
@@ -135,13 +134,13 @@ export default function ContactPage() {
                       rows={6}
                       value={formData.message}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-hafalohaRed/20 focus:border-hafalohaRed transition text-gray-900 resize-none"
+                      className="w-full px-4 py-3 rounded-lg border border-warm-200 focus:outline-none focus:ring-2 focus:ring-hafalohaRed/20 focus:border-hafalohaRed transition text-warm-900 resize-none"
                       placeholder="How can we help you?"
                     />
                   </div>
                   <button
                     type="submit"
-                    className="w-full sm:w-auto px-8 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition"
+                    className="w-full sm:w-auto px-8 py-3 bg-warm-900 text-white rounded-lg font-medium hover:bg-warm-800 transition"
                   >
                     Send Message
                   </button>
@@ -163,8 +162,8 @@ export default function ContactPage() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-900 mb-1">Email</h3>
-                      <a href="mailto:info@hafaloha.com" className="text-gray-600 hover:text-hafalohaRed transition text-sm">
+                      <h3 className="font-medium text-warm-900 mb-1">Email</h3>
+                      <a href="mailto:info@hafaloha.com" className="text-warm-600 hover:text-hafalohaRed transition text-sm">
                         info@hafaloha.com
                       </a>
                     </div>
@@ -182,8 +181,8 @@ export default function ContactPage() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-900 mb-1">Phone</h3>
-                      <a href="tel:+16714727733" className="text-gray-600 hover:text-hafalohaRed transition text-sm">
+                      <h3 className="font-medium text-warm-900 mb-1">Phone</h3>
+                      <a href="tel:+16714727733" className="text-warm-600 hover:text-hafalohaRed transition text-sm">
                         +1 (671) 472-7733
                       </a>
                     </div>
@@ -202,8 +201,8 @@ export default function ContactPage() {
                       </svg>
                     </div>
                     <div>
-                      <h3 className="font-medium text-gray-900 mb-1">Visit Us</h3>
-                      <address className="text-gray-600 text-sm not-italic leading-relaxed">
+                      <h3 className="font-medium text-warm-900 mb-1">Visit Us</h3>
+                      <address className="text-warm-600 text-sm not-italic leading-relaxed">
                         121 E. Marine Corps Dr<br />
                         Suite 1-103 & Suite 1-104<br />
                         Hagåtña, Guam 96910
@@ -216,13 +215,13 @@ export default function ContactPage() {
               {/* Social Links */}
               <StaggerItem>
                 <div className="rounded-lg p-6 bg-warm">
-                  <h3 className="font-medium text-gray-900 mb-4">Follow Us</h3>
+                  <h3 className="font-medium text-warm-900 mb-4">Follow Us</h3>
                   <div className="flex gap-3">
                     <a
                       href="https://www.instagram.com/hafaloha"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-gray-500 hover:text-hafalohaRed transition"
+                      className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-warm-500 hover:text-hafalohaRed transition"
                       aria-label="Instagram"
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -233,7 +232,7 @@ export default function ContactPage() {
                       href="https://www.facebook.com/hafaloha"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-gray-500 hover:text-hafalohaRed transition"
+                      className="w-10 h-10 bg-white rounded-lg flex items-center justify-center text-warm-500 hover:text-hafalohaRed transition"
                       aria-label="Facebook"
                     >
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

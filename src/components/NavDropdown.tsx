@@ -90,7 +90,7 @@ export default function NavDropdown({ onItemClick, darkMode = false }: NavDropdo
         className={`flex items-center font-semibold transition py-2 ${
           darkMode 
             ? 'text-white hover:text-hafalohaGold' 
-            : 'text-gray-700 hover:text-hafalohaRed nav-link-hover'
+            : 'text-warm-700 hover:text-hafalohaRed nav-link-hover'
         }`}
         onClick={() => setIsOpen(!isOpen)}
       >
@@ -107,7 +107,7 @@ export default function NavDropdown({ onItemClick, darkMode = false }: NavDropdo
 
       {/* Mega Menu Dropdown */}
       {isOpen && (
-        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 animate-slide-down overflow-hidden"
+        <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white rounded-xl shadow-2xl border border-warm-100 z-50 animate-slide-down overflow-hidden"
              style={{ width: '580px' }}>
           <div className="p-6">
             {/* Featured Categories with Images */}
@@ -119,7 +119,7 @@ export default function NavDropdown({ onItemClick, darkMode = false }: NavDropdo
                   className="group relative overflow-hidden rounded-lg"
                   onClick={handleItemClick}
                 >
-                  <div className="aspect-4/3 bg-gray-100 overflow-hidden">
+                  <div className="aspect-4/3 bg-warm-100 overflow-hidden">
                     <img 
                       src={category.image} 
                       alt={category.name}
@@ -136,9 +136,9 @@ export default function NavDropdown({ onItemClick, darkMode = false }: NavDropdo
             </div>
 
             {/* Collections Grid */}
-            <div className="border-t border-gray-100 pt-4">
+            <div className="border-t border-warm-100 pt-4">
               <div className="flex items-center justify-between mb-3">
-                <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Collections</h4>
+                <h4 className="text-xs font-semibold text-warm-500 uppercase tracking-wider">Collections</h4>
                 <Link
                   to="/collections"
                   className="text-xs font-medium text-hafalohaRed hover:underline"
@@ -149,20 +149,20 @@ export default function NavDropdown({ onItemClick, darkMode = false }: NavDropdo
               </div>
               
               {loading ? (
-                <div className="text-gray-400 text-sm py-2">Loading...</div>
+                <div className="text-warm-400 text-sm py-2">Loading...</div>
               ) : (
                 <div className="grid grid-cols-3 gap-2">
                   {collections.slice(0, 6).map((collection) => (
                     <Link
                       key={collection.id}
                       to={`/collections/${collection.slug}`}
-                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-gray-700 hover:bg-hafalohaCream hover:text-hafalohaRed transition text-sm font-medium"
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-warm-700 hover:bg-hafalohaCream hover:text-hafalohaRed transition text-sm font-medium"
                       onClick={handleItemClick}
                     >
                       <span className="text-hafalohaGold">●</span>
                       {collection.name}
                       {collection.product_count > 0 && (
-                        <span className="ml-auto text-xs text-gray-400">
+                        <span className="ml-auto text-xs text-warm-400">
                           {collection.product_count}
                         </span>
                       )}
@@ -173,10 +173,10 @@ export default function NavDropdown({ onItemClick, darkMode = false }: NavDropdo
             </div>
 
             {/* Quick Links */}
-            <div className="border-t border-gray-100 mt-4 pt-4 flex items-center justify-between">
+            <div className="border-t border-warm-100 mt-4 pt-4 flex items-center justify-between">
               <Link
                 to="/products"
-                className="flex items-center gap-2 text-gray-700 hover:text-hafalohaRed transition font-semibold"
+                className="flex items-center gap-2 text-warm-700 hover:text-hafalohaRed transition font-semibold"
                 onClick={handleItemClick}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

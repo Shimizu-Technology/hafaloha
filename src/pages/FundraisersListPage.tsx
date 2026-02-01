@@ -64,7 +64,7 @@ export default function FundraisersListPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-warm-50">
-        <div className="bg-white border-b border-gray-100">
+        <div className="bg-white border-b border-warm-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
             <div className="text-center">
               <div className="animate-pulse bg-warm-200 rounded-full w-16 h-16 mx-auto mb-6" />
@@ -104,16 +104,16 @@ export default function FundraisersListPage() {
   const endedFundraisers = fundraisers.filter(f => f.is_ended);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-warm-50">
       {/* Hero Section */}
-      <div className="bg-white border-b border-gray-100">
+      <div className="bg-white border-b border-warm-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <FadeIn>
             <div className="text-center max-w-3xl mx-auto">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-hafalohaRed/10 mb-6">
                 <Heart className="w-8 h-8 text-hafalohaRed" />
               </div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+              <h1 className="text-3xl sm:text-4xl font-bold text-warm-900 mb-4">
                 Support Our Fundraisers
               </h1>
               <p className="text-lg text-warm-500">
@@ -129,7 +129,7 @@ export default function FundraisersListPage() {
         {/* Active Fundraisers */}
         {activeFundraisers.length > 0 ? (
           <section className="mb-16">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+            <h2 className="text-2xl font-bold text-warm-900 mb-6 flex items-center">
               <span className="w-2 h-2 bg-green-500 rounded-full mr-3 animate-pulse"></span>
               Active Fundraisers
             </h2>
@@ -138,7 +138,7 @@ export default function FundraisersListPage() {
                 <StaggerItem key={fundraiser.id}>
                 <Link
                   to={`/fundraisers/${fundraiser.slug}`}
-                  className="group bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg hover:border-hafalohaRed/30 transition-all duration-300 block"
+                  className="group bg-white rounded-xl shadow-sm border border-warm-200 overflow-hidden hover:shadow-lg hover:border-hafalohaRed/30 transition-all duration-300 block"
                 >
                   {/* Image or Placeholder */}
                   <div className="aspect-video bg-linear-to-br from-hafalohaRed/10 to-hafalohaRed/5 relative overflow-hidden">
@@ -163,12 +163,12 @@ export default function FundraisersListPage() {
                   </div>
 
                   <div className="p-5">
-                    <h3 className="text-lg font-semibold text-gray-900 group-hover:text-hafalohaRed transition-colors mb-2">
+                    <h3 className="text-lg font-semibold text-warm-900 group-hover:text-hafalohaRed transition-colors mb-2">
                       {fundraiser.name}
                     </h3>
                     
                     {fundraiser.description && (
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-2">
+                      <p className="text-warm-600 text-sm mb-4 line-clamp-2">
                         {fundraiser.description}
                       </p>
                     )}
@@ -177,14 +177,14 @@ export default function FundraisersListPage() {
                     {fundraiser.goal_amount_cents && fundraiser.goal_amount_cents > 0 && (
                       <div className="mb-4">
                         <div className="flex justify-between text-sm mb-1">
-                          <span className="text-gray-600">
+                          <span className="text-warm-600">
                             {formatPrice(fundraiser.raised_amount_cents || 0)} raised
                           </span>
-                          <span className="text-gray-500">
+                          <span className="text-warm-500">
                             {formatPrice(fundraiser.goal_amount_cents)} goal
                           </span>
                         </div>
-                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                        <div className="h-2 bg-warm-100 rounded-full overflow-hidden">
                           <div
                             className="h-full bg-hafalohaRed rounded-full transition-all duration-500"
                             style={{ width: `${Math.min(fundraiser.progress_percentage, 100)}%` }}
@@ -194,7 +194,7 @@ export default function FundraisersListPage() {
                     )}
 
                     {/* Meta Info */}
-                    <div className="flex items-center justify-between text-sm text-gray-500">
+                    <div className="flex items-center justify-between text-sm text-warm-500">
                       <div className="flex items-center space-x-4">
                         {fundraiser.end_date && (
                           <span className="flex items-center">
@@ -213,12 +213,12 @@ export default function FundraisersListPage() {
           </section>
         ) : (
           <section className="mb-16">
-            <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
-              <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            <div className="text-center py-16 bg-white rounded-xl border border-warm-200">
+              <Heart className="w-16 h-16 text-warm-300 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-warm-900 mb-2">
                 No Active Fundraisers
               </h2>
-              <p className="text-gray-600 max-w-md mx-auto">
+              <p className="text-warm-600 max-w-md mx-auto">
                 Check back soon! New fundraisers are added regularly to support 
                 local teams and organizations.
               </p>
@@ -229,17 +229,17 @@ export default function FundraisersListPage() {
         {/* Ended Fundraisers */}
         {endedFundraisers.length > 0 && (
           <section>
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">
+            <h2 className="text-xl font-semibold text-warm-700 mb-4">
               Past Fundraisers
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {endedFundraisers.map((fundraiser) => (
                 <div
                   key={fundraiser.id}
-                  className="bg-white rounded-lg border border-gray-200 p-4 opacity-75"
+                  className="bg-white rounded-lg border border-warm-200 p-4 opacity-75"
                 >
-                  <h3 className="font-medium text-gray-700 mb-1">{fundraiser.name}</h3>
-                  <p className="text-sm text-gray-500">
+                  <h3 className="font-medium text-warm-700 mb-1">{fundraiser.name}</h3>
+                  <p className="text-sm text-warm-500">
                     Ended {formatDate(fundraiser.end_date)}
                   </p>
                   {fundraiser.goal_amount_cents && fundraiser.raised_amount_cents && (
@@ -265,10 +265,10 @@ export default function FundraisersListPage() {
             </p>
             <a
               href="mailto:info@hafaloha.com?subject=Fundraiser Inquiry"
-              className="inline-flex items-center px-6 py-3 bg-white text-hafalohaRed font-semibold rounded-lg hover:bg-gray-100 transition-colors"
+              className="group inline-flex items-center px-6 py-3 bg-white text-hafalohaRed font-semibold rounded-lg hover:bg-warm-100 transition-colors"
             >
               Contact Us
-              <ArrowRight className="w-4 h-4 ml-2" />
+              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform duration-200" />
             </a>
           </div>
         </section>
