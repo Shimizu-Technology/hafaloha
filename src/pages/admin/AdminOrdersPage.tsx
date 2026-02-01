@@ -479,7 +479,7 @@ export default function AdminOrdersPage() {
           >
             <option value="all">All Types</option>
             <option value="retail">🛍️ Retail</option>
-            <option value="acai">🍰 Acai Cakes</option>
+            <option value="acai">Acai Cakes</option>
             <option value="wholesale">📦 Wholesale</option>
           </select>
         </div>
@@ -536,7 +536,7 @@ export default function AdminOrdersPage() {
                       <div className="text-sm font-medium text-gray-900">{order.order_number}</div>
                       <div className="mt-1">
                         {order.order_type === 'acai' ? (
-                          <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-800 rounded">🍰 Acai</span>
+                          <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-800 rounded">Acai</span>
                         ) : order.order_type === 'wholesale' ? (
                           <span className="px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-800 rounded">📦 Wholesale</span>
                         ) : (
@@ -609,7 +609,7 @@ export default function AdminOrdersPage() {
                       <p className="text-sm text-gray-600">{order.customer_name}</p>
                       <div className="mt-1">
                         {order.order_type === 'acai' ? (
-                          <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-800 rounded">🍰 Acai</span>
+                          <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-800 rounded">Acai</span>
                         ) : order.order_type === 'wholesale' ? (
                           <span className="px-2 py-0.5 text-xs font-medium bg-orange-100 text-orange-800 rounded">📦 Wholesale</span>
                         ) : (
@@ -954,7 +954,7 @@ export default function AdminOrdersPage() {
               {/* Acai Pickup Info (for acai orders) */}
               {selectedOrder.order_type === 'acai' && (
                 <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">🍰 Acai Cake Details</h3>
+                  <h3 className="font-semibold text-gray-900 mb-3">Acai Cake Details</h3>
                   <div className="text-sm bg-purple-50 border border-purple-200 p-4 rounded-lg space-y-2">
                     {selectedOrder.acai_pickup_date && (
                       <p>

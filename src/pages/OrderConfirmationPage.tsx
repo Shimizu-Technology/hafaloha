@@ -244,7 +244,7 @@ export default function OrderConfirmationPage() {
             </motion.div>
             
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-              {isAcaiOrder ? '🍰 Açaí Cake Order Confirmed!' : 'Order Confirmed!'}
+              {isAcaiOrder ? 'Açaí Cake Order Confirmed!' : 'Order Confirmed!'}
             </h1>
             <p className="text-gray-600 mb-6">
               Thank you for your order, <span className="font-semibold">{order.customer_name}</span>!

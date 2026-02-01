@@ -143,7 +143,7 @@ export default function ProductsPage() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
           <div className="max-w-md mx-auto">
-            <div className="text-6xl mb-6">🌺</div>
+            <div className="mb-6"><svg className="w-16 h-16 mx-auto text-hafalohaRed" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" /></svg></div>
             <h2 className="text-2xl font-bold text-warm-900 mb-4">Coming Soon!</h2>
             <p className="text-warm-600 mb-8">
               We're preparing our collection of premium Chamorro pride apparel. 

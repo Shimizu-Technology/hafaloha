@@ -6,6 +6,10 @@ import FadeIn from '../components/animations/FadeIn';
 import { StaggerContainer, StaggerItem } from '../components/animations/StaggerContainer';
 import { homepageApi, type HomepageSection } from '../services/api';
 
+// Strip emoji characters from text (replace with empty string)
+const stripEmoji = (text: string): string =>
+  text.replace(/(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu, '').replace(/\s{2,}/g, ' ').trim();
+
 // Default fallback content
 const defaultHero = {
   title: "Island Living Apparel for All",
@@ -88,7 +92,7 @@ export default function HomePage() {
     <div className="min-h-screen">
       {/* ============================================================ */}
       {/* HERO SECTION                                                 */}
-      {/* Beach photo + heavy dark overlay + gradient orbs for depth   */}
+      {/* Beach photo + heavy dark vignette + gradient orbs for depth  */}
       {/* ============================================================ */}
       <section className="relative bg-warm-900 text-white min-h-[85vh] flex items-center overflow-hidden">
         {/* Beach background photo */}
@@ -101,21 +105,30 @@ export default function HomePage() {
           />
         )}
 
-        {/* Heavy dark overlay for text readability — 65% center, stronger edges */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/75" />
+        {/* Heavy dark overlay — strong center vignette for text readability */}
+        <div className="absolute inset-0 bg-black/70" />
+        {/* Extra radial vignette — darkest in center where text sits */}
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 50%, rgba(0,0,0,0.15) 100%)'
+          }}
+        />
 
-        {/* Gradient orbs — atmospheric depth on top of the photo */}
+        {/* Subtle warm color orbs — atmospheric depth on top */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 -left-1/4 w-96 h-96 bg-red-500/15 rounded-full blur-3xl" />
-          <div className="absolute top-1/3 -right-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl" />
-          <div className="absolute -bottom-1/4 left-1/3 w-80 h-80 bg-red-400/10 rounded-full blur-3xl" />
+          <div className="absolute top-1/4 -left-1/4 w-96 h-96 bg-red-500/10 rounded-full blur-3xl" />
+          <div className="absolute top-1/3 -right-1/4 w-96 h-96 bg-amber-500/8 rounded-full blur-3xl" />
         </div>
 
-        {/* Content — text-on-dark with text shadows for max readability */}
+        {/* Content — text-on-dark with strong text shadows */}
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 w-full text-center">
-          {/* Badge — appears first */}
+          {/* Badge */}
           <motion.div {...heroMotion(0)}>
-            <span className="inline-block px-4 py-1.5 bg-white/15 backdrop-blur-sm border border-white/25 text-sm font-medium rounded-full mb-8 text-white/90" style={{ textShadow: '0 1px 3px rgba(0,0,0,0.5)' }}>
+            <span
+              className="inline-block px-5 py-2 bg-black/40 backdrop-blur-md border border-white/20 text-sm font-semibold rounded-full mb-8 text-white"
+              style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
+            >
               Hafa Adai &mdash; Island Living Apparel
             </span>
           </motion.div>
@@ -123,20 +136,20 @@ export default function HomePage() {
           {/* Heading */}
           <motion.h1
             {...heroMotion(0.15)}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-[1.1] tracking-tight text-white drop-shadow-lg"
-            style={{ textShadow: '0 2px 8px rgba(0,0,0,0.6), 0 4px 20px rgba(0,0,0,0.3)' }}
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-[1.1] tracking-tight text-white"
+            style={{ textShadow: '0 2px 10px rgba(0,0,0,0.9), 0 4px 25px rgba(0,0,0,0.5), 0 0 40px rgba(0,0,0,0.3)' }}
           >
-            {heroContent.title || defaultHero.title}
+            {stripEmoji(heroContent.title || defaultHero.title)}
           </motion.h1>
 
           {/* Subtitle */}
           {heroContent.subtitle && (
             <motion.p
               {...heroMotion(0.3)}
-              className="text-lg sm:text-xl mb-12 text-white/85 max-w-2xl mx-auto leading-relaxed"
-              style={{ textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}
+              className="text-lg sm:text-xl mb-12 text-white max-w-2xl mx-auto leading-relaxed font-medium"
+              style={{ textShadow: '0 1px 6px rgba(0,0,0,0.9), 0 2px 15px rgba(0,0,0,0.5)' }}
             >
-              {heroContent.subtitle}
+              {stripEmoji(heroContent.subtitle)}
             </motion.p>
           )}
 
@@ -156,8 +169,8 @@ export default function HomePage() {
             </Link>
             <Link
               to="/collections"
-              className="border-2 border-white/40 text-white hover:bg-white/10 rounded-xl text-lg px-8 py-4 inline-flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5"
-              style={{ textShadow: '0 1px 3px rgba(0,0,0,0.4)' }}
+              className="border-2 border-white/50 text-white hover:bg-white/15 rounded-xl text-lg px-8 py-4 inline-flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5 font-medium"
+              style={{ textShadow: '0 1px 4px rgba(0,0,0,0.6)' }}
             >
               Browse Collections
             </Link>

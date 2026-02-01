@@ -105,7 +105,7 @@ export default function OrderHistoryPage() {
       case 'acai':
         return '🍇';
       case 'wholesale':
-        return '❤️';
+        return '♥';
       default:
         return '📦';
     }
