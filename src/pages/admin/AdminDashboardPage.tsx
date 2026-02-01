@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
+import { ShoppingCart, DollarSign, Clock, Package, Plus, ClipboardList, FolderOpen, Settings } from 'lucide-react';
+import { StatCard, AdminPageHeader } from '../../components/admin';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
@@ -136,25 +138,25 @@ export default function AdminDashboardPage() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <Link to="/admin/products/new" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group">
           <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
-            <span className="text-xl">➕</span>
+            <Plus className="w-5 h-5 text-gray-600 group-hover:text-hafalohaRed transition" />
           </div>
           <p className="text-sm font-medium text-gray-700">Add Product</p>
         </Link>
         <Link to="/admin/orders" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group">
           <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
-            <span className="text-xl"></span>
+            <ClipboardList className="w-5 h-5 text-gray-600 group-hover:text-hafalohaRed transition" />
           </div>
           <p className="text-sm font-medium text-gray-700">View Orders</p>
         </Link>
         <Link to="/admin/collections" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group">
           <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
-            <span className="text-xl"></span>
+            <FolderOpen className="w-5 h-5 text-gray-600 group-hover:text-hafalohaRed transition" />
           </div>
           <p className="text-sm font-medium text-gray-700">Collections</p>
         </Link>
         <Link to="/admin/settings" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group">
           <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
-            <span className="text-xl">⚙️</span>
+            <Settings className="w-5 h-5 text-gray-600 group-hover:text-hafalohaRed transition" />
           </div>
           <p className="text-sm font-medium text-gray-700">Settings</p>
         </Link>
@@ -174,7 +176,7 @@ export default function AdminDashboardPage() {
         <div className="p-6">
           {recentOrders.length === 0 ? (
             <div className="text-center py-12">
-              <div className="text-4xl mb-4"></div>
+              <div className="mb-4"><ClipboardList className="w-12 h-12 mx-auto text-gray-300" /></div>
               <p className="text-gray-500">No orders yet</p>
               <p className="text-sm text-gray-400 mt-1">Orders will appear here once customers start purchasing</p>
             </div>

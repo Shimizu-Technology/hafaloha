@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
+import AdminIcon from '../components/admin/AdminIconMap';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
@@ -79,8 +80,8 @@ export default function AdminLayout() {
     { name: 'Dashboard', path: '/admin', icon: 'dashboard' },
     { name: 'Orders', path: '/admin/orders', icon: 'orders' },
     { name: 'Products', path: '/admin/products', icon: 'products' },
-    { name: 'Collections', path: '/admin/collections', icon: '' },
-    { name: 'Inventory', path: '/admin/inventory', icon: '' },
+    { name: 'Collections', path: '/admin/collections', icon: 'collections' },
+    { name: 'Inventory', path: '/admin/inventory', icon: 'inventory' },
   ];
   
   const specialNavigation: NavItem[] = [
@@ -112,7 +113,7 @@ export default function AdminLayout() {
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
               }`}
             >
-              <span className="text-lg">{item.icon}</span>
+              <AdminIcon name={item.icon} className="w-5 h-5" />
               <span className="font-medium text-sm">{item.name}</span>
               {isActive && (
                 <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
@@ -202,19 +203,26 @@ export default function AdminLayout() {
             </svg>
           </button>
 
-          {/* Page title - dynamic based on path */}
+          {/* Page title - route-based lookup */}
           <h1 className="text-lg font-semibold text-gray-900 hidden md:block">
-            {location.pathname === '/admin' && 'Dashboard'}
-            {location.pathname === '/admin/orders' && 'Orders'}
-            {location.pathname === '/admin/products' && 'Products'}
-            {location.pathname.includes('/admin/products/') && 'Product Details'}
-            {location.pathname === '/admin/collections' && 'Collections'}
-            {location.pathname === '/admin/fundraisers' && 'Fundraisers'}
-            {location.pathname === '/admin/acai' && 'Açaí Cakes Settings'}
-            {location.pathname === '/admin/users' && 'User Management'}
-            {location.pathname === '/admin/import' && 'CSV Import'}
-            {location.pathname === '/admin/settings' && 'Settings'}
-            {location.pathname === '/admin/settings/variant-presets' && 'Variant Presets'}
+            {(() => {
+              const titles: Record<string, string> = {
+                '/admin': 'Dashboard',
+                '/admin/orders': 'Orders',
+                '/admin/products': 'Products',
+                '/admin/collections': 'Collections',
+                '/admin/inventory': 'Inventory',
+                '/admin/fundraisers': 'Fundraisers',
+                '/admin/acai': 'Açaí Cakes',
+                '/admin/users': 'User Management',
+                '/admin/import': 'CSV Import',
+                '/admin/settings': 'Settings',
+                '/admin/settings/variant-presets': 'Variant Presets',
+              };
+              return titles[location.pathname]
+                || (location.pathname.includes('/admin/products/') ? 'Product Details' : '')
+                || (location.pathname.includes('/admin/fundraisers/') ? 'Fundraiser Details' : '');
+            })()}
           </h1>
 
           {/* Quick actions */}
