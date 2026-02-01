@@ -2,7 +2,11 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, DollarSign, Clock, Package, Plus, ClipboardList, FolderOpen, Settings } from 'lucide-react';
+import {
+  ShoppingCart, DollarSign, Clock, Package, Plus, ClipboardList, FolderOpen, Settings,
+  TrendingUp, TrendingDown, Minus, ArrowRight,
+} from 'lucide-react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { StatCard } from '../../components/admin';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
@@ -14,6 +18,21 @@ interface DashboardStats {
   total_products: number;
 }
 
+interface ChartPoint {
+  date: string;
+  label: string;
+  orders: number;
+  revenue_cents: number;
+}
+
+interface ChartData {
+  series: ChartPoint[];
+  comparison: {
+    this_week: { orders: number; revenue_cents: number };
+    last_week: { orders: number; revenue_cents: number };
+  };
+}
+
 interface RecentOrder {
   id: number;
   order_number: string;
@@ -23,16 +42,32 @@ interface RecentOrder {
   created_at: string;
 }
 
+const formatCurrency = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+const formatDate = (dateString: string) =>
+  new Date(dateString).toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+  });
+
+const STATUS_COLORS: Record<string, string> = {
+  pending: 'bg-yellow-100 text-yellow-800',
+  confirmed: 'bg-indigo-100 text-indigo-800',
+  processing: 'bg-blue-100 text-blue-800',
+  ready: 'bg-emerald-100 text-emerald-800',
+  shipped: 'bg-purple-100 text-purple-800',
+  picked_up: 'bg-green-100 text-green-800',
+  delivered: 'bg-green-100 text-green-800',
+  cancelled: 'bg-red-100 text-red-800',
+};
+
 export default function AdminDashboardPage() {
   const { getToken } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
-    total_orders: 0,
-    total_revenue_cents: 0,
-    pending_orders: 0,
-    total_products: 0,
+    total_orders: 0, total_revenue_cents: 0, pending_orders: 0, total_products: 0,
   });
+  const [chartData, setChartData] = useState<ChartData | null>(null);
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [chartMode, setChartMode] = useState<'revenue' | 'orders'>('revenue');
 
   useEffect(() => {
     fetchDashboardData();
@@ -41,16 +76,17 @@ export default function AdminDashboardPage() {
   const fetchDashboardData = async () => {
     try {
       const token = await getToken();
-      
-      const statsResponse = await axios.get(`${API_BASE_URL}/api/v1/admin/dashboard/stats`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setStats(statsResponse.data);
+      const headers = { Authorization: `Bearer ${token}` };
 
-      const ordersResponse = await axios.get(`${API_BASE_URL}/api/v1/admin/orders?per_page=5`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setRecentOrders(ordersResponse.data.orders || []);
+      const [statsRes, chartRes, ordersRes] = await Promise.all([
+        axios.get(`${API_BASE_URL}/api/v1/admin/dashboard/stats`, { headers }),
+        axios.get(`${API_BASE_URL}/api/v1/admin/dashboard/chart_data?days=14`, { headers }).catch(() => null),
+        axios.get(`${API_BASE_URL}/api/v1/admin/orders?per_page=8`, { headers }),
+      ]);
+
+      setStats(statsRes.data);
+      if (chartRes) setChartData(chartRes.data);
+      setRecentOrders(ordersRes.data.orders || []);
     } catch (err) {
       console.error('Failed to fetch dashboard data:', err);
     } finally {
@@ -58,19 +94,24 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const formatCurrency = (cents: number) => `$${(cents / 100).toFixed(2)}`;
-  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString();
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-hafalohaRed mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-hafalohaRed mx-auto mb-4" />
           <p className="text-gray-500">Loading dashboard...</p>
         </div>
       </div>
     );
   }
+
+  // Week-over-week comparison
+  const comp = chartData?.comparison;
+  const revenueChange = comp
+    ? comp.last_week.revenue_cents > 0
+      ? ((comp.this_week.revenue_cents - comp.last_week.revenue_cents) / comp.last_week.revenue_cents) * 100
+      : comp.this_week.revenue_cents > 0 ? 100 : 0
+    : null;
 
   return (
     <div className="space-y-8">
@@ -79,7 +120,7 @@ export default function AdminDashboardPage() {
         <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-white">Welcome back!</h1>
         <p className="text-white">Here's what's happening with your store today.</p>
       </div>
-      
+
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <StatCard
@@ -115,6 +156,104 @@ export default function AdminDashboardPage() {
         />
       </div>
 
+      {/* Revenue Chart + Week Comparison */}
+      {chartData && (
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Chart */}
+          <div className="lg:col-span-3 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-bold text-gray-900">Overview</h2>
+              <div className="flex bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setChartMode('revenue')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition ${
+                    chartMode === 'revenue'
+                      ? 'bg-white shadow-sm text-gray-900'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Revenue
+                </button>
+                <button
+                  onClick={() => setChartMode('orders')}
+                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition ${
+                    chartMode === 'orders'
+                      ? 'bg-white shadow-sm text-gray-900'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Orders
+                </button>
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={chartData.series} barCategoryGap="20%">
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                <XAxis
+                  dataKey="label"
+                  tick={{ fontSize: 12, fill: '#9ca3af' }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: '#9ca3af' }}
+                  axisLine={false}
+                  tickLine={false}
+                  tickFormatter={chartMode === 'revenue' ? (v) => `$${(v / 100).toFixed(0)}` : undefined}
+                />
+                <Tooltip
+                  formatter={(value: number) =>
+                    chartMode === 'revenue'
+                      ? [formatCurrency(value), 'Revenue']
+                      : [value, 'Orders']
+                  }
+                  contentStyle={{
+                    borderRadius: '8px',
+                    border: '1px solid #e5e7eb',
+                    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+                  }}
+                />
+                <Bar
+                  dataKey={chartMode === 'revenue' ? 'revenue_cents' : 'orders'}
+                  fill={chartMode === 'revenue' ? '#16a34a' : '#C1191F'}
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Week Comparison Sidebar */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col justify-center">
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">This Week</h3>
+            <div className="space-y-6">
+              <div>
+                <p className="text-sm text-gray-500">Revenue</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {formatCurrency(comp?.this_week.revenue_cents || 0)}
+                </p>
+                {revenueChange !== null && revenueChange !== 0 && (
+                  <div className={`flex items-center gap-1 mt-1 text-sm font-medium ${
+                    revenueChange > 0 ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {revenueChange > 0 ? <TrendingUp className="w-4 h-4" /> :
+                     revenueChange < 0 ? <TrendingDown className="w-4 h-4" /> :
+                     <Minus className="w-4 h-4" />}
+                    {revenueChange > 0 ? '+' : ''}{revenueChange.toFixed(0)}% vs last week
+                  </div>
+                )}
+              </div>
+              <div>
+                <p className="text-sm text-gray-500">Orders</p>
+                <p className="text-2xl font-bold text-gray-900">{comp?.this_week.orders || 0}</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  {comp?.last_week.orders || 0} last week
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Quick Actions */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <Link to="/admin/products/new" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group">
@@ -143,48 +282,49 @@ export default function AdminDashboardPage() {
         </Link>
       </div>
 
-      {/* Recent Orders */}
+      {/* Recent Orders — Enhanced with status badges */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
           <h2 className="text-lg font-bold text-gray-900">Recent Orders</h2>
           <Link to="/admin/orders" className="text-sm font-medium text-hafalohaRed hover:underline flex items-center gap-1">
             View All
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+            <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
-        <div className="p-6">
+        <div className="divide-y divide-gray-50">
           {recentOrders.length === 0 ? (
-            <div className="text-center py-12">
+            <div className="text-center py-12 px-6">
               <ClipboardList className="w-12 h-12 mx-auto text-gray-300 mb-4" />
               <p className="text-gray-500">No orders yet</p>
               <p className="text-sm text-gray-400 mt-1">Orders will appear here once customers start purchasing</p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {recentOrders.map((order) => (
-                <Link 
-                  key={order.id} 
-                  to={`/admin/orders?id=${order.id}`}
-                  className="flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition -mx-2"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-sm font-semibold text-gray-600">
-                      {order.customer_name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">{order.order_number}</p>
-                      <p className="text-sm text-gray-500">{order.customer_name}</p>
-                    </div>
+            recentOrders.map((order) => (
+              <Link
+                key={order.id}
+                to={`/admin/orders?id=${order.id}`}
+                className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-sm font-semibold text-gray-600">
+                    {order.customer_name.charAt(0)}
                   </div>
+                  <div>
+                    <p className="font-semibold text-gray-900 text-sm">{order.order_number}</p>
+                    <p className="text-sm text-gray-500">{order.customer_name}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-800'}`}>
+                    {order.status.charAt(0).toUpperCase() + order.status.slice(1).replace('_', ' ')}
+                  </span>
                   <div className="text-right">
-                    <p className="font-bold text-gray-900">{formatCurrency(order.total_cents)}</p>
+                    <p className="font-bold text-gray-900 text-sm">{formatCurrency(order.total_cents)}</p>
                     <p className="text-xs text-gray-400">{formatDate(order.created_at)}</p>
                   </div>
-                </Link>
-              ))}
-            </div>
+                </div>
+              </Link>
+            ))
           )}
         </div>
       </div>
