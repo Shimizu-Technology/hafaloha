@@ -17,32 +17,31 @@ export default function FeaturedProducts() {
       try {
         setIsLoading(true);
         // Fetch featured products, limit to 8 for homepage
-        const response = await productsApi.getProducts({ 
-          featured: true, 
-          per_page: 8 
+        const response = await productsApi.getProducts({
+          featured: true,
+          per_page: 8
         });
-        
+
         let featuredProducts = response.products;
-        
+
         // If we have fewer than 6 featured products, fetch newest to fill the gap
         if (featuredProducts.length < 6) {
-          const newestResponse = await productsApi.getProducts({ 
+          const newestResponse = await productsApi.getProducts({
             per_page: 8 - featuredProducts.length,
             sort: 'newest'
           });
-          
+
           // Combine featured + newest, remove duplicates
           const allProducts = [...featuredProducts, ...newestResponse.products];
-          const uniqueProducts = allProducts.filter((product, index, self) => 
+          const uniqueProducts = allProducts.filter((product, index, self) =>
             index === self.findIndex((p) => p.id === product.id)
           );
-          
+
           featuredProducts = uniqueProducts.slice(0, 8);
         }
-        
+
         setProducts(featuredProducts);
-      } catch (err) {
-        console.error('Failed to fetch featured products:', err);
+      } catch {
         setError('Failed to load products');
       } finally {
         setIsLoading(false);
@@ -114,7 +113,7 @@ export default function FeaturedProducts() {
                     </div>
                   )}
 
-                  {/* Badges - Only essential ones */}
+                  {/* Badges */}
                   <div className="absolute top-3 left-3 flex flex-col gap-2">
                     {!product.actually_available && <ProductBadge type="sold-out" />}
                     {isOnSale && <ProductBadge type="sale" />}
@@ -123,12 +122,10 @@ export default function FeaturedProducts() {
 
                 {/* Content */}
                 <div className="pt-4 flex flex-col grow">
-                  {/* Product Name */}
                   <h3 className="font-medium text-sm sm:text-base text-warm-900 mb-2 line-clamp-2 group-hover:text-hafalohaRed transition">
                     {product.name}
                   </h3>
 
-                  {/* Price */}
                   <div className="mt-auto">
                     {isOnSale ? (
                       <div className="flex items-center gap-2">
@@ -157,7 +154,7 @@ export default function FeaturedProducts() {
         <div className="text-center">
           <Link
             to="/products"
-            className="group inline-flex items-center gap-2 text-base px-8 py-3 bg-warm-900 text-white rounded-lg hover:bg-warm-800 transition font-medium"
+            className="group inline-flex items-center gap-2 text-base px-8 py-3 bg-warm-900 text-white rounded-lg hover:bg-warm-800 transition-all duration-200 hover:-translate-y-0.5 font-medium"
           >
             View All Products
             <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
