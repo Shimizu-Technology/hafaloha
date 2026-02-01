@@ -4,9 +4,8 @@ import axios from 'axios';
 import { Link } from 'react-router-dom';
 import {
   ShoppingCart, DollarSign, Clock, Package, Plus, ClipboardList, FolderOpen, Settings,
-  TrendingUp, TrendingDown, Minus, ArrowRight,
+  BarChart3, ArrowRight,
 } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { StatCard } from '../../components/admin';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
@@ -16,21 +15,6 @@ interface DashboardStats {
   total_revenue_cents: number;
   pending_orders: number;
   total_products: number;
-}
-
-interface ChartPoint {
-  date: string;
-  label: string;
-  orders: number;
-  revenue_cents: number;
-}
-
-interface ChartData {
-  series: ChartPoint[];
-  comparison: {
-    this_week: { orders: number; revenue_cents: number };
-    last_week: { orders: number; revenue_cents: number };
-  };
 }
 
 interface RecentOrder {
@@ -64,10 +48,8 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats>({
     total_orders: 0, total_revenue_cents: 0, pending_orders: 0, total_products: 0,
   });
-  const [chartData, setChartData] = useState<ChartData | null>(null);
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
   const [loading, setLoading] = useState(true);
-  const [chartMode, setChartMode] = useState<'revenue' | 'orders'>('revenue');
 
   useEffect(() => {
     fetchDashboardData();
@@ -78,14 +60,12 @@ export default function AdminDashboardPage() {
       const token = await getToken();
       const headers = { Authorization: `Bearer ${token}` };
 
-      const [statsRes, chartRes, ordersRes] = await Promise.all([
+      const [statsRes, ordersRes] = await Promise.all([
         axios.get(`${API_BASE_URL}/api/v1/admin/dashboard/stats`, { headers }),
-        axios.get(`${API_BASE_URL}/api/v1/admin/dashboard/chart_data?days=14`, { headers }).catch(() => null),
         axios.get(`${API_BASE_URL}/api/v1/admin/orders?per_page=8`, { headers }),
       ]);
 
       setStats(statsRes.data);
-      if (chartRes) setChartData(chartRes.data);
       setRecentOrders(ordersRes.data.orders || []);
     } catch (err) {
       console.error('Failed to fetch dashboard data:', err);
@@ -105,20 +85,12 @@ export default function AdminDashboardPage() {
     );
   }
 
-  // Week-over-week comparison
-  const comp = chartData?.comparison;
-  const revenueChange = comp
-    ? comp.last_week.revenue_cents > 0
-      ? ((comp.this_week.revenue_cents - comp.last_week.revenue_cents) / comp.last_week.revenue_cents) * 100
-      : comp.this_week.revenue_cents > 0 ? 100 : 0
-    : null;
-
   return (
     <div className="space-y-8">
       {/* Welcome Header */}
       <div className="rounded-2xl p-6 sm:p-8 shadow-lg bg-hafalohaRed">
-        <h1 className="text-2xl sm:text-3xl font-bold mb-2 text-white">Welcome back!</h1>
-        <p className="text-white">Here's what's happening with your store today.</p>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ color: '#ffffff' }}>Welcome back!</h1>
+        <p style={{ color: '#ffffff', opacity: 0.9 }}>Here's what's happening with your store today.</p>
       </div>
 
       {/* Stats Grid */}
@@ -156,106 +128,8 @@ export default function AdminDashboardPage() {
         />
       </div>
 
-      {/* Revenue Chart + Week Comparison */}
-      {chartData && (
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Chart */}
-          <div className="lg:col-span-3 bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-bold text-gray-900">Overview</h2>
-              <div className="flex bg-gray-100 rounded-lg p-1">
-                <button
-                  onClick={() => setChartMode('revenue')}
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition ${
-                    chartMode === 'revenue'
-                      ? 'bg-white shadow-sm text-gray-900'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Revenue
-                </button>
-                <button
-                  onClick={() => setChartMode('orders')}
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition ${
-                    chartMode === 'orders'
-                      ? 'bg-white shadow-sm text-gray-900'
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  Orders
-                </button>
-              </div>
-            </div>
-            <ResponsiveContainer width="100%" height={280}>
-              <BarChart data={chartData.series} barCategoryGap="20%">
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                <XAxis
-                  dataKey="label"
-                  tick={{ fontSize: 12, fill: '#9ca3af' }}
-                  axisLine={false}
-                  tickLine={false}
-                />
-                <YAxis
-                  tick={{ fontSize: 12, fill: '#9ca3af' }}
-                  axisLine={false}
-                  tickLine={false}
-                  tickFormatter={chartMode === 'revenue' ? (v) => `$${(v / 100).toFixed(0)}` : undefined}
-                />
-                <Tooltip
-                  formatter={(value: number) =>
-                    chartMode === 'revenue'
-                      ? [formatCurrency(value), 'Revenue']
-                      : [value, 'Orders']
-                  }
-                  contentStyle={{
-                    borderRadius: '8px',
-                    border: '1px solid #e5e7eb',
-                    boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
-                  }}
-                />
-                <Bar
-                  dataKey={chartMode === 'revenue' ? 'revenue_cents' : 'orders'}
-                  fill={chartMode === 'revenue' ? '#16a34a' : '#C1191F'}
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Week Comparison Sidebar */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col justify-center">
-            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">This Week</h3>
-            <div className="space-y-6">
-              <div>
-                <p className="text-sm text-gray-500">Revenue</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(comp?.this_week.revenue_cents || 0)}
-                </p>
-                {revenueChange !== null && revenueChange !== 0 && (
-                  <div className={`flex items-center gap-1 mt-1 text-sm font-medium ${
-                    revenueChange > 0 ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {revenueChange > 0 ? <TrendingUp className="w-4 h-4" /> :
-                     revenueChange < 0 ? <TrendingDown className="w-4 h-4" /> :
-                     <Minus className="w-4 h-4" />}
-                    {revenueChange > 0 ? '+' : ''}{revenueChange.toFixed(0)}% vs last week
-                  </div>
-                )}
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">Orders</p>
-                <p className="text-2xl font-bold text-gray-900">{comp?.this_week.orders || 0}</p>
-                <p className="text-sm text-gray-400 mt-1">
-                  {comp?.last_week.orders || 0} last week
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
         <Link to="/admin/products/new" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group">
           <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
             <Plus className="w-5 h-5 text-gray-600 group-hover:text-hafalohaRed transition" />
@@ -274,6 +148,12 @@ export default function AdminDashboardPage() {
           </div>
           <p className="text-sm font-medium text-gray-700">Collections</p>
         </Link>
+        <Link to="/admin/analytics" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group">
+          <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
+            <BarChart3 className="w-5 h-5 text-gray-600 group-hover:text-hafalohaRed transition" />
+          </div>
+          <p className="text-sm font-medium text-gray-700">Analytics</p>
+        </Link>
         <Link to="/admin/settings" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group">
           <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
             <Settings className="w-5 h-5 text-gray-600 group-hover:text-hafalohaRed transition" />
@@ -282,7 +162,7 @@ export default function AdminDashboardPage() {
         </Link>
       </div>
 
-      {/* Recent Orders — Enhanced with status badges */}
+      {/* Recent Orders */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
           <h2 className="text-lg font-bold text-gray-900">Recent Orders</h2>

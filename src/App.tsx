@@ -10,6 +10,7 @@ import CollectionDetailPage from './pages/CollectionDetailPage';
 import AdminSettingsPage from './pages/AdminSettingsPage';
 import AdminLayout from './layouts/AdminLayout';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
+import AdminAnalyticsPage from './pages/admin/AdminAnalyticsPage';
 import AdminOrdersPage from './pages/admin/AdminOrdersPage';
 import AdminProductsPage from './pages/admin/AdminProductsPage';
 import AdminCollectionsPage from './pages/admin/AdminCollectionsPage';
@@ -423,6 +424,7 @@ function AppContent() {
           {/* Admin Routes with Layout */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboardPage />} />
+            <Route path="analytics" element={<AdminAnalyticsPage />} />
             <Route path="orders" element={<AdminOrdersPage />} />
             <Route path="products" element={<AdminProductsPage />} />
             <Route path="products/new" element={<ProductFormPage />} />

@@ -16,6 +16,7 @@ import {
   Clock,
   ShoppingBag,
   TrendingUp,
+  BarChart3,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -39,6 +40,7 @@ export const ADMIN_ICONS: Record<string, LucideIcon> = {
   pending: Clock,
   'shopping-bag': ShoppingBag,
   trending: TrendingUp,
+  analytics: BarChart3,
 };
 
 interface AdminIconProps {
