@@ -1,20 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { collectionsApi } from '../services/api';
+import type { Collection as ApiCollection, Product } from '../services/api';
 import ProductCard from '../components/ProductCard';
-import type { Product } from '../services/api';
 import { ProductGridSkeleton, PageHeaderSkeleton } from '../components/Skeleton';
 import FadeIn from '../components/animations/FadeIn';
 import { StaggerContainer, StaggerItem } from '../components/animations/StaggerContainer';
 import Breadcrumbs from '../components/Breadcrumbs';
 
-interface Collection {
-  id: number;
-  name: string;
-  slug: string;
-  description: string | null;
-  product_count: number;
-}
+type Collection = ApiCollection;
 
 interface Meta {
   page: number;
@@ -34,6 +28,15 @@ export default function CollectionDetailPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [productType, setProductType] = useState('');
+
+  // Derive product type filter options from actual products
+  const productTypes = useMemo(() => {
+    const types = new Set<string>();
+    products.forEach((p) => {
+      if (p.product_type) types.add(p.product_type);
+    });
+    return Array.from(types).sort();
+  }, [products]);
 
   useEffect(() => {
     if (slug) {
@@ -109,11 +112,13 @@ export default function CollectionDetailPage() {
 
   const totalPages = meta ? Math.ceil(meta.total / meta.per_page) : 1;
 
+  const heroImage = collection.thumbnail_url || collection.image_url;
+
   return (
     <div className="min-h-screen bg-warm-50">
       {/* Breadcrumbs */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+      <div className="bg-warm-100 border-b border-warm-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <Breadcrumbs items={[
             { label: 'Home', path: '/' },
             { label: 'Collections', path: '/collections' },
@@ -122,23 +127,50 @@ export default function CollectionDetailPage() {
         </div>
       </div>
 
-      {/* Header */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <FadeIn>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">{collection.name}</h1>
-            {collection.description && (
-              <p className="text-lg text-warm-500 mb-4">{collection.description}</p>
-            )}
-            <p className="text-sm text-warm-500">
-              {meta?.total || 0} {meta?.total === 1 ? 'product' : 'products'}
-            </p>
-          </FadeIn>
+      {/* Hero Banner */}
+      {heroImage ? (
+        <div className="relative overflow-hidden bg-gray-900">
+          <img
+            src={heroImage}
+            alt={collection.name}
+            className="absolute inset-0 w-full h-full object-cover opacity-40 blur-sm scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/50 to-gray-900/30" />
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
+            <FadeIn>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-4">
+                {collection.name}
+              </h1>
+              {collection.description && (
+                <p className="text-lg text-white/80 max-w-2xl mb-4">{collection.description}</p>
+              )}
+              <p className="text-sm text-white/60">
+                {meta?.total || 0} {meta?.total === 1 ? 'product' : 'products'}
+              </p>
+            </FadeIn>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="relative bg-warm-100 overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--color-hafaloha-cream)_0%,_transparent_50%)] opacity-60" />
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
+            <FadeIn>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 mb-4">
+                {collection.name}
+              </h1>
+              {collection.description && (
+                <p className="text-lg text-warm-500 max-w-2xl mb-4">{collection.description}</p>
+              )}
+              <p className="text-sm text-warm-400">
+                {meta?.total || 0} {meta?.total === 1 ? 'product' : 'products'}
+              </p>
+            </FadeIn>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
-      <div className="bg-white border-b">
+      <div className="border-b border-warm-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row gap-4">
             {/* Search */}
@@ -148,31 +180,32 @@ export default function CollectionDetailPage() {
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                className="w-full px-4 py-2.5 bg-white border border-warm-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent transition"
               />
             </form>
 
-            {/* Product Type Filter */}
-            <select
-              value={productType}
-              onChange={(e) => {
-                setProductType(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
-            >
-              <option value="">All Types</option>
-              <option value="Apparel">Apparel</option>
-              <option value="Hats">Hats</option>
-              <option value="Bags">Bags</option>
-              <option value="Accessories">Accessories</option>
-            </select>
+            {/* Product Type Filter — derived from actual products */}
+            {productTypes.length > 1 && (
+              <select
+                value={productType}
+                onChange={(e) => {
+                  setProductType(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="px-4 py-2 bg-white border border-warm-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent transition"
+              >
+                <option value="">All Types</option>
+                {productTypes.map((type) => (
+                  <option key={type} value={type}>{type}</option>
+                ))}
+              </select>
+            )}
 
             {/* Clear Filters */}
             {(searchQuery || productType) && (
               <button
                 onClick={handleClearFilters}
-                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                className="px-6 py-2 bg-warm-200 text-warm-700 rounded-lg hover:bg-warm-300 transition"
               >
                 Clear Filters
               </button>
