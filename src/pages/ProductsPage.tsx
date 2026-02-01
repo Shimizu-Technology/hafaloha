@@ -167,7 +167,7 @@ export default function ProductsPage() {
     <div className="min-h-screen bg-white">
       {/* Header */}
       <div className="bg-warm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
           <FadeIn>
             <div className="text-center">
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 tracking-tight">

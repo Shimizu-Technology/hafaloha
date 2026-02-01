@@ -95,9 +95,9 @@ export default function CollectionsPage() {
       <div className="min-h-screen bg-gray-50">
         {/* Header */}
         <div className="bg-white border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Collections</h1>
-            <p className="text-lg text-gray-600">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 tracking-tight">Collections</h1>
+            <p className="text-lg text-gray-600 max-w-2xl">
               Shop our curated collections of Chamorro pride apparel and merchandise
             </p>
           </div>
@@ -137,10 +137,10 @@ export default function CollectionsPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <FadeIn>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Collections</h1>
-            <p className="text-lg text-gray-600">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 tracking-tight">Collections</h1>
+            <p className="text-lg text-gray-600 max-w-2xl">
               Shop our curated collections of Chamorro pride apparel and merchandise
             </p>
           </FadeIn>
@@ -192,7 +192,7 @@ export default function CollectionsPage() {
       </div>
 
       {/* Collections Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, i) => (

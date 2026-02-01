@@ -15,9 +15,9 @@ export default function ShippingInfoPage() {
 
       {/* Hero Section */}
       <div className="bg-warm">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
           <FadeIn direction="none">
-            <h1 className="text-4xl sm:text-5xl font-bold text-center mb-6 text-gray-900 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-6 text-gray-900 tracking-tight">
               Shipping Information
             </h1>
           </FadeIn>
@@ -30,11 +30,11 @@ export default function ShippingInfoPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
         {/* Processing Times */}
         <FadeIn immediate>
           <div className="mb-16">
-            <h2 className="text-3xl font-bold mb-6 text-gray-900 tracking-tight">Processing Times</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-gray-900 tracking-tight">Processing Times</h2>
             <div className="rounded-lg p-8 bg-warm">
               <p className="text-lg text-gray-700 leading-relaxed mb-4">
                 All orders are processed within <span className="font-semibold text-gray-900">1–3 business days</span> after
@@ -50,7 +50,7 @@ export default function ShippingInfoPage() {
         {/* Shipping Options */}
         <div className="mb-16">
           <FadeIn immediate>
-            <h2 className="text-3xl font-bold mb-8 text-gray-900 tracking-tight">Shipping Options</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-12 text-gray-900 tracking-tight">Shipping Options</h2>
           </FadeIn>
 
           <StaggerContainer immediate className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -133,7 +133,7 @@ export default function ShippingInfoPage() {
         {/* Tracking */}
         <FadeIn immediate>
           <div className="mb-16">
-            <h2 className="text-3xl font-bold mb-6 text-gray-900 tracking-tight">Tracking Your Order</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-gray-900 tracking-tight">Tracking Your Order</h2>
             <div className="prose prose-lg max-w-none">
               <p className="text-lg text-gray-700 leading-relaxed mb-4">
                 Once your order ships, you'll receive an email with your USPS tracking number. You can use this number

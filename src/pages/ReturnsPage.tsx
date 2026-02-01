@@ -15,9 +15,9 @@ export default function ReturnsPage() {
 
       {/* Hero Section */}
       <div className="bg-warm">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
           <FadeIn direction="none">
-            <h1 className="text-4xl sm:text-5xl font-bold text-center mb-6 text-gray-900 tracking-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-6 text-gray-900 tracking-tight">
               Returns & Refunds
             </h1>
           </FadeIn>
@@ -30,7 +30,7 @@ export default function ReturnsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
         {/* Return Window */}
         <FadeIn immediate>
           <div className="mb-16">
@@ -58,7 +58,7 @@ export default function ReturnsPage() {
         {/* Conditions */}
         <div className="mb-16">
           <FadeIn immediate>
-            <h2 className="text-3xl font-bold mb-8 text-gray-900 tracking-tight">Return Conditions</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-12 text-gray-900 tracking-tight">Return Conditions</h2>
           </FadeIn>
           <StaggerContainer immediate className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* Eligible */}
@@ -142,7 +142,7 @@ export default function ReturnsPage() {
         {/* How to Return */}
         <FadeIn immediate>
           <div className="mb-16">
-            <h2 className="text-3xl font-bold mb-8 text-gray-900 tracking-tight">How to Initiate a Return</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-12 text-gray-900 tracking-tight">How to Initiate a Return</h2>
             <div className="space-y-6">
               {[
                 {
@@ -183,7 +183,7 @@ export default function ReturnsPage() {
         {/* Refund Timeline */}
         <FadeIn immediate>
           <div className="mb-16">
-            <h2 className="text-3xl font-bold mb-6 text-gray-900 tracking-tight">Refund Processing</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-gray-900 tracking-tight">Refund Processing</h2>
             <div className="rounded-lg p-8 bg-warm">
               <p className="text-lg text-gray-700 leading-relaxed mb-4">
                 Refunds are processed to your <span className="font-semibold text-gray-900">original payment method</span> (credit card, debit card, etc.).
@@ -200,7 +200,7 @@ export default function ReturnsPage() {
         {/* Exchanges */}
         <FadeIn immediate>
           <div className="mb-16">
-            <h2 className="text-3xl font-bold mb-6 text-gray-900 tracking-tight">Exchanges</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-gray-900 tracking-tight">Exchanges</h2>
             <div className="prose prose-lg max-w-none">
               <p className="text-lg text-gray-700 leading-relaxed mb-4">
                 Need a different size or color? We're happy to help with exchanges! Simply email us at{' '}

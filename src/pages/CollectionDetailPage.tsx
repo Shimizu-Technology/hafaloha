@@ -124,9 +124,9 @@ export default function CollectionDetailPage() {
 
       {/* Header */}
       <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <FadeIn>
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">{collection.name}</h1>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 tracking-tight">{collection.name}</h1>
             {collection.description && (
               <p className="text-lg text-warm-500 mb-4">{collection.description}</p>
             )}

@@ -187,7 +187,7 @@ export default function FundraiserPage() {
       >
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white px-4">
-            <h1 className="text-3xl md:text-5xl font-bold mb-2">{fundraiser.name}</h1>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-2 tracking-tight">{fundraiser.name}</h1>
             {!fundraiser.can_order && (
               <span className="inline-block px-4 py-2 bg-gray-800/80 rounded-full text-sm">
                 This fundraiser has ended
@@ -204,7 +204,7 @@ export default function FundraiserPage() {
             {/* Description */}
             {fundraiser.description && (
               <div className="bg-white rounded-lg shadow p-6">
-                <h2 className="text-xl font-semibold mb-4">About This Fundraiser</h2>
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4 tracking-tight">About This Fundraiser</h2>
                 <p className="text-gray-700 whitespace-pre-wrap">{fundraiser.description}</p>
               </div>
             )}
@@ -218,7 +218,7 @@ export default function FundraiserPage() {
 
             {/* Products */}
             <div>
-              <h2 className="text-2xl font-bold mb-4">Products</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-6 tracking-tight">Products</h2>
               {products.length === 0 ? (
                 <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
                   <Package className="w-12 h-12 mx-auto mb-2 opacity-50" />

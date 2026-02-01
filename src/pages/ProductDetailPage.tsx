@@ -568,7 +568,7 @@ export default function ProductDetailPage() {
               )}
 
               {/* Name & Price */}
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3">{product.name}</h1>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-3 tracking-tight">{product.name}</h1>
               <div className="flex items-baseline gap-3 mb-6">
                 <span className="text-3xl sm:text-4xl font-bold text-hafalohaRed">
                   {formatPrice(displayPrice)}

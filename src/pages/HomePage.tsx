@@ -200,7 +200,7 @@ export default function HomePage() {
       {/* ============================================================ */}
       {/* WHY HAFALOHA — brand values strip                            */}
       {/* ============================================================ */}
-      <div className="border-y border-gray-100 py-12 sm:py-16">
+      <div className="border-y border-gray-100 py-16 sm:py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <StaggerItem>
@@ -234,7 +234,7 @@ export default function HomePage() {
         <div className="py-20 sm:py-24 bg-warm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <FadeIn>
-              <div className="text-center mb-10 sm:mb-14">
+              <div className="text-center mb-12 sm:mb-14">
                 <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
                   Shop by Category
                 </h2>
@@ -304,8 +304,8 @@ export default function HomePage() {
             
             {/* Text — 5 columns */}
             <FadeIn direction="right" delay={0.1} className="md:col-span-5">
-              <div>
-                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 text-gray-900 tracking-tight">
+              <div className="max-w-prose">
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-8 text-gray-900 tracking-tight">
                   The Hafaloha Story
                 </h2>
                 <p className="text-gray-600 mb-6 leading-relaxed">
@@ -346,7 +346,7 @@ export default function HomePage() {
           </div>
 
           <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-3 text-white">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3 text-white tracking-tight">
               Stay Connected
             </h2>
             <p className="text-gray-300 mb-2 max-w-xl mx-auto">

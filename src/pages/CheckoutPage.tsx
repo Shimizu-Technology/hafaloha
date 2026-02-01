@@ -287,7 +287,7 @@ function CheckoutForm() {
           <span className="inline-block text-hafalohaRed font-semibold text-sm uppercase tracking-wider mb-2">
             Secure Checkout
           </span>
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">Complete Your Order</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Complete Your Order</h1>
           <p className="text-gray-500 mt-2">Fill in the details below to complete your purchase</p>
         </div>
         
