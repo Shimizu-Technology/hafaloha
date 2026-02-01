@@ -12,12 +12,13 @@
   --color-warm-700: #44403C;
   --color-warm-800: #292524;
   --color-warm-900: #1C1917;
+  --color-warm-950: #0C0A08;
 }
 
 :root {
   --color-hafaloha-red: #B31B1B;
   --color-hafaloha-gold: #FFD700;
-  --color-hafaloha-cream: #FFF8E7;
+  --color-hafaloha-cream: #FDFBF7;
   --color-hafaloha-dark: #1a1a2e;
   --color-hafaloha-navy: #1e293b;
   --color-hafaloha-red-dark: #8B1515;
@@ -233,6 +234,7 @@ p {
 
 .btn-primary:active {
   transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(179, 27, 27, 0.2);
 }
 
 .btn-secondary {
@@ -255,6 +257,7 @@ p {
 
 .btn-secondary:active {
   transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(68, 63, 56, 0.15);
 }
 
 /* Mega menu animation */

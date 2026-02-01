@@ -92,12 +92,18 @@ export default function CollectionsPage() {
   // Show empty state for errors or no collections
   if (error || (collections.length === 0 && !searchQuery)) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-warm-50">
         {/* Header */}
         <div className="bg-white border-b">
+<<<<<<< HEAD
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 tracking-tight">Collections</h1>
             <p className="text-lg text-gray-600 max-w-2xl">
+=======
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <h1 className="text-4xl font-bold text-warm-900 mb-4">Collections</h1>
+            <p className="text-lg text-warm-600">
+>>>>>>> feature/HAF-50-51-color-interactions
               Shop our curated collections of Chamorro pride apparel and merchandise
             </p>
           </div>
@@ -106,15 +112,15 @@ export default function CollectionsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
           <div className="max-w-md mx-auto">
             <div className="text-6xl mb-6">🏝️</div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Collections Coming Soon!</h2>
-            <p className="text-gray-600 mb-8">
+            <h2 className="text-2xl font-bold text-warm-900 mb-4">Collections Coming Soon!</h2>
+            <p className="text-warm-600 mb-8">
               We're organizing our products into beautiful collections. 
               Check back soon to browse by category!
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
                 onClick={fetchCollections}
-                className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                className="px-6 py-3 bg-warm-200 text-warm-700 rounded-lg hover:bg-warm-300 transition"
               >
                 Refresh
               </button>
@@ -134,13 +140,18 @@ export default function CollectionsPage() {
   const totalPages = meta ? Math.ceil(meta.total / meta.per_page) : 1;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-warm-50">
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <FadeIn>
+<<<<<<< HEAD
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 tracking-tight">Collections</h1>
             <p className="text-lg text-gray-600 max-w-2xl">
+=======
+            <h1 className="text-4xl font-bold text-warm-900 mb-4">Collections</h1>
+            <p className="text-lg text-warm-600">
+>>>>>>> feature/HAF-50-51-color-interactions
               Shop our curated collections of Chamorro pride apparel and merchandise
             </p>
           </FadeIn>
@@ -157,10 +168,10 @@ export default function CollectionsPage() {
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 placeholder="Search collections..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-warm-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
               />
               <svg
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-warm-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -177,14 +188,14 @@ export default function CollectionsPage() {
               <button
                 type="button"
                 onClick={handleClearSearch}
-                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                className="px-6 py-2 bg-warm-200 text-warm-700 rounded-lg hover:bg-warm-300 transition"
               >
                 Clear
               </button>
             )}
           </form>
           {searchQuery && (
-            <p className="text-sm text-gray-600 mt-3">
+            <p className="text-sm text-warm-600 mt-3">
               Showing {meta?.total || 0} result{meta?.total !== 1 ? 's' : ''} for "{searchQuery}"
             </p>
           )}
@@ -201,7 +212,7 @@ export default function CollectionsPage() {
           </div>
         ) : collections.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-600 mb-4">
+            <p className="text-warm-600 mb-4">
               {searchQuery ? `No collections found for "${searchQuery}"` : 'No collections found'}
             </p>
             {searchQuery && (
@@ -220,10 +231,10 @@ export default function CollectionsPage() {
                 <StaggerItem key={collection.id}>
                   <Link
                     to={`/collections/${collection.slug}`}
-                    className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 block"
+                    className="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 block"
                   >
                     {/* Thumbnail */}
-                    <div className="aspect-square bg-gray-100 relative overflow-hidden">
+                    <div className="aspect-square bg-warm-100 relative overflow-hidden">
                       {collection.thumbnail_url ? (
                         <img
                           src={collection.thumbnail_url}
@@ -232,9 +243,9 @@ export default function CollectionsPage() {
                           style={{ objectFit: 'contain' }}
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                        <div className="w-full h-full flex items-center justify-center bg-warm-200">
                           <svg
-                            className="w-24 h-24 text-gray-400"
+                            className="w-24 h-24 text-warm-400"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -249,7 +260,7 @@ export default function CollectionsPage() {
                         </div>
                       )}
                       {collection.featured && (
-                        <div className="absolute top-3 right-3 bg-hafalohaGold text-gray-900 px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                        <div className="absolute top-3 right-3 bg-hafalohaGold text-warm-900 px-3 py-1 rounded-full text-xs font-bold shadow-lg">
                           Featured
                         </div>
                       )}
@@ -257,15 +268,15 @@ export default function CollectionsPage() {
 
                     {/* Collection Info */}
                     <div className="p-6">
-                      <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-hafalohaRed transition-colors">
+                      <h3 className="text-xl font-bold text-warm-900 mb-2 group-hover:text-hafalohaRed transition-colors">
                         {collection.name}
                       </h3>
                       {collection.description && (
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                        <p className="text-sm text-warm-600 mb-3 line-clamp-2">
                           {collection.description}
                         </p>
                       )}
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-warm-500">
                         {collection.product_count} {collection.product_count === 1 ? 'product' : 'products'}
                       </p>
                     </div>
@@ -280,7 +291,7 @@ export default function CollectionsPage() {
                 <button
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
-                  className="px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="px-3 sm:px-4 py-2 text-sm sm:text-base border border-warm-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-warm-50"
                 >
                   <span className="hidden sm:inline">Previous</span>
                   <span className="sm:hidden">Prev</span>
@@ -306,7 +317,7 @@ export default function CollectionsPage() {
                         className={`px-3 sm:px-4 py-2 text-sm sm:text-base rounded-lg ${
                           currentPage === pageNum
                             ? 'bg-hafalohaRed text-white'
-                            : 'border border-gray-300 hover:bg-gray-50'
+                            : 'border border-warm-300 hover:bg-warm-50'
                         }`}
                       >
                         {pageNum}
@@ -318,7 +329,7 @@ export default function CollectionsPage() {
                 <button
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
-                  className="px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="px-3 sm:px-4 py-2 text-sm sm:text-base border border-warm-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-warm-50"
                 >
                   Next
                 </button>

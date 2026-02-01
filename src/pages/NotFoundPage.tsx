@@ -37,14 +37,24 @@ export default function NotFoundPage() {
 
         <FadeIn delay={0.15}>
           <h2 className="text-2xl sm:text-3xl font-bold text-warm-900 mb-4 tracking-tight">
+<<<<<<< HEAD
             Looks like you&apos;ve drifted off the island
+=======
+            Looks like you've drifted off the island
+>>>>>>> feature/HAF-50-51-color-interactions
           </h2>
         </FadeIn>
 
         <FadeIn delay={0.25}>
+<<<<<<< HEAD
           <p className="text-lg text-warm-500 mb-8 leading-relaxed">
             The page you&apos;re looking for doesn&apos;t exist or has been moved.
             No worries — let&apos;s get you back to the good stuff!
+=======
+          <p className="text-lg text-warm-600 mb-10 leading-relaxed">
+            The page you're looking for doesn't exist or has been moved.
+            No worries — let's get you back to the good stuff!
+>>>>>>> feature/HAF-50-51-color-interactions
           </p>
         </FadeIn>
 
@@ -75,7 +85,11 @@ export default function NotFoundPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/"
+<<<<<<< HEAD
               className="inline-flex items-center justify-center gap-2 bg-warm-800 text-white px-6 py-3 rounded-lg font-medium hover:bg-warm-700 transition"
+=======
+              className="inline-flex items-center justify-center gap-2 bg-warm-900 text-white px-6 py-3 rounded-lg font-medium hover:bg-warm-800 transition"
+>>>>>>> feature/HAF-50-51-color-interactions
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />

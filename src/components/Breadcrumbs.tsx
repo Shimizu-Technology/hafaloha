@@ -21,18 +21,18 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
             {item.path && !isLast ? (
               <Link
                 to={item.path}
-                className="text-gray-600 hover:text-hafalohaRed transition"
+                className="text-warm-600 hover:text-hafalohaRed transition"
               >
                 {item.label}
               </Link>
             ) : (
-              <span className={isLast ? 'text-gray-900 font-medium' : 'text-gray-600'}>
+              <span className={isLast ? 'text-warm-900 font-medium' : 'text-warm-600'}>
                 {item.label}
               </span>
             )}
 
             {!isLast && (
-              <ChevronRight className="w-4 h-4 text-gray-400" />
+              <ChevronRight className="w-4 h-4 text-warm-400" />
             )}
           </div>
         );

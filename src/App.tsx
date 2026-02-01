@@ -191,7 +191,7 @@ function AppContent() {
 
         {/* Navigation - Hidden when printing and on admin pages */}
         {!isAdminPage && (
-        <nav className="bg-white border-b border-gray-100 sticky top-0 z-40 print:hidden">
+        <nav className="bg-white border-b border-warm-100 sticky top-0 z-40 print:hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-18 py-3">
               {/* Logo */}
@@ -209,21 +209,21 @@ function AppContent() {
                 <NavDropdown onItemClick={handleNavClick} darkMode={false} />
                 <Link
                   to="/acai-cakes"
-                  className="text-gray-700 hover:text-hafalohaRed font-medium transition py-2"
+                  className="text-warm-700 hover:text-hafalohaRed font-medium transition py-2"
                   onClick={handleNavClick}
                 >
                   Açaí Cakes
                 </Link>
                 <Link
                   to="/fundraisers"
-                  className="text-gray-700 hover:text-hafalohaRed font-medium transition py-2"
+                  className="text-warm-700 hover:text-hafalohaRed font-medium transition py-2"
                   onClick={handleNavClick}
                 >
                   Fundraisers
                 </Link>
                 <Link
                   to="/about"
-                  className="text-gray-700 hover:text-hafalohaRed font-medium transition py-2"
+                  className="text-warm-700 hover:text-hafalohaRed font-medium transition py-2"
                   onClick={handleNavClick}
                 >
                   Our Story
@@ -240,10 +240,10 @@ function AppContent() {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search products..."
-                      className="pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-hafalohaRed/20 focus:border-hafalohaRed w-56 xl:w-64 transition-all text-sm text-gray-900 placeholder-gray-400"
+                      className="pl-10 pr-4 py-2.5 bg-warm-50 border border-warm-200 rounded-full focus:outline-none focus:ring-2 focus:ring-hafalohaRed/20 focus:border-hafalohaRed w-56 xl:w-64 transition-all text-sm text-warm-900 placeholder-warm-400"
                     />
                     <svg
-                      className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+                      className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-warm-400"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -261,7 +261,7 @@ function AppContent() {
                 {/* Search Icon - Tablet */}
                 <button
                   type="button"
-                  className="hidden md:block lg:hidden p-2 text-gray-600 hover:text-hafalohaRed transition"
+                  className="hidden md:block lg:hidden p-2 text-warm-600 hover:text-hafalohaRed transition"
                   onClick={() => {
                     const input = document.querySelector('input[placeholder="Search products..."]') as HTMLInputElement;
                     if (input) input.focus();
@@ -294,7 +294,7 @@ function AppContent() {
                 {/* Mobile Menu Button */}
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="md:hidden p-2 text-gray-600 hover:text-hafalohaRed transition rounded-lg"
+                  className="md:hidden p-2 text-warm-600 hover:text-hafalohaRed transition rounded-lg"
                   aria-label="Toggle menu"
                 >
                   {mobileMenuOpen ? (
@@ -313,7 +313,7 @@ function AppContent() {
 
           {/* Mobile Menu */}
           {mobileMenuOpen && (
-            <div className="md:hidden border-t border-gray-100 bg-white animate-slide-down">
+            <div className="md:hidden border-t border-warm-100 bg-white animate-slide-down">
               <div className="px-4 py-4 space-y-4">
                 {/* Mobile Search */}
                 <form onSubmit={handleSearch}>
@@ -323,10 +323,10 @@ function AppContent() {
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                       placeholder="Search products..."
-                      className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-hafalohaRed/20 focus:border-hafalohaRed text-gray-900 placeholder-gray-400 transition text-sm"
+                      className="w-full pl-10 pr-4 py-3 bg-warm-50 border border-warm-200 rounded-full focus:outline-none focus:ring-2 focus:ring-hafalohaRed/20 focus:border-hafalohaRed text-warm-900 placeholder-warm-400 transition text-sm"
                     />
                     <svg
-                      className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+                      className="absolute left-3.5 top-1/2 transform -translate-y-1/2 w-4 h-4 text-warm-400"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -347,7 +347,7 @@ function AppContent() {
                 {/* Other Nav Links */}
                 <Link
                   to="/acai-cakes"
-                  className="flex items-center gap-3 text-gray-700 hover:text-hafalohaRed font-medium py-2"
+                  className="flex items-center gap-3 text-warm-700 hover:text-hafalohaRed font-medium py-2"
                   onClick={handleNavClick}
                 >
                   <span className="text-xl">🍰</span>
@@ -355,7 +355,7 @@ function AppContent() {
                 </Link>
                 <Link
                   to="/fundraisers"
-                  className="flex items-center gap-3 text-gray-700 hover:text-hafalohaRed font-medium py-2"
+                  className="flex items-center gap-3 text-warm-700 hover:text-hafalohaRed font-medium py-2"
                   onClick={handleNavClick}
                 >
                   <span className="text-xl">❤️</span>
@@ -363,7 +363,7 @@ function AppContent() {
                 </Link>
                 <Link
                   to="/about"
-                  className="flex items-center gap-3 text-gray-700 hover:text-hafalohaRed font-medium py-2"
+                  className="flex items-center gap-3 text-warm-700 hover:text-hafalohaRed font-medium py-2"
                   onClick={handleNavClick}
                 >
                   <span className="text-xl">📖</span>
@@ -371,7 +371,7 @@ function AppContent() {
                 </Link>
                 
                 {/* Auth Section */}
-                <div className="pt-4 border-t border-gray-100">
+                <div className="pt-4 border-t border-warm-100">
                   <SignedOut>
                     <SignInButton mode="modal">
                       <button className="w-full py-3 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition font-medium">
@@ -381,7 +381,7 @@ function AppContent() {
                   </SignedOut>
                   <SignedIn>
                     <div className="flex items-center justify-between py-2">
-                      <span className="text-gray-700 font-medium">My Account</span>
+                      <span className="text-warm-700 font-medium">My Account</span>
                       <CustomUserButton isAdmin={isAdmin} />
                     </div>
                   </SignedIn>
@@ -437,7 +437,11 @@ function AppContent() {
 
         {/* Footer - Hidden when printing and on admin pages */}
         {!isAdminPage && (
+<<<<<<< HEAD
         <footer className="decorative-border-footer bg-warm-50 border-t border-warm-100 print:hidden">
+=======
+        <footer className="bg-warm-50 border-t border-warm-100 decorative-border-footer print:hidden">
+>>>>>>> feature/HAF-50-51-color-interactions
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12">
               {/* Brand */}
@@ -479,25 +483,44 @@ function AppContent() {
 
               {/* Footer Navigation */}
               <div>
+<<<<<<< HEAD
                 <h4 className="font-medium text-warm-800 mb-4">Shop</h4>
                 <ul className="space-y-2">
                   <li>
                     <Link to="/products" className="text-warm-500 hover:text-warm-800 transition text-sm">
+=======
+                <h4 className="font-medium text-warm-900 mb-4">Shop</h4>
+                <ul className="space-y-2">
+                  <li>
+                    <Link to="/products" className="text-warm-500 hover:text-warm-900 transition text-sm">
+>>>>>>> feature/HAF-50-51-color-interactions
                       All Products
                     </Link>
                   </li>
                   <li>
+<<<<<<< HEAD
                     <Link to="/products?category=mens" className="text-warm-500 hover:text-warm-800 transition text-sm">
+=======
+                    <Link to="/products?category=mens" className="text-warm-500 hover:text-warm-900 transition text-sm">
+>>>>>>> feature/HAF-50-51-color-interactions
                       Mens
                     </Link>
                   </li>
                   <li>
+<<<<<<< HEAD
                     <Link to="/products?category=womens" className="text-warm-500 hover:text-warm-800 transition text-sm">
+=======
+                    <Link to="/products?category=womens" className="text-warm-500 hover:text-warm-900 transition text-sm">
+>>>>>>> feature/HAF-50-51-color-interactions
                       Womens
                     </Link>
                   </li>
                   <li>
+<<<<<<< HEAD
                     <Link to="/collections" className="text-warm-500 hover:text-warm-800 transition text-sm">
+=======
+                    <Link to="/collections" className="text-warm-500 hover:text-warm-900 transition text-sm">
+>>>>>>> feature/HAF-50-51-color-interactions
                       Collections
                     </Link>
                   </li>
@@ -505,25 +528,44 @@ function AppContent() {
               </div>
 
               <div>
+<<<<<<< HEAD
                 <h4 className="font-medium text-warm-800 mb-4">Info</h4>
                 <ul className="space-y-2">
                   <li>
                     <Link to="/about" className="text-warm-500 hover:text-warm-800 transition text-sm">
+=======
+                <h4 className="font-medium text-warm-900 mb-4">Info</h4>
+                <ul className="space-y-2">
+                  <li>
+                    <Link to="/about" className="text-warm-500 hover:text-warm-900 transition text-sm">
+>>>>>>> feature/HAF-50-51-color-interactions
                       Our Story
                     </Link>
                   </li>
                   <li>
+<<<<<<< HEAD
                     <Link to="/contact" className="text-warm-500 hover:text-warm-800 transition text-sm">
+=======
+                    <Link to="/contact" className="text-warm-500 hover:text-warm-900 transition text-sm">
+>>>>>>> feature/HAF-50-51-color-interactions
                       Contact
                     </Link>
                   </li>
                   <li>
+<<<<<<< HEAD
                     <Link to="/shipping" className="text-warm-500 hover:text-warm-800 transition text-sm">
+=======
+                    <Link to="/shipping" className="text-warm-500 hover:text-warm-900 transition text-sm">
+>>>>>>> feature/HAF-50-51-color-interactions
                       Shipping Info
                     </Link>
                   </li>
                   <li>
+<<<<<<< HEAD
                     <Link to="/returns" className="text-warm-500 hover:text-warm-800 transition text-sm">
+=======
+                    <Link to="/returns" className="text-warm-500 hover:text-warm-900 transition text-sm">
+>>>>>>> feature/HAF-50-51-color-interactions
                       Returns
                     </Link>
                   </li>
@@ -531,13 +573,21 @@ function AppContent() {
               </div>
 
               <div>
+<<<<<<< HEAD
                 <h4 className="font-medium text-warm-800 mb-4">Location</h4>
+=======
+                <h4 className="font-medium text-warm-900 mb-4">Location</h4>
+>>>>>>> feature/HAF-50-51-color-interactions
                 <address className="text-warm-500 text-sm not-italic">
                   121 E. Marine Corps Dr<br />
                   Suite 1-103 & Suite 1-104<br />
                   Hagåtña, Guam 96910<br />
                   <br />
+<<<<<<< HEAD
                   <a href="tel:+16714727733" className="hover:text-warm-800 transition">
+=======
+                  <a href="tel:+16714727733" className="hover:text-warm-900 transition">
+>>>>>>> feature/HAF-50-51-color-interactions
                     +1 (671) 472-7733
                   </a>
                 </address>
@@ -547,7 +597,11 @@ function AppContent() {
             <div className="border-t border-warm-200 mt-12 pt-8">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
                 <p className="text-warm-400 text-sm text-center sm:text-left">
+<<<<<<< HEAD
                   &copy; {new Date().getFullYear()} Hafaloha. All rights reserved.
+=======
+                  &copy; 2026 Hafaloha. All rights reserved.
+>>>>>>> feature/HAF-50-51-color-interactions
                 </p>
                 <div className="flex gap-6 text-sm">
                   <Link to="/privacy" className="text-warm-400 hover:text-warm-600 transition">

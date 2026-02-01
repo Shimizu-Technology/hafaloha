@@ -80,7 +80,7 @@ export default function HomePage() {
       {/* ============================================================ */}
       {/* HERO SECTION — gradient orb background, optional white card  */}
       {/* ============================================================ */}
-      <div className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white min-h-[70vh] flex items-center overflow-hidden">
+      <div className="relative bg-gradient-to-br from-warm-900 via-warm-800 to-warm-900 text-white min-h-[70vh] flex items-center overflow-hidden">
         {/* Gradient orbs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-1/4 -left-1/4 w-96 h-96 bg-red-500/20 rounded-full blur-3xl" />
@@ -105,7 +105,7 @@ export default function HomePage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.1, ease: heroEase }}
-                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-gray-900 leading-tight tracking-tight"
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-warm-900 leading-tight tracking-tight"
               >
                 {heroContent.title || defaultHero.title}
               </motion.h1>
@@ -114,7 +114,7 @@ export default function HomePage() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.2, ease: heroEase }}
-                  className="text-base sm:text-lg mb-8 text-gray-600 max-w-xl mx-auto leading-relaxed"
+                  className="text-base sm:text-lg mb-8 text-warm-600 max-w-xl mx-auto leading-relaxed"
                 >
                   {heroContent.subtitle}
                 </motion.p>
@@ -158,7 +158,7 @@ export default function HomePage() {
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.2, ease: heroEase }}
-                  className="text-lg sm:text-xl mb-10 text-gray-300 max-w-xl mx-auto leading-relaxed"
+                  className="text-lg sm:text-xl mb-10 text-warm-300 max-w-xl mx-auto leading-relaxed"
                 >
                   {heroContent.subtitle}
                 </motion.p>
@@ -200,28 +200,34 @@ export default function HomePage() {
       {/* ============================================================ */}
       {/* WHY HAFALOHA — brand values strip                            */}
       {/* ============================================================ */}
+<<<<<<< HEAD
       <div className="border-y border-gray-100 py-16 sm:py-20">
+=======
+      <div className="border-y border-warm-100 py-12 sm:py-16 relative">
+        {/* Gold accent line at top */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 bg-hafalohaGold rounded-full -translate-y-1/2" />
+>>>>>>> feature/HAF-50-51-color-interactions
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <StaggerItem>
               <div className="text-2xl mb-2">🌺</div>
-              <h3 className="font-semibold text-gray-900 mb-1">Island Pride</h3>
-              <p className="text-sm text-gray-500">Chamorro &amp; Hawaiian heritage</p>
+              <h3 className="font-semibold text-warm-900 mb-1">Island Pride</h3>
+              <p className="text-sm text-warm-500">Chamorro &amp; Hawaiian heritage</p>
             </StaggerItem>
             <StaggerItem>
               <div className="text-2xl mb-2">✨</div>
-              <h3 className="font-semibold text-gray-900 mb-1">Premium Quality</h3>
-              <p className="text-sm text-gray-500">Built to last</p>
+              <h3 className="font-semibold text-warm-900 mb-1">Premium Quality</h3>
+              <p className="text-sm text-warm-500">Built to last</p>
             </StaggerItem>
             <StaggerItem>
               <div className="text-2xl mb-2">🤙</div>
-              <h3 className="font-semibold text-gray-900 mb-1">Community First</h3>
-              <p className="text-sm text-gray-500">Supporting our island family</p>
+              <h3 className="font-semibold text-warm-900 mb-1">Community First</h3>
+              <p className="text-sm text-warm-500">Supporting our island family</p>
             </StaggerItem>
             <StaggerItem>
               <div className="text-2xl mb-2">📦</div>
-              <h3 className="font-semibold text-gray-900 mb-1">Ships Worldwide</h3>
-              <p className="text-sm text-gray-500">From Guam to your door</p>
+              <h3 className="font-semibold text-warm-900 mb-1">Ships Worldwide</h3>
+              <p className="text-sm text-warm-500">From Guam to your door</p>
             </StaggerItem>
           </StaggerContainer>
         </div>
@@ -234,10 +240,16 @@ export default function HomePage() {
         <div className="py-20 sm:py-24 bg-warm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <FadeIn>
+<<<<<<< HEAD
               <div className="text-center mb-12 sm:mb-14">
                 <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">
+=======
+              <div className="text-center mb-10 sm:mb-14">
+                <h2 className="text-3xl sm:text-4xl font-bold text-warm-900 tracking-tight">
+>>>>>>> feature/HAF-50-51-color-interactions
                   Shop by Category
                 </h2>
+                <div className="w-12 h-1 bg-hafalohaGold rounded-full mx-auto mt-4" />
               </div>
             </FadeIn>
 
@@ -304,22 +316,27 @@ export default function HomePage() {
             
             {/* Text — 5 columns */}
             <FadeIn direction="right" delay={0.1} className="md:col-span-5">
+<<<<<<< HEAD
               <div className="max-w-prose">
                 <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-8 text-gray-900 tracking-tight">
+=======
+              <div>
+                <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 text-warm-900 tracking-tight">
+>>>>>>> feature/HAF-50-51-color-interactions
                   The Hafaloha Story
                 </h2>
-                <p className="text-gray-600 mb-6 leading-relaxed">
+                <p className="text-warm-600 mb-6 leading-relaxed">
                   Håfa Adai! We're Leonard and Tara Kaae, the founders of Hafaloha. What started as just 
                   a few designs and a dream has grown into something we're incredibly proud of.
                 </p>
-                <blockquote className="mb-8 pl-5 border-l-4 border-hafalohaRed/40">
-                  <p className="text-lg sm:text-xl font-medium text-gray-800 italic leading-relaxed">
+                <blockquote className="mb-8 pl-5 border-l-4 border-hafalohaGold">
+                  <p className="text-lg sm:text-xl font-medium text-warm-800 italic leading-relaxed">
                     "Hafaloha is more than just products or a brand—it's a lifestyle and a way of life."
                   </p>
                 </blockquote>
                 <Link
                   to="/about"
-                  className="group inline-flex items-center gap-2 text-gray-900 font-semibold hover:text-hafalohaRed transition-colors"
+                  className="group inline-flex items-center gap-2 text-warm-900 font-semibold hover:text-hafalohaRed transition-colors"
                 >
                   Read Our Full Story
                   <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -338,7 +355,7 @@ export default function HomePage() {
       <FadeIn>
         <div className="relative py-20 sm:py-24 overflow-hidden">
           {/* Gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
+          <div className="absolute inset-0 bg-gradient-to-br from-warm-900 via-warm-800 to-warm-900" />
           {/* Subtle orbs */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-1/2 -left-1/4 w-80 h-80 bg-red-500/10 rounded-full blur-3xl" />
@@ -349,10 +366,10 @@ export default function HomePage() {
             <h2 className="text-2xl sm:text-3xl font-bold mb-3 text-white tracking-tight">
               Stay Connected
             </h2>
-            <p className="text-gray-300 mb-2 max-w-xl mx-auto">
+            <p className="text-warm-300 mb-2 max-w-xl mx-auto">
               Follow us on social media for new drops and community updates.
             </p>
-            <p className="text-sm text-gray-400 mb-8">
+            <p className="text-sm text-warm-400 mb-8">
               Join 2,000+ island lovers 🌴
             </p>
             <div className="flex justify-center gap-5">
