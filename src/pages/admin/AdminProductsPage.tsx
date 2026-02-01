@@ -10,6 +10,7 @@ import {
   ProductsTable,
   ProductDetailModal,
 } from '../../components/admin/products';
+import { SkeletonListPage } from '../../components/admin';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
@@ -200,12 +201,7 @@ export default function AdminProductsPage() {
 
       {/* Content */}
       {loading ? (
-        <div className="flex items-center justify-center py-16">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-hafalohaRed mx-auto mb-4" />
-            <p className="text-gray-500">Loading products...</p>
-          </div>
-        </div>
+        <SkeletonListPage />
       ) : filteredProducts.length === 0 ? (
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-12 text-center">
           <h3 className="text-lg font-bold text-gray-900 mb-2">No products found</h3>

@@ -6,7 +6,7 @@ import {
   ShoppingCart, DollarSign, Clock, Package, Plus, ClipboardList, FolderOpen, Settings,
   BarChart3, ArrowRight,
 } from 'lucide-react';
-import { StatCard } from '../../components/admin';
+import { StatCard, SkeletonDashboard } from '../../components/admin';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
@@ -75,14 +75,7 @@ export default function AdminDashboardPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-hafalohaRed mx-auto mb-4" />
-          <p className="text-gray-500">Loading dashboard...</p>
-        </div>
-      </div>
-    );
+    return <SkeletonDashboard />;
   }
 
   return (

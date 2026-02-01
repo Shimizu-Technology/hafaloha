@@ -4,6 +4,7 @@ import axios from 'axios';
 import {
   TrendingUp, TrendingDown, Minus,
 } from 'lucide-react';
+import { SkeletonBar, SkeletonStatCard } from '../../components/admin';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
@@ -64,11 +65,12 @@ export default function AdminAnalyticsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-hafalohaRed mx-auto mb-4" />
-          <p className="text-gray-500">Loading analytics...</p>
+      <div className="space-y-8">
+        <div className="flex justify-between"><SkeletonBar className="h-7 w-32" /><SkeletonBar className="h-8 w-28 rounded-lg" /></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <SkeletonStatCard /><SkeletonStatCard /><SkeletonStatCard /><SkeletonStatCard />
         </div>
+        <SkeletonBar className="h-96 rounded-xl" />
       </div>
     );
   }

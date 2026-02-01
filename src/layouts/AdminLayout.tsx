@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
 import { ChevronRight, ExternalLink, Menu, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import AdminIcon from '../components/admin/AdminIconMap';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
@@ -291,7 +292,17 @@ export default function AdminLayout() {
 
         {/* Page content */}
         <main className="p-4 lg:p-8">
-          <Outlet />
+          <AnimatePresence mode="wait">
+              <motion.div
+                key={location.pathname}
+                initial={{ opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15, ease: 'easeOut' }}
+              >
+                <Outlet />
+              </motion.div>
+            </AnimatePresence>
         </main>
       </div>
     </div>
