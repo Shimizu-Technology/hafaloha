@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
+import { ChevronRight, ExternalLink, Menu, X } from 'lucide-react';
 import AdminIcon from '../components/admin/AdminIconMap';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
@@ -10,6 +11,71 @@ interface NavItem {
   name: string;
   path: string;
   icon: string;
+}
+
+// --- Route metadata for breadcrumbs + titles ---
+interface RouteMeta {
+  title: string;
+  parent?: string; // parent path for breadcrumb chain
+}
+
+const ROUTE_META: Record<string, RouteMeta> = {
+  '/admin':                          { title: 'Dashboard' },
+  '/admin/orders':                   { title: 'Orders',           parent: '/admin' },
+  '/admin/products':                 { title: 'Products',         parent: '/admin' },
+  '/admin/products/new':             { title: 'New Product',      parent: '/admin/products' },
+  '/admin/collections':              { title: 'Collections',      parent: '/admin' },
+  '/admin/inventory':                { title: 'Inventory',        parent: '/admin' },
+  '/admin/fundraisers':              { title: 'Fundraisers',      parent: '/admin' },
+  '/admin/acai':                     { title: 'Acai Cakes',       parent: '/admin' },
+  '/admin/users':                    { title: 'Users',            parent: '/admin' },
+  '/admin/import':                   { title: 'CSV Import',       parent: '/admin' },
+  '/admin/settings':                 { title: 'Settings',         parent: '/admin' },
+  '/admin/settings/variant-presets': { title: 'Variant Presets',   parent: '/admin/settings' },
+};
+
+// Dynamic route matching for paths like /admin/products/:id/edit
+function getRouteMeta(pathname: string): RouteMeta {
+  // Exact match first
+  if (ROUTE_META[pathname]) return ROUTE_META[pathname];
+  
+  // Dynamic patterns
+  if (/^\/admin\/products\/\d+\/edit$/.test(pathname))
+    return { title: 'Edit Product', parent: '/admin/products' };
+  if (/^\/admin\/fundraisers\/new$/.test(pathname))
+    return { title: 'New Fundraiser', parent: '/admin/fundraisers' };
+  if (/^\/admin\/fundraisers\/\d+\/edit$/.test(pathname))
+    return { title: 'Edit Fundraiser', parent: '/admin/fundraisers' };
+  if (/^\/admin\/fundraisers\/\d+$/.test(pathname))
+    return { title: 'Fundraiser Details', parent: '/admin/fundraisers' };
+  
+  // Fallback
+  return { title: '', parent: '/admin' };
+}
+
+interface Crumb {
+  label: string;
+  path?: string;
+}
+
+function buildBreadcrumbs(pathname: string): Crumb[] {
+  const crumbs: Crumb[] = [];
+  let current = pathname;
+  
+  // Walk up the parent chain
+  while (current) {
+    const meta = getRouteMeta(current);
+    if (!meta.title) break;
+    crumbs.unshift({ label: meta.title, path: current });
+    current = meta.parent || '';
+  }
+  
+  // Last crumb is current page (no link)
+  if (crumbs.length > 0) {
+    delete crumbs[crumbs.length - 1].path;
+  }
+  
+  return crumbs;
 }
 
 export default function AdminLayout() {
@@ -21,19 +87,14 @@ export default function AdminLayout() {
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [checkingAdmin, setCheckingAdmin] = useState(true);
 
-  // Check admin status from API
   useEffect(() => {
     const checkAdminStatus = async () => {
-      if (!isLoaded) {
-        return;
-      }
-
+      if (!isLoaded) return;
       if (!user) {
         setCheckingAdmin(false);
         setIsAdmin(false);
         return;
       }
-
       try {
         const token = await getToken();
         const response = await axios.get(`${API_BASE_URL}/api/v1/me`, {
@@ -47,51 +108,41 @@ export default function AdminLayout() {
         setCheckingAdmin(false);
       }
     };
-
     checkAdminStatus();
   }, [isLoaded, user, getToken]);
 
-  // Redirect if not admin
   useEffect(() => {
-    if (!checkingAdmin && isAdmin === false) {
-      navigate('/');
-    }
+    if (!checkingAdmin && isAdmin === false) navigate('/');
   }, [checkingAdmin, isAdmin, navigate]);
 
-  // Show loading while checking admin status
   if (!isLoaded || checkingAdmin) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hafalohaRed mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hafalohaRed mx-auto mb-4" />
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     );
   }
 
-  // Don't render admin content if not admin
-  if (!isAdmin) {
-    return null;
-  }
+  if (!isAdmin) return null;
 
-  // Group navigation items
+  // --- Navigation groups ---
   const mainNavigation: NavItem[] = [
     { name: 'Dashboard', path: '/admin', icon: 'dashboard' },
-    { name: 'Orders', path: '/admin/orders', icon: 'orders' },
-    { name: 'Products', path: '/admin/products', icon: 'products' },
+    { name: 'Orders',    path: '/admin/orders', icon: 'orders' },
+    { name: 'Products',  path: '/admin/products', icon: 'products' },
     { name: 'Collections', path: '/admin/collections', icon: 'collections' },
     { name: 'Inventory', path: '/admin/inventory', icon: 'inventory' },
   ];
-  
   const specialNavigation: NavItem[] = [
     { name: 'Fundraisers', path: '/admin/fundraisers', icon: 'fundraisers' },
-    { name: 'Açaí Cakes', path: '/admin/acai', icon: 'acai' },
+    { name: 'Acai Cakes',  path: '/admin/acai', icon: 'acai' },
   ];
-  
   const systemNavigation: NavItem[] = [
-    { name: 'Users', path: '/admin/users', icon: 'users' },
-    { name: 'Import', path: '/admin/import', icon: 'import' },
+    { name: 'Users',    path: '/admin/users', icon: 'users' },
+    { name: 'Import',   path: '/admin/import', icon: 'import' },
     { name: 'Settings', path: '/admin/settings', icon: 'settings' },
     { name: 'Variant Presets', path: '/admin/settings/variant-presets', icon: 'presets' },
   ];
@@ -101,7 +152,8 @@ export default function AdminLayout() {
       <p className="px-4 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">{title}</p>
       <div className="space-y-1">
         {items.map((item) => {
-          const isActive = location.pathname === item.path;
+          const isActive = location.pathname === item.path ||
+            (item.path !== '/admin' && location.pathname.startsWith(item.path + '/'));
           return (
             <Link
               key={item.path}
@@ -116,7 +168,7 @@ export default function AdminLayout() {
               <AdminIcon name={item.icon} className="w-5 h-5" />
               <span className="font-medium text-sm">{item.name}</span>
               {isActive && (
-                <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full"></div>
+                <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full" />
               )}
             </Link>
           );
@@ -124,6 +176,12 @@ export default function AdminLayout() {
       </div>
     </div>
   );
+
+  // --- Breadcrumbs ---
+  const breadcrumbs = buildBreadcrumbs(location.pathname);
+  const pageTitle = breadcrumbs.length > 0
+    ? breadcrumbs[breadcrumbs.length - 1].label
+    : '';
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -143,16 +201,14 @@ export default function AdminLayout() {
       >
         {/* Logo */}
         <div className="h-16 flex items-center justify-between px-6 border-b border-gray-100 bg-gradient-to-r from-hafalohaRed to-hafalohaRed/90">
-          <Link to="/" className="flex items-center gap-2">
-            <span className="text-xl font-bold text-white">Håfaloha Admin</span>
+          <Link to="/admin" className="flex items-center gap-2">
+            <span className="text-xl font-bold text-white">Hafaloha Admin</span>
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
             className="md:hidden text-white/80 hover:text-white p-1"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X className="w-5 h-5" />
           </button>
         </div>
 
@@ -188,42 +244,36 @@ export default function AdminLayout() {
             onClick={() => setSidebarOpen(true)}
             className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition"
           >
-            <svg
-              className="w-6 h-6 text-gray-700"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
+            <Menu className="w-6 h-6 text-gray-700" />
           </button>
 
-          {/* Page title - route-based lookup */}
-          <h1 className="text-lg font-semibold text-gray-900 hidden md:block">
-            {(() => {
-              const titles: Record<string, string> = {
-                '/admin': 'Dashboard',
-                '/admin/orders': 'Orders',
-                '/admin/products': 'Products',
-                '/admin/collections': 'Collections',
-                '/admin/inventory': 'Inventory',
-                '/admin/fundraisers': 'Fundraisers',
-                '/admin/acai': 'Açaí Cakes',
-                '/admin/users': 'User Management',
-                '/admin/import': 'CSV Import',
-                '/admin/settings': 'Settings',
-                '/admin/settings/variant-presets': 'Variant Presets',
-              };
-              return titles[location.pathname]
-                || (location.pathname.includes('/admin/products/') ? 'Product Details' : '')
-                || (location.pathname.includes('/admin/fundraisers/') ? 'Fundraiser Details' : '');
-            })()}
-          </h1>
+          {/* Breadcrumbs / Page title */}
+          <div className="hidden md:flex items-center gap-1.5">
+            {breadcrumbs.length > 1 ? (
+              breadcrumbs.map((crumb, i) => {
+                const isLast = i === breadcrumbs.length - 1;
+                return (
+                  <span key={i} className="flex items-center gap-1.5">
+                    {crumb.path ? (
+                      <Link
+                        to={crumb.path}
+                        className="text-sm text-gray-500 hover:text-hafalohaRed transition"
+                      >
+                        {crumb.label}
+                      </Link>
+                    ) : (
+                      <span className="text-sm font-semibold text-gray-900">
+                        {crumb.label}
+                      </span>
+                    )}
+                    {!isLast && <ChevronRight className="w-3.5 h-3.5 text-gray-400" />}
+                  </span>
+                );
+              })
+            ) : (
+              <span className="text-lg font-semibold text-gray-900">{pageTitle}</span>
+            )}
+          </div>
 
           {/* Quick actions */}
           <div className="flex items-center gap-3">
@@ -231,9 +281,7 @@ export default function AdminLayout() {
               to="/"
               className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-hafalohaRed bg-gray-50 hover:bg-gray-100 rounded-lg transition"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
+              <ExternalLink className="w-4 h-4" />
               View Store
             </Link>
           </div>
@@ -247,4 +295,3 @@ export default function AdminLayout() {
     </div>
   );
 }
-
