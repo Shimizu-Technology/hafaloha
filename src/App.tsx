@@ -33,6 +33,7 @@ import ContactPage from './pages/ContactPage';
 import ShippingInfoPage from './pages/ShippingInfoPage';
 import ReturnsPage from './pages/ReturnsPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import TermsOfServicePage from './pages/TermsOfServicePage';
 import axios from 'axios';
 import { Toaster } from 'react-hot-toast';
 import CartIcon from './components/CartIcon'; // Import CartIcon
@@ -409,6 +410,7 @@ function AppContent() {
           <Route path="/shipping" element={<ShippingInfoPage />} />
           <Route path="/returns" element={<ReturnsPage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
+          <Route path="/terms" element={<TermsOfServicePage />} />
           
           {/* Admin Routes with Layout */}
           <Route path="/admin" element={<AdminLayout />}>
@@ -435,7 +437,7 @@ function AppContent() {
 
         {/* Footer - Hidden when printing and on admin pages */}
         {!isAdminPage && (
-        <footer className="bg-warm-50 border-t border-warm-100 print:hidden">
+        <footer className="decorative-border-footer bg-warm-50 border-t border-warm-100 print:hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 sm:gap-12">
               {/* Brand */}
@@ -445,7 +447,7 @@ function AppContent() {
                   alt="Hafaloha" 
                   className="h-8 w-auto"
                 />
-                <p className="text-gray-500 text-sm mt-4 leading-relaxed">
+                <p className="text-warm-500 text-sm mt-4 leading-relaxed">
                   Island Living Apparel for All<br />
                   Celebrating Chamorro and Hawaiian heritage
                 </p>
@@ -454,7 +456,7 @@ function AppContent() {
                     href="https://www.facebook.com/hafaloha" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-gray-600 transition"
+                    className="text-warm-400 hover:text-warm-600 transition"
                     aria-label="Facebook"
                   >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -465,7 +467,7 @@ function AppContent() {
                     href="https://www.instagram.com/hafaloha" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-gray-400 hover:text-gray-600 transition"
+                    className="text-warm-400 hover:text-warm-600 transition"
                     aria-label="Instagram"
                   >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -477,25 +479,25 @@ function AppContent() {
 
               {/* Footer Navigation */}
               <div>
-                <h4 className="font-medium text-gray-900 mb-4">Shop</h4>
+                <h4 className="font-medium text-warm-800 mb-4">Shop</h4>
                 <ul className="space-y-2">
                   <li>
-                    <Link to="/products" className="text-gray-500 hover:text-gray-900 transition text-sm">
+                    <Link to="/products" className="text-warm-500 hover:text-warm-800 transition text-sm">
                       All Products
                     </Link>
                   </li>
                   <li>
-                    <Link to="/products?category=mens" className="text-gray-500 hover:text-gray-900 transition text-sm">
+                    <Link to="/products?category=mens" className="text-warm-500 hover:text-warm-800 transition text-sm">
                       Mens
                     </Link>
                   </li>
                   <li>
-                    <Link to="/products?category=womens" className="text-gray-500 hover:text-gray-900 transition text-sm">
+                    <Link to="/products?category=womens" className="text-warm-500 hover:text-warm-800 transition text-sm">
                       Womens
                     </Link>
                   </li>
                   <li>
-                    <Link to="/collections" className="text-gray-500 hover:text-gray-900 transition text-sm">
+                    <Link to="/collections" className="text-warm-500 hover:text-warm-800 transition text-sm">
                       Collections
                     </Link>
                   </li>
@@ -503,25 +505,25 @@ function AppContent() {
               </div>
 
               <div>
-                <h4 className="font-medium text-gray-900 mb-4">Info</h4>
+                <h4 className="font-medium text-warm-800 mb-4">Info</h4>
                 <ul className="space-y-2">
                   <li>
-                    <Link to="/about" className="text-gray-500 hover:text-gray-900 transition text-sm">
+                    <Link to="/about" className="text-warm-500 hover:text-warm-800 transition text-sm">
                       Our Story
                     </Link>
                   </li>
                   <li>
-                    <Link to="/contact" className="text-gray-500 hover:text-gray-900 transition text-sm">
+                    <Link to="/contact" className="text-warm-500 hover:text-warm-800 transition text-sm">
                       Contact
                     </Link>
                   </li>
                   <li>
-                    <Link to="/shipping" className="text-gray-500 hover:text-gray-900 transition text-sm">
+                    <Link to="/shipping" className="text-warm-500 hover:text-warm-800 transition text-sm">
                       Shipping Info
                     </Link>
                   </li>
                   <li>
-                    <Link to="/returns" className="text-gray-500 hover:text-gray-900 transition text-sm">
+                    <Link to="/returns" className="text-warm-500 hover:text-warm-800 transition text-sm">
                       Returns
                     </Link>
                   </li>
@@ -529,29 +531,29 @@ function AppContent() {
               </div>
 
               <div>
-                <h4 className="font-medium text-gray-900 mb-4">Location</h4>
-                <address className="text-gray-500 text-sm not-italic">
+                <h4 className="font-medium text-warm-800 mb-4">Location</h4>
+                <address className="text-warm-500 text-sm not-italic">
                   121 E. Marine Corps Dr<br />
                   Suite 1-103 & Suite 1-104<br />
                   Hagåtña, Guam 96910<br />
                   <br />
-                  <a href="tel:+16714727733" className="hover:text-gray-900 transition">
+                  <a href="tel:+16714727733" className="hover:text-warm-800 transition">
                     +1 (671) 472-7733
                   </a>
                 </address>
               </div>
             </div>
 
-            <div className="border-t border-gray-200 mt-12 pt-8">
+            <div className="border-t border-warm-200 mt-12 pt-8">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <p className="text-gray-400 text-sm text-center sm:text-left">
-                  &copy; 2026 Hafaloha. All rights reserved.
+                <p className="text-warm-400 text-sm text-center sm:text-left">
+                  &copy; {new Date().getFullYear()} Hafaloha. All rights reserved.
                 </p>
                 <div className="flex gap-6 text-sm">
-                  <Link to="/privacy" className="text-gray-400 hover:text-gray-600 transition">
+                  <Link to="/privacy" className="text-warm-400 hover:text-warm-600 transition">
                     Privacy Policy
                   </Link>
-                  <Link to="/terms" className="text-gray-400 hover:text-gray-600 transition">
+                  <Link to="/terms" className="text-warm-400 hover:text-warm-600 transition">
                     Terms of Service
                   </Link>
                 </div>
