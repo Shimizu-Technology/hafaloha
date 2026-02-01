@@ -271,30 +271,25 @@ function CheckoutForm() {
   
   if (configLoading) {
     return (
-      <div className="min-h-screen bg-warm-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-hafalohaRed mx-auto mb-4"></div>
-          <p className="text-warm-600">Loading checkout...</p>
+          <p className="text-gray-600">Loading checkout...</p>
         </div>
       </div>
     );
   }
   
   return (
-    <div className="min-h-screen bg-warm-50 py-6 sm:py-8">
+    <div className="min-h-screen bg-gray-50 py-6 sm:py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8 text-center sm:text-left">
           <span className="inline-block text-hafalohaRed font-semibold text-sm uppercase tracking-wider mb-2">
             Secure Checkout
           </span>
-<<<<<<< HEAD
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 tracking-tight">Complete Your Order</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">Complete Your Order</h1>
           <p className="text-gray-500 mt-2">Fill in the details below to complete your purchase</p>
-=======
-          <h1 className="text-3xl sm:text-4xl font-bold text-warm-900">Complete Your Order</h1>
-          <p className="text-warm-500 mt-2">Fill in the details below to complete your purchase</p>
->>>>>>> feature/HAF-50-51-color-interactions
         </div>
         
         {/* Test Mode Banner */}
@@ -320,18 +315,18 @@ function CheckoutForm() {
           <div className="lg:col-span-2">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Contact Information */}
-              <div className="bg-white rounded-xl shadow-sm border border-warm-100 p-6 sm:p-8">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 bg-hafalohaCream rounded-full flex items-center justify-center">
                     <svg className="w-5 h-5 text-hafalohaRed" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                   </div>
-                  <h2 className="text-xl font-bold text-warm-900">Contact Information</h2>
+                  <h2 className="text-xl font-bold text-gray-900">Contact Information</h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
-                    <label htmlFor="name" className="block text-sm font-semibold text-warm-700 mb-1.5">
+                    <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-1.5">
                       Full Name *
                     </label>
                     <input
@@ -340,12 +335,12 @@ function CheckoutForm() {
                       required
                       value={name}
                       onChange={(e) => setName(e.target.value)}
-                      className="w-full px-4 py-3 bg-warm-50 border border-warm-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
                       placeholder="John Doe"
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label htmlFor="email" className="block text-sm font-semibold text-warm-700 mb-1.5">
+                    <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-1.5">
                       Email *
                     </label>
                     <input
@@ -354,12 +349,12 @@ function CheckoutForm() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-3 bg-warm-50 border border-warm-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
                       placeholder="your@email.com"
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label htmlFor="phone" className="block text-sm font-semibold text-warm-700 mb-1.5">
+                    <label htmlFor="phone" className="block text-sm font-semibold text-gray-700 mb-1.5">
                       Phone *
                     </label>
                     <input
@@ -368,7 +363,7 @@ function CheckoutForm() {
                       required
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="w-full px-4 py-3 bg-warm-50 border border-warm-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
                       placeholder="(555) 123-4567"
                     />
                   </div>
@@ -376,14 +371,14 @@ function CheckoutForm() {
               </div>
               
               {/* Delivery Method */}
-              <div className="bg-white rounded-xl shadow-sm border border-warm-100 p-6 sm:p-8">
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 bg-hafalohaCream rounded-full flex items-center justify-center">
                     <svg className="w-5 h-5 text-hafalohaRed" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                     </svg>
                   </div>
-                  <h2 className="text-xl font-bold text-warm-900">Delivery Method</h2>
+                  <h2 className="text-xl font-bold text-gray-900">Delivery Method</h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <button
@@ -396,15 +391,15 @@ function CheckoutForm() {
                     className={`p-5 border-2 rounded-xl transition-all ${
                       deliveryMethod === 'shipping'
                         ? 'border-hafalohaRed bg-red-50 ring-4 ring-hafalohaRed/10'
-                        : 'border-warm-200 hover:border-warm-300 bg-white'
+                        : 'border-gray-200 hover:border-gray-300 bg-white'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="text-left">
-                        <p className="font-bold text-warm-900">Ship to Address</p>
-                        <p className="text-sm text-warm-500 mt-1">Delivered to your door</p>
+                        <p className="font-bold text-gray-900">Ship to Address</p>
+                        <p className="text-sm text-gray-500 mt-1">Delivered to your door</p>
                       </div>
-                      <svg className={`w-6 h-6 ${deliveryMethod === 'shipping' ? 'text-hafalohaRed' : 'text-warm-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className={`w-6 h-6 ${deliveryMethod === 'shipping' ? 'text-hafalohaRed' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
@@ -418,24 +413,14 @@ function CheckoutForm() {
                     }}
                     className={`p-5 border-2 rounded-xl transition-all ${
                       deliveryMethod === 'pickup'
-<<<<<<< HEAD
-                        ? 'border-hafalohaRed bg-red-50'
-                        : 'border-warm-300 hover:border-warm-400'
-=======
                         ? 'border-hafalohaRed bg-red-50 ring-4 ring-hafalohaRed/10'
                         : 'border-gray-200 hover:border-gray-300 bg-white'
->>>>>>> feature/HAF-56-57-62-secondary-pages
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="text-left">
-<<<<<<< HEAD
-                        <p className="font-semibold text-warm-900">Pickup</p>
-                        <p className="text-sm text-warm-600 mt-1">Free - Pickup at office</p>
-=======
                         <p className="font-bold text-gray-900">Pickup</p>
                         <p className="text-sm text-gray-500 mt-1">Free — Pickup at store</p>
->>>>>>> feature/HAF-56-57-62-secondary-pages
                       </div>
                       <svg className={`w-6 h-6 ${deliveryMethod === 'pickup' ? 'text-hafalohaRed' : 'text-gray-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -473,10 +458,6 @@ function CheckoutForm() {
               {/* Shipping Address - Only show if shipping selected */}
               <AnimatePresence mode="wait">
               {deliveryMethod === 'shipping' && (
-<<<<<<< HEAD
-                <div className="bg-white rounded-lg shadow p-6">
-                  <h2 className="text-xl font-semibold text-warm-900 mb-4">Shipping Address</h2>
-=======
                 <motion.div
                   key="shipping-form"
                   initial={{ opacity: 0, y: -10 }}
@@ -494,10 +475,9 @@ function CheckoutForm() {
                     </div>
                     <h2 className="text-xl font-bold text-gray-900">Shipping Address</h2>
                   </div>
->>>>>>> feature/HAF-56-57-62-secondary-pages
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="sm:col-span-2">
-                    <label htmlFor="street1" className="block text-sm font-medium text-warm-700 mb-1">
+                    <label htmlFor="street1" className="block text-sm font-medium text-gray-700 mb-1">
                       Address Line 1 *
                     </label>
                     <input
@@ -506,12 +486,12 @@ function CheckoutForm() {
                       required
                       value={shippingAddress.street1}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, street1: e.target.value })}
-                      className="w-full px-4 py-2 border border-warm-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
                       placeholder="123 Main St"
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label htmlFor="street2" className="block text-sm font-medium text-warm-700 mb-1">
+                    <label htmlFor="street2" className="block text-sm font-medium text-gray-700 mb-1">
                       Address Line 2
                     </label>
                     <input
@@ -519,12 +499,12 @@ function CheckoutForm() {
                       id="street2"
                       value={shippingAddress.street2 || ''}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, street2: e.target.value })}
-                      className="w-full px-4 py-2 border border-warm-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
                       placeholder="Apt, suite, etc. (optional)"
                     />
                   </div>
                   <div>
-                    <label htmlFor="city" className="block text-sm font-medium text-warm-700 mb-1">
+                    <label htmlFor="city" className="block text-sm font-medium text-gray-700 mb-1">
                       City *
                     </label>
                     <input
@@ -533,11 +513,11 @@ function CheckoutForm() {
                       required
                       value={shippingAddress.city}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
-                      className="w-full px-4 py-2 border border-warm-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
                     />
                   </div>
                   <div>
-                    <label htmlFor="state" className="block text-sm font-medium text-warm-700 mb-1">
+                    <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
                       State *
                     </label>
                     <input
@@ -546,13 +526,13 @@ function CheckoutForm() {
                       required
                       value={shippingAddress.state}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, state: e.target.value })}
-                      className="w-full px-4 py-2 border border-warm-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
                       placeholder="CA"
                       maxLength={2}
                     />
                   </div>
                   <div>
-                    <label htmlFor="zip" className="block text-sm font-medium text-warm-700 mb-1">
+                    <label htmlFor="zip" className="block text-sm font-medium text-gray-700 mb-1">
                       ZIP Code *
                     </label>
                     <input
@@ -561,12 +541,12 @@ function CheckoutForm() {
                       required
                       value={shippingAddress.zip}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, zip: e.target.value })}
-                      className="w-full px-4 py-2 border border-warm-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
                       placeholder="12345"
                     />
                   </div>
                   <div>
-                    <label htmlFor="country" className="block text-sm font-medium text-warm-700 mb-1">
+                    <label htmlFor="country" className="block text-sm font-medium text-gray-700 mb-1">
                       Country *
                     </label>
                     <select
@@ -574,7 +554,7 @@ function CheckoutForm() {
                       required
                       value={shippingAddress.country}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, country: e.target.value })}
-                      className="w-full px-4 py-2 border border-warm-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
                     >
                       <option value="US">United States</option>
                       <option value="GU">Guam</option>
@@ -588,7 +568,7 @@ function CheckoutForm() {
                     type="button"
                     onClick={handleCalculateShipping}
                     disabled={calculatingShipping || !shippingAddress.street1 || !shippingAddress.city || !shippingAddress.state || !shippingAddress.zip}
-                    className="w-full bg-hafalohaRed text-white py-3 px-4 rounded-lg font-medium hover:bg-red-700 disabled:bg-warm-300 disabled:cursor-not-allowed transition"
+                    className="w-full bg-hafalohaRed text-white py-3 px-4 rounded-lg font-medium hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
                   >
                     {calculatingShipping ? 'Calculating...' : 'Calculate Shipping Rates'}
                   </button>
@@ -601,7 +581,7 @@ function CheckoutForm() {
                 {/* Shipping Rates */}
                 {availableShippingRates.length > 0 && (
                   <div className="mt-6">
-                    <h3 className="text-sm font-semibold text-warm-900 mb-3">Select Shipping Method:</h3>
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Select Shipping Method:</h3>
                     <div className="space-y-3">
                       {availableShippingRates.map((rate, index) => (
                         <button
@@ -610,25 +590,20 @@ function CheckoutForm() {
                           onClick={() => setShippingMethod(rate)}
                           className={`w-full p-4 border-2 rounded-xl text-left transition-all ${
                             shippingMethod?.carrier === rate.carrier && shippingMethod?.service === rate.service
-<<<<<<< HEAD
-                              ? 'border-hafalohaRed bg-red-50'
-                              : 'border-warm-300 hover:border-warm-400'
-=======
                               ? 'border-hafalohaRed bg-red-50 ring-4 ring-hafalohaRed/10'
                               : 'border-gray-200 hover:border-gray-300'
->>>>>>> feature/HAF-56-57-62-secondary-pages
                           }`}
                         >
                           <div className="flex justify-between items-center">
                             <div>
-                              <p className="font-semibold text-warm-900">{rate.carrier} - {rate.service}</p>
+                              <p className="font-semibold text-gray-900">{rate.carrier} - {rate.service}</p>
                               {rate.delivery_days && (
-                                <p className="text-sm text-warm-600 mt-1">
+                                <p className="text-sm text-gray-600 mt-1">
                                   Estimated delivery: {rate.delivery_days} business days
                                 </p>
                               )}
                             </div>
-                            <p className="text-lg font-bold text-warm-900">{formatPrice(rate.rate_cents)}</p>
+                            <p className="text-lg font-bold text-gray-900">{formatPrice(rate.rate_cents)}</p>
                           </div>
                         </button>
                       ))}
@@ -681,19 +656,14 @@ function CheckoutForm() {
           
           {/* Right Column - Order Summary */}
           <div className="lg:col-span-1">
-<<<<<<< HEAD
-            <div className="bg-white rounded-lg shadow p-6 sticky top-4">
-              <h2 className="text-xl font-semibold text-warm-900 mb-4">Order Summary</h2>
-=======
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 sticky top-24">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
->>>>>>> feature/HAF-56-57-62-secondary-pages
               
               {/* Items */}
               <div className="space-y-4 mb-4 max-h-64 overflow-y-auto">
                 {items.map((item) => (
                   <div key={item.id} className="flex items-center">
-                    <div className="flex-shrink-0 w-16 h-16 rounded-md overflow-hidden border border-warm-200">
+                    <div className="flex-shrink-0 w-16 h-16 rounded-md overflow-hidden border border-gray-200">
                       {item.product.primary_image_url ? (
                         <img
                           src={item.product.primary_image_url}
@@ -701,17 +671,17 @@ function CheckoutForm() {
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-warm-100 text-warm-400 text-xs">
+                        <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs">
                           No Image
                         </div>
                       )}
                     </div>
                     <div className="ml-4 flex-grow">
-                      <p className="text-sm font-medium text-warm-900">{item.product.name}</p>
-                      <p className="text-xs text-warm-500">{item.product_variant.display_name}</p>
-                      <p className="text-xs text-warm-500">Qty: {item.quantity}</p>
+                      <p className="text-sm font-medium text-gray-900">{item.product.name}</p>
+                      <p className="text-xs text-gray-500">{item.product_variant.display_name}</p>
+                      <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                     </div>
-                    <p className="text-sm font-medium text-warm-900">{formatPrice(item.subtotal_cents)}</p>
+                    <p className="text-sm font-medium text-gray-900">{formatPrice(item.subtotal_cents)}</p>
                   </div>
                 ))}
               </div>
@@ -719,14 +689,14 @@ function CheckoutForm() {
               {/* Totals */}
               <div className="border-t pt-4 space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-warm-600">Subtotal</span>
-                  <span className="text-warm-900">{formatPrice(subtotalCents)}</span>
+                  <span className="text-gray-600">Subtotal</span>
+                  <span className="text-gray-900">{formatPrice(subtotalCents)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-warm-600">
+                  <span className="text-gray-600">
                     {deliveryMethod === 'pickup' ? 'Pickup' : 'Shipping'}
                   </span>
-                  <span className="text-warm-900">
+                  <span className="text-gray-900">
                     {deliveryMethod === 'pickup' 
                       ? 'FREE' 
                       : shippingMethod 
@@ -736,16 +706,16 @@ function CheckoutForm() {
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-warm-600">Tax</span>
-                  <span className="text-warm-900">$0.00</span>
+                  <span className="text-gray-600">Tax</span>
+                  <span className="text-gray-900">$0.00</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold border-t pt-2 mt-2">
-                  <span className="text-warm-900">Total</span>
+                  <span className="text-gray-900">Total</span>
                   <span className="text-hafalohaRed">{formatPrice(totalCents)}</span>
                 </div>
               </div>
               
-              <p className="text-xs text-warm-500 mt-4">
+              <p className="text-xs text-gray-500 mt-4">
                 {isTestMode 
                   ? 'Test mode: No real payment will be charged.'
                   : deliveryMethod === 'shipping' && !shippingMethod

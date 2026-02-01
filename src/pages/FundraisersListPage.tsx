@@ -73,7 +73,7 @@ export default function FundraisersListPage() {
             </div>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {Array.from({ length: 3 }).map((_, i) => (
               <FundraiserCardSkeleton key={i} />
@@ -106,26 +106,17 @@ export default function FundraisersListPage() {
   return (
     <div className="min-h-screen bg-warm-50">
       {/* Hero Section */}
-<<<<<<< HEAD
-      <div className="bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-=======
       <div className="bg-white border-b border-warm-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
->>>>>>> feature/HAF-50-51-color-interactions
           <FadeIn>
             <div className="text-center max-w-3xl mx-auto">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-hafalohaRed/10 mb-6">
                 <Heart className="w-8 h-8 text-hafalohaRed" />
               </div>
-<<<<<<< HEAD
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4 tracking-tight">
-=======
               <h1 className="text-3xl sm:text-4xl font-bold text-warm-900 mb-4">
->>>>>>> feature/HAF-50-51-color-interactions
                 Support Our Fundraisers
               </h1>
-              <p className="text-lg text-warm-500 max-w-2xl mx-auto">
+              <p className="text-lg text-warm-500">
                 Help support local teams, schools, and organizations by purchasing 
                 Hafaloha merchandise. A portion of every sale goes directly to the cause.
               </p>
@@ -138,11 +129,7 @@ export default function FundraisersListPage() {
         {/* Active Fundraisers */}
         {activeFundraisers.length > 0 ? (
           <section className="mb-16">
-<<<<<<< HEAD
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 flex items-center tracking-tight">
-=======
             <h2 className="text-2xl font-bold text-warm-900 mb-6 flex items-center">
->>>>>>> feature/HAF-50-51-color-interactions
               <span className="w-2 h-2 bg-green-500 rounded-full mr-3 animate-pulse"></span>
               Active Fundraisers
             </h2>
@@ -269,7 +256,7 @@ export default function FundraisersListPage() {
         {/* CTA for Organizations */}
         <section className="mt-16">
           <div className="bg-linear-to-r from-hafalohaRed to-hafalohaRed/90 rounded-2xl p-8 sm:p-12 text-center text-white">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-4 tracking-tight">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4">
               Want to Start a Fundraiser?
             </h2>
             <p className="text-white/90 max-w-2xl mx-auto mb-6">
