@@ -136,8 +136,8 @@ export default function HomePage() {
           {/* Heading */}
           <motion.h1
             {...heroMotion(0.15)}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-[1.1] tracking-tight text-white"
-            style={{ textShadow: '0 2px 10px rgba(0,0,0,0.9), 0 4px 25px rgba(0,0,0,0.5), 0 0 40px rgba(0,0,0,0.3)' }}
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-[1.1] tracking-tight"
+            style={{ color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.9), 0 4px 25px rgba(0,0,0,0.5), 0 0 40px rgba(0,0,0,0.3)' }}
           >
             {stripEmoji(heroContent.title || defaultHero.title)}
           </motion.h1>
@@ -146,8 +146,8 @@ export default function HomePage() {
           {heroContent.subtitle && (
             <motion.p
               {...heroMotion(0.3)}
-              className="text-lg sm:text-xl mb-12 text-white max-w-2xl mx-auto leading-relaxed font-medium"
-              style={{ textShadow: '0 1px 6px rgba(0,0,0,0.9), 0 2px 15px rgba(0,0,0,0.5)' }}
+              className="text-lg sm:text-xl mb-12 max-w-2xl mx-auto leading-relaxed font-medium"
+              style={{ color: '#ffffff', textShadow: '0 1px 6px rgba(0,0,0,0.9), 0 2px 15px rgba(0,0,0,0.5)' }}
             >
               {stripEmoji(heroContent.subtitle)}
             </motion.p>
