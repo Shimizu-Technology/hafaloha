@@ -7,25 +7,6 @@ interface MobileNavDropdownProps {
   darkMode?: boolean;
 }
 
-// Featured categories
-const featuredCategories = [
-  {
-    name: "Women's",
-    image: '/images/hafaloha-womens-img.webp',
-    link: '/products?collection=womens',
-  },
-  {
-    name: "Men's",
-    image: '/images/hafaloha-mens-img.webp',
-    link: '/products?collection=mens',
-  },
-  {
-    name: "Kids",
-    image: '/images/hafaloha-mens-img.webp',
-    link: '/products?collection=kids',
-  }
-];
-
 export default function MobileNavDropdown({ onItemClick, darkMode = false }: MobileNavDropdownProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [collections, setCollections] = useState<Collection[]>([]);
@@ -72,30 +53,6 @@ export default function MobileNavDropdown({ onItemClick, darkMode = false }: Mob
       {/* Expandable Sub-menu */}
       {isExpanded && (
         <div className="animate-slide-down">
-          {/* Featured Categories with Images */}
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            {featuredCategories.map((category) => (
-              <Link
-                key={category.name}
-                to={category.link}
-                className="group relative overflow-hidden rounded-lg"
-                onClick={onItemClick}
-              >
-                <div className="aspect-square bg-warm-100 overflow-hidden">
-                  <img 
-                    src={category.image} 
-                    alt={category.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-3 text-white">
-                    <span className="font-semibold text-sm">Shop {category.name}</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-
           {/* Collections List */}
           <div className={`pl-3 space-y-1 ml-1 ${darkMode ? 'border-l-2 border-white/20' : 'border-l-2 border-hafalohaRed/30'}`}>
             {/* All Products */}

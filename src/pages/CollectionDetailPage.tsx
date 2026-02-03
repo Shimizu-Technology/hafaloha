@@ -127,47 +127,33 @@ export default function CollectionDetailPage() {
         </div>
       </div>
 
-      {/* Hero Banner */}
-      {heroImage ? (
-        <div className="relative overflow-hidden bg-gray-900">
+      {/* Hero Banner - Clean design with brand colors */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-warm-800 via-warm-700 to-warm-900">
+        {/* Background image if available */}
+        {heroImage && (
           <img
             src={heroImage}
-            alt={collection.name}
-            className="absolute inset-0 w-full h-full object-cover opacity-40 blur-sm scale-105"
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover opacity-20 blur-sm scale-105"
+            loading="eager"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-gray-900/50 to-gray-900/30" />
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
-            <FadeIn>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-4">
-                {collection.name}
-              </h1>
-              {collection.description && (
-                <p className="text-lg text-white/80 max-w-2xl mb-4">{collection.description}</p>
-              )}
-              <p className="text-sm text-white/60">
-                {meta?.total || 0} {meta?.total === 1 ? 'product' : 'products'}
-              </p>
-            </FadeIn>
-          </div>
+        )}
+        {/* Gradient overlay for better text readability */}
+        <div className="absolute inset-0 bg-gradient-to-r from-warm-900/90 via-warm-800/70 to-warm-900/80" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+          <FadeIn>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-3">
+              {collection.name}
+            </h1>
+            {collection.description && (
+              <p className="text-lg text-white/80 max-w-2xl mb-3">{collection.description}</p>
+            )}
+            <p className="text-sm text-white/60">
+              {meta?.total || 0} {meta?.total === 1 ? 'product' : 'products'}
+            </p>
+          </FadeIn>
         </div>
-      ) : (
-        <div className="relative bg-warm-100 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--color-hafaloha-cream)_0%,_transparent_50%)] opacity-60" />
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
-            <FadeIn>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 mb-4">
-                {collection.name}
-              </h1>
-              {collection.description && (
-                <p className="text-lg text-warm-500 max-w-2xl mb-4">{collection.description}</p>
-              )}
-              <p className="text-sm text-warm-400">
-                {meta?.total || 0} {meta?.total === 1 ? 'product' : 'products'}
-              </p>
-            </FadeIn>
-          </div>
-        </div>
-      )}
+      </div>
 
       {/* Filters */}
       <div className="border-b border-warm-200">
