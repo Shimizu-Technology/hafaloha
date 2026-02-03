@@ -642,7 +642,7 @@ export default function ProductDetailPage() {
                   <div className="flex items-center gap-4">
                     <button
                       onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                      className="w-10 h-10 flex items-center justify-center border-2 border-warm-300 rounded-lg hover:border-hafalohaRed transition"
+                      className="w-11 h-11 flex items-center justify-center border-2 border-warm-300 rounded-lg hover:border-hafalohaRed transition"
                       disabled={quantity <= 1}
                     >
                       −
@@ -661,7 +661,7 @@ export default function ProductDetailPage() {
                     />
                     <button
                       onClick={() => setQuantity(Math.min(maxQuantity, quantity + 1))}
-                      className="w-10 h-10 flex items-center justify-center border-2 border-warm-300 rounded-lg hover:border-hafalohaRed transition"
+                      className="w-11 h-11 flex items-center justify-center border-2 border-warm-300 rounded-lg hover:border-hafalohaRed transition"
                       disabled={quantity >= maxQuantity}
                     >
                       +

@@ -486,7 +486,7 @@ function CheckoutForm() {
                       required
                       value={shippingAddress.street1}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, street1: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
                       placeholder="123 Main St"
                     />
                   </div>
@@ -499,7 +499,7 @@ function CheckoutForm() {
                       id="street2"
                       value={shippingAddress.street2 || ''}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, street2: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
                       placeholder="Apt, suite, etc. (optional)"
                     />
                   </div>
@@ -513,7 +513,7 @@ function CheckoutForm() {
                       required
                       value={shippingAddress.city}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, city: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
                     />
                   </div>
                   <div>
@@ -526,7 +526,7 @@ function CheckoutForm() {
                       required
                       value={shippingAddress.state}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, state: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
                       placeholder="CA"
                       maxLength={2}
                     />
@@ -541,7 +541,7 @@ function CheckoutForm() {
                       required
                       value={shippingAddress.zip}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, zip: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
                       placeholder="12345"
                     />
                   </div>
@@ -554,7 +554,7 @@ function CheckoutForm() {
                       required
                       value={shippingAddress.country}
                       onChange={(e) => setShippingAddress({ ...shippingAddress, country: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
                     >
                       <option value="US">United States</option>
                       <option value="GU">Guam</option>

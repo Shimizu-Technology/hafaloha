@@ -474,10 +474,10 @@ function CartModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50">
-      <div className="bg-white w-full sm:max-w-lg sm:rounded-lg max-h-[80vh] flex flex-col">
+      <div className="bg-white w-full sm:max-w-lg sm:rounded-lg sm:rounded-b-lg rounded-t-2xl max-h-[80dvh] flex flex-col">
         <div className="p-4 border-b flex justify-between items-center">
           <h2 className="text-xl font-bold">Your Order</h2>
-          <button onClick={onClose} className="p-2 hover:bg-warm-100 rounded-lg">✕</button>
+          <button onClick={onClose} className="p-2.5 hover:bg-warm-100 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center">✕</button>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -499,21 +499,21 @@ function CartModal({
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => onUpdateQuantity(item.fundraiser_product_id, item.variant_id, -1)}
-                  className="p-1 border rounded hover:bg-warm-100"
+                  className="p-2.5 border rounded-lg hover:bg-warm-100 transition"
                 >
                   <Minus className="w-4 h-4" />
                 </button>
                 <span className="w-8 text-center font-medium">{item.quantity}</span>
                 <button
                   onClick={() => onUpdateQuantity(item.fundraiser_product_id, item.variant_id, 1)}
-                  className="p-1 border rounded hover:bg-warm-100"
+                  className="p-2.5 border rounded-lg hover:bg-warm-100 transition"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
               </div>
               <button
                 onClick={() => onRemove(item.fundraiser_product_id, item.variant_id)}
-                className="p-2 text-warm-400 hover:text-red-600"
+                className="p-2.5 text-warm-400 hover:text-red-600"
               >
                 <Trash2 className="w-5 h-5" />
               </button>

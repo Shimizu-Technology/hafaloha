@@ -264,7 +264,7 @@ function AppContent() {
                 {/* Search Icon - Tablet */}
                 <button
                   type="button"
-                  className="hidden md:block lg:hidden p-2 text-warm-600 hover:text-hafalohaRed transition"
+                  className="hidden md:flex lg:hidden p-2.5 min-w-[44px] min-h-[44px] items-center justify-center text-warm-600 hover:text-hafalohaRed transition rounded-lg"
                   onClick={() => {
                     const input = document.querySelector('input[placeholder="Search products..."]') as HTMLInputElement;
                     if (input) input.focus();
@@ -297,7 +297,7 @@ function AppContent() {
                 {/* Mobile Menu Button */}
                 <button
                   onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                  className="md:hidden p-2 text-warm-600 hover:text-hafalohaRed transition rounded-lg"
+                  className="md:hidden p-2.5 min-w-[44px] min-h-[44px] flex items-center justify-center text-warm-600 hover:text-hafalohaRed transition rounded-lg"
                   aria-label="Toggle menu"
                 >
                   {mobileMenuOpen ? (
@@ -467,7 +467,7 @@ function AppContent() {
                     href="https://www.facebook.com/hafaloha" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-warm-400 hover:text-warm-600 transition"
+                    className="text-warm-400 hover:text-warm-600 transition p-1.5 -m-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center"
                     aria-label="Facebook"
                   >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -478,7 +478,7 @@ function AppContent() {
                     href="https://www.instagram.com/hafaloha" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-warm-400 hover:text-warm-600 transition"
+                    className="text-warm-400 hover:text-warm-600 transition p-1.5 -m-1.5 min-w-[44px] min-h-[44px] flex items-center justify-center"
                     aria-label="Instagram"
                   >
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

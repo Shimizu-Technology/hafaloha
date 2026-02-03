@@ -189,7 +189,7 @@ export default function CartDrawer() {
                     <div className="flex items-center bg-warm-100 rounded-full">
                       <button
                         onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
-                        className="w-8 h-8 flex items-center justify-center text-warm-600 hover:text-hafalohaRed hover:bg-warm-200 rounded-full transition disabled:opacity-50"
+                        className="w-11 h-11 flex items-center justify-center text-warm-600 hover:text-hafalohaRed hover:bg-warm-200 rounded-full transition disabled:opacity-50"
                         disabled={item.quantity <= 1 || isLoading}
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -201,7 +201,7 @@ export default function CartDrawer() {
                       </span>
                       <button
                         onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
-                        className="w-8 h-8 flex items-center justify-center text-warm-600 hover:text-hafalohaRed hover:bg-warm-200 rounded-full transition disabled:opacity-50"
+                        className="w-11 h-11 flex items-center justify-center text-warm-600 hover:text-hafalohaRed hover:bg-warm-200 rounded-full transition disabled:opacity-50"
                         disabled={
                           isLoading ||
                           (item.product.inventory_level !== 'none' && 
