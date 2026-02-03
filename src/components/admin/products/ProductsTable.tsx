@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, Edit, MoreVertical, Archive, ArchiveRestore, Copy, Globe, GlobeLock, ArrowUpDown } from 'lucide-react';
-import { Product, formatCurrency, getStockDisplay } from './productUtils';
+import type { Product } from './productUtils';
+import { formatCurrency, getStockDisplay } from './productUtils';
 
 interface ProductsTableProps {
   products: Product[];

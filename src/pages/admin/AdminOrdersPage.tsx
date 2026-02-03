@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import type { Order } from '../../components/admin/orders';
 import {
-  Order,
   OrderFilters,
   OrdersTable,
   OrderDetailModal,

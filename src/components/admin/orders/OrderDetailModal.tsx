@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Order, formatCurrency, formatDate, getStatusBadge, formatStatus, getNextStatusAction } from './orderUtils';
+import type { Order } from './orderUtils';
+import { formatCurrency, formatDate, getStatusBadge, formatStatus, getNextStatusAction } from './orderUtils';
 
 interface OrderDetailModalProps {
   order: Order;

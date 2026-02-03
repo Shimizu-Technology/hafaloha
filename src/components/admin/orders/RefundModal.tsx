@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Order, formatCurrency } from './orderUtils';
+import type { Order } from './orderUtils';
+import { formatCurrency } from './orderUtils';
 
 interface RefundModalProps {
   order: Order;

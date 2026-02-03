@@ -190,11 +190,12 @@ export default function AdminAnalyticsPage() {
                 tickFormatter={chartMode === 'revenue' ? (v) => `$${(v / 100).toFixed(0)}` : undefined}
               />
               <Tooltip
-                formatter={(value: number) =>
-                  chartMode === 'revenue'
-                    ? [formatCurrency(value), 'Revenue']
-                    : [value, 'Orders']
-                }
+                formatter={(value) => {
+                  const v = Number(value);
+                  return chartMode === 'revenue'
+                    ? [formatCurrency(v), 'Revenue']
+                    : [v, 'Orders'];
+                }}
                 contentStyle={{
                   borderRadius: '8px',
                   border: '1px solid #e5e7eb',

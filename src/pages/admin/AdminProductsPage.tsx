@@ -3,9 +3,8 @@ import { useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import type { Product, DetailedProduct } from '../../components/admin/products';
 import {
-  Product,
-  DetailedProduct,
   ProductFilters,
   ProductsTable,
   ProductDetailModal,

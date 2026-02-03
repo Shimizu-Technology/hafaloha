@@ -1,4 +1,5 @@
-import { Order, formatCurrency, formatDate, getStatusBadge, formatStatus, getNextStatusAction } from './orderUtils';
+import type { Order } from './orderUtils';
+import { formatCurrency, formatDate, getStatusBadge, formatStatus, getNextStatusAction } from './orderUtils';
 
 interface OrdersTableProps {
   orders: Order[];

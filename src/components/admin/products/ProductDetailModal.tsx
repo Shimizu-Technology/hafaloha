@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Edit } from 'lucide-react';
-import { DetailedProduct, formatCurrency, getVariantStatus } from './productUtils';
+import type { DetailedProduct } from './productUtils';
+import { formatCurrency, getVariantStatus } from './productUtils';
 
 interface ProductDetailModalProps {
   product: DetailedProduct;
