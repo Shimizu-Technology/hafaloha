@@ -438,13 +438,12 @@ export default function ProductDetailPage() {
           items={
             product.collections && product.collections.length > 0
               ? [
-                  { label: 'Home', path: '/' },
+                  { label: 'Shop', path: '/products' },
                   { label: product.collections[0].name, path: `/collections/${product.collections[0].slug}` },
                   { label: product.name }
                 ]
               : [
-                  { label: 'Home', path: '/' },
-                  { label: 'Products', path: '/products' },
+                  { label: 'Shop', path: '/products' },
                   { label: product.name }
                 ]
           }
