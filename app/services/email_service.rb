@@ -11,7 +11,7 @@ class EmailService
 
     begin
       params = {
-        from: "Hafaloha <orders@hafaloha.com>",
+        from: from_address,
         to: [order.email],
         subject: "Order Confirmation ##{order.id.to_s.rjust(6, '0')} - Hafaloha",
         html: order_confirmation_html(order)
@@ -42,7 +42,7 @@ class EmailService
 
     begin
       params = {
-        from: "Hafaloha <orders@hafaloha.com>",
+        from: from_address,
         to: admin_emails,
         subject: "🛍️ New Order ##{order.id.to_s.rjust(6, '0')} - #{order.email}",
         html: admin_notification_html(order)
@@ -75,7 +75,7 @@ class EmailService
 
     begin
       params = {
-        from: "Hafaloha <orders@hafaloha.com>",
+        from: from_address,
         to: [order.email],
         subject: "Your Order Has Shipped! 📦 - Order ##{order.order_number}",
         html: order_shipped_html(order)
@@ -106,7 +106,7 @@ class EmailService
       subject = "Your Order is Ready for Pickup! #{emoji} - Order ##{order.order_number}"
       
       params = {
-        from: "Hafaloha <orders@hafaloha.com>",
+        from: from_address,
         to: [order.email],
         subject: subject,
         html: order_ready_html(order)
@@ -139,7 +139,7 @@ class EmailService
       refund_date = Time.current.strftime('%B %d, %Y')
 
       params = {
-        from: "Hafaloha <orders@hafaloha.com>",
+        from: from_address,
         to: [order.email],
         subject: "Hafaloha — Refund Processed for Order ##{order.order_number}",
         html: refund_notification_html(order, amount_formatted, reason, refund_date)
@@ -160,6 +160,13 @@ class EmailService
   end
 
   private
+
+  # Configurable from address - uses RESEND_FROM_EMAIL env var
+  # Falls back to shimizu-technology.com until hafaloha.com is verified on Resend
+  def self.from_address
+    email = ENV.fetch("RESEND_FROM_EMAIL", "noreply@shimizu-technology.com")
+    "Hafaloha <#{email}>"
+  end
 
   # Generate customer confirmation HTML
   def self.order_confirmation_html(order)
