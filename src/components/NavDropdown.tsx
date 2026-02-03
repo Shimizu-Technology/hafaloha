@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { collectionsApi, Collection } from '../services/api';
+import { collectionsApi, type Collection } from '../services/api';
 
 interface NavDropdownProps {
   onItemClick: () => void;
