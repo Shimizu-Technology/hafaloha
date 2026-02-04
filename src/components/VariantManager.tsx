@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import variantPresetsService from '../services/variantPresets';
 import type { VariantPreset, PresetValue } from '../services/variantPresets';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+import { API_BASE_URL } from '../config';
 
 // Types
 interface Variant {

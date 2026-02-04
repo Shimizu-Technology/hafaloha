@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import axios from 'axios';
 import FadeIn from '../components/animations/FadeIn';
 import { StaggerContainer, StaggerItem } from '../components/animations/StaggerContainer';
 import Breadcrumbs from '../components/Breadcrumbs';
+import { API_BASE_URL } from '../config';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -11,15 +13,30 @@ export default function ContactPage() {
     message: '',
   });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Frontend only — no backend submission
-    setSubmitted(true);
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      await axios.post(`${API_BASE_URL}/api/v1/contact`, { contact: formData });
+      setSubmitted(true);
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.data?.errors) {
+        setError(err.response.data.errors.join(', '));
+      } else {
+        setError('Something went wrong. Please try again or email us directly.');
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -138,11 +155,17 @@ export default function ContactPage() {
                       placeholder="How can we help you?"
                     />
                   </div>
+                  {error && (
+                    <div className="rounded-lg p-4 bg-red-50 border border-red-200 text-red-700 text-sm">
+                      {error}
+                    </div>
+                  )}
                   <button
                     type="submit"
-                    className="w-full sm:w-auto px-8 py-3 bg-warm-900 text-white rounded-lg font-medium hover:bg-warm-800 transition"
+                    disabled={submitting}
+                    className="w-full sm:w-auto px-8 py-3 bg-warm-900 text-white rounded-lg font-medium hover:bg-warm-800 transition disabled:opacity-60 disabled:cursor-not-allowed"
                   >
-                    Send Message
+                    {submitting ? 'Sending...' : 'Send Message'}
                   </button>
                 </form>
               )}

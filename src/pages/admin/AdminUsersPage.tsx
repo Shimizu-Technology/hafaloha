@@ -3,7 +3,7 @@ import { useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+import { API_BASE_URL } from '../../config';
 
 interface User {
   id: number;

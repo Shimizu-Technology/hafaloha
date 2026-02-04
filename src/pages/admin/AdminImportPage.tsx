@@ -3,7 +3,7 @@ import { Upload, FileText, AlertCircle, CheckCircle, Clock, XCircle } from 'luci
 import axios from 'axios';
 import { useAuth } from '@clerk/clerk-react';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+import { API_BASE_URL } from '../../config';
 
 interface Import {
   id: number;
