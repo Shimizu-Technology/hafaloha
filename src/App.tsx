@@ -403,7 +403,7 @@ function AppContent() {
 
         {/* Routes with page transitions */}
         <AnimatePresence mode="wait">
-        <Routes key={location.pathname}>
+        <Routes location={location}>
           <Route path="/" element={<HomePage />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/products/:slug" element={<ProductDetailPage />} />

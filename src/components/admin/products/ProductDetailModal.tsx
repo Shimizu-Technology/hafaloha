@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import useLockBodyScroll from '../../../hooks/useLockBodyScroll';
 import { useNavigate } from 'react-router-dom';
 import { X, Edit } from 'lucide-react';
 import type { DetailedProduct } from './productUtils';
@@ -11,8 +12,11 @@ interface ProductDetailModalProps {
 }
 
 export default function ProductDetailModal({ product, loading, onClose }: ProductDetailModalProps) {
+  useLockBodyScroll(true);
+
   const navigate = useNavigate();
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const modalContentRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <div
@@ -20,7 +24,7 @@ export default function ProductDetailModal({ product, loading, onClose }: Produc
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl"
+        className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col min-h-0 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         {loading ? (
@@ -31,14 +35,23 @@ export default function ProductDetailModal({ product, loading, onClose }: Produc
         ) : (
           <>
             {/* Header */}
-            <div className="flex justify-between items-center p-6 border-b border-gray-200">
+            <div className="flex justify-between items-center p-6 border-b border-gray-200 shrink-0">
               <h2 className="text-2xl font-bold text-gray-900">{product.name}</h2>
-              <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition">
+              <button onClick={onClose} className="btn-icon text-gray-400 hover:text-gray-600 transition">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div
+              ref={modalContentRef}
+              className="flex-1 min-h-0 overflow-y-auto p-6 space-y-6 overscroll-contain"
+              onWheel={(event) => {
+                if (modalContentRef.current) {
+                  modalContentRef.current.scrollTop += event.deltaY;
+                }
+                event.stopPropagation();
+              }}
+            >
               {/* Product Info Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Images */}
@@ -128,7 +141,7 @@ export default function ProductDetailModal({ product, loading, onClose }: Produc
                       <dt className="text-gray-600">Inventory Tracking:</dt>
                       <dd className="flex items-center gap-2">
                         {product.inventory_level === 'none' && (
-                          <span className="text-sm px-2 py-1 bg-gray-100 text-gray-700 rounded">\u274C None</span>
+                          <span className="text-sm px-2 py-1 bg-gray-100 text-gray-700 rounded">Not tracked</span>
                         )}
                         {product.inventory_level === 'product' && (
                           <>
@@ -222,21 +235,22 @@ export default function ProductDetailModal({ product, loading, onClose }: Produc
                 </div>
               )}
 
-              {/* Action Buttons */}
-              <div className="flex gap-3 pt-4 border-t border-gray-200">
-                <button
-                  onClick={() => { onClose(); navigate(`/admin/products/${product.id}/edit`); }}
-                  className="flex-1 px-6 py-3 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 font-medium inline-flex items-center justify-center"
-                >
-                  <Edit className="w-5 h-5 mr-2" /> Edit Product
-                </button>
-                <button
-                  onClick={onClose}
-                  className="px-6 py-3 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium"
-                >
-                  Close
-                </button>
-              </div>
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex gap-3 p-6 border-t border-gray-200 shrink-0">
+              <button
+                onClick={() => { onClose(); navigate(`/admin/products/${product.id}/edit`); }}
+                className="btn-primary flex-1 inline-flex items-center justify-center"
+              >
+                <Edit className="w-5 h-5 mr-2" /> Edit Product
+              </button>
+              <button
+                onClick={onClose}
+                className="btn-secondary"
+              >
+                Close
+              </button>
             </div>
           </>
         )}

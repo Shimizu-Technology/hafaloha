@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import type { CartItem } from '../types/cart';
+import useLockBodyScroll from '../hooks/useLockBodyScroll';
 
 export default function CartDrawer() {
   const navigate = useNavigate();
@@ -16,6 +17,8 @@ export default function CartDrawer() {
     clearCart,
     subtotal,
   } = useCartStore();
+
+  useLockBodyScroll(isOpen);
 
   // Fetch cart when component mounts or when cart opens
   useEffect(() => {
@@ -65,7 +68,7 @@ export default function CartDrawer() {
       {/* Drawer */}
       <div className="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-white shadow-2xl z-50 flex flex-col animate-slide-in-right">
         {/* Header with gradient */}
-        <div className="bg-gradient-to-r from-hafalohaRed to-hafalohaRed/90 px-5 py-4">
+        <div className="bg-linear-to-r from-hafalohaRed to-hafalohaRed/90 px-5 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">

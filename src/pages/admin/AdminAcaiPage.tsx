@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Save, Plus, Trash2, Edit2, X } from 'lucide-react';
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
@@ -105,6 +106,10 @@ export default function AdminAcaiPage() {
   const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
   const [editingBlocked, setEditingBlocked] = useState<BlockedSlot | null>(null);
   const [showBlockedModal, setShowBlockedModal] = useState(false);
+  const crustModalContentRef = useRef<HTMLDivElement | null>(null);
+  const placardModalContentRef = useRef<HTMLDivElement | null>(null);
+  const windowModalContentRef = useRef<HTMLDivElement | null>(null);
+  const blockedModalContentRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -359,6 +364,8 @@ export default function AdminAcaiPage() {
     }
   };
 
+  useLockBodyScroll(showCrustModal || showPlacardModal || showWindowModal || showBlockedModal);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -557,7 +564,7 @@ export default function AdminAcaiPage() {
                     </button>
                     <button
                       onClick={() => deleteCrustOption(crust.id)}
-                      className="p-2 text-red-500 hover:text-red-700"
+                      className="btn-icon text-red-500 hover:text-red-700"
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -615,7 +622,7 @@ export default function AdminAcaiPage() {
                     </button>
                     <button
                       onClick={() => deletePlacardOption(placard.id)}
-                      className="p-2 text-red-500 hover:text-red-700"
+                      className="btn-icon text-red-500 hover:text-red-700"
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -669,7 +676,7 @@ export default function AdminAcaiPage() {
                     </button>
                     <button
                       onClick={() => deletePickupWindow(window.id)}
-                      className="p-2 text-red-500 hover:text-red-700"
+                      className="btn-icon text-red-500 hover:text-red-700"
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -744,7 +751,7 @@ export default function AdminAcaiPage() {
                     </button>
                     <button
                       onClick={() => deleteBlockedSlot(slot.id)}
-                      className="p-2 text-red-500 hover:text-red-700"
+                      className="btn-icon text-red-500 hover:text-red-700"
                     >
                       <Trash2 className="w-5 h-5" />
                     </button>
@@ -759,15 +766,24 @@ export default function AdminAcaiPage() {
       {/* Crust Option Modal */}
       {showCrustModal && editingCrust && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setShowCrustModal(false)}>
-          <div className="bg-white rounded-lg max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-4">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[85vh] flex flex-col min-h-0" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 shrink-0">
               <h3 className="text-lg font-semibold">{editingCrust.id ? 'Edit' : 'Add'} Crust Option</h3>
-              <button onClick={() => setShowCrustModal(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setShowCrustModal(false)} className="btn-icon text-gray-400 hover:text-gray-600">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div
+              ref={crustModalContentRef}
+              className="flex-1 min-h-0 overflow-y-auto p-6 space-y-4 overscroll-contain"
+              onWheel={(event) => {
+                if (crustModalContentRef.current) {
+                  crustModalContentRef.current.scrollTop += event.deltaY;
+                }
+                event.stopPropagation();
+              }}
+            >
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
                 <input
@@ -816,7 +832,7 @@ export default function AdminAcaiPage() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 mt-6">
+            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 shrink-0">
               <button
                 onClick={() => setShowCrustModal(false)}
                 className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -837,15 +853,24 @@ export default function AdminAcaiPage() {
       {/* Placard Option Modal */}
       {showPlacardModal && editingPlacard && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setShowPlacardModal(false)}>
-          <div className="bg-white rounded-lg max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-4">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[85vh] flex flex-col min-h-0" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 shrink-0">
               <h3 className="text-lg font-semibold">{editingPlacard.id ? 'Edit' : 'Add'} Placard Option</h3>
-              <button onClick={() => setShowPlacardModal(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setShowPlacardModal(false)} className="btn-icon text-gray-400 hover:text-gray-600">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div
+              ref={placardModalContentRef}
+              className="flex-1 min-h-0 overflow-y-auto p-6 space-y-4 overscroll-contain"
+              onWheel={(event) => {
+                if (placardModalContentRef.current) {
+                  placardModalContentRef.current.scrollTop += event.deltaY;
+                }
+                event.stopPropagation();
+              }}
+            >
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
                 <input
@@ -894,7 +919,7 @@ export default function AdminAcaiPage() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 mt-6">
+            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 shrink-0">
               <button
                 onClick={() => setShowPlacardModal(false)}
                 className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -915,15 +940,24 @@ export default function AdminAcaiPage() {
       {/* Pickup Window Modal */}
       {showWindowModal && editingWindow && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setShowWindowModal(false)}>
-          <div className="bg-white rounded-lg max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-4">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[85vh] flex flex-col min-h-0" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 shrink-0">
               <h3 className="text-lg font-semibold">{editingWindow.id ? 'Edit' : 'Add'} Pickup Window</h3>
-              <button onClick={() => setShowWindowModal(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setShowWindowModal(false)} className="btn-icon text-gray-400 hover:text-gray-600">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div
+              ref={windowModalContentRef}
+              className="flex-1 min-h-0 overflow-y-auto p-6 space-y-4 overscroll-contain"
+              onWheel={(event) => {
+                if (windowModalContentRef.current) {
+                  windowModalContentRef.current.scrollTop += event.deltaY;
+                }
+                event.stopPropagation();
+              }}
+            >
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Day of Week *</label>
                 <select
@@ -988,7 +1022,7 @@ export default function AdminAcaiPage() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 mt-6">
+            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 shrink-0">
               <button
                 onClick={() => setShowWindowModal(false)}
                 className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
@@ -1009,15 +1043,24 @@ export default function AdminAcaiPage() {
       {/* Blocked Date Modal */}
       {showBlockedModal && editingBlocked && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setShowBlockedModal(false)}>
-          <div className="bg-white rounded-lg max-w-md w-full p-6" onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-4">
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[85vh] flex flex-col min-h-0" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-200 shrink-0">
               <h3 className="text-lg font-semibold">{editingBlocked.id ? 'Edit' : 'Block'} Date</h3>
-              <button onClick={() => setShowBlockedModal(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setShowBlockedModal(false)} className="btn-icon text-gray-400 hover:text-gray-600">
                 <X className="w-6 h-6" />
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div
+              ref={blockedModalContentRef}
+              className="flex-1 min-h-0 overflow-y-auto p-6 space-y-4 overscroll-contain"
+              onWheel={(event) => {
+                if (blockedModalContentRef.current) {
+                  blockedModalContentRef.current.scrollTop += event.deltaY;
+                }
+                event.stopPropagation();
+              }}
+            >
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Date *</label>
                 <input
@@ -1088,7 +1131,7 @@ export default function AdminAcaiPage() {
               </div>
             </div>
 
-            <div className="flex justify-end gap-3 mt-6">
+            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 shrink-0">
               <button
                 onClick={() => setShowBlockedModal(false)}
                 className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"

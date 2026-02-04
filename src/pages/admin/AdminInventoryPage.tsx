@@ -242,7 +242,7 @@ export default function AdminInventoryPage() {
           <div className="flex items-end">
             <button
               onClick={() => { setAuditType(''); setDateRange({ start: '', end: '' }); setPage(1); }}
-              className="w-full px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition"
+              className="w-full px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2"
             >
               Clear Filters
             </button>
@@ -351,7 +351,7 @@ export default function AdminInventoryPage() {
                 <button
                   onClick={() => setPage(page - 1)}
                   disabled={page === 1}
-                  className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2"
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
@@ -361,7 +361,7 @@ export default function AdminInventoryPage() {
                 <button
                   onClick={() => setPage(page + 1)}
                   disabled={page >= pagination.total_pages}
-                  className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                  className="px-3 py-1 border border-gray-300 rounded-md text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2"
                 >
                   <ChevronRight className="w-4 h-4" />
                 </button>

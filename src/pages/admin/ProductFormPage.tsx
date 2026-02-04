@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import { ArrowLeft, Save, X, Archive, AlertTriangle } from 'lucide-react';
 import ImageUpload from '../../components/ImageUpload';
 import VariantManager from '../../components/VariantManager';
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
@@ -53,6 +54,7 @@ export default function ProductFormPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isArchived, setIsArchived] = useState(false);
   const [images, setImages] = useState<ProductImage[]>([]);
+  const deleteModalContentRef = useRef<HTMLDivElement | null>(null);
   const [allCollections, setAllCollections] = useState<Collection[]>([]);
   const [formData, setFormData] = useState<ProductFormData>({
     name: '',
@@ -322,6 +324,8 @@ export default function ProductFormPage() {
     }
   };
 
+  useLockBodyScroll(showDeleteModal);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -351,7 +355,7 @@ export default function ProductFormPage() {
         <div className="mb-6 bg-orange-50 border-l-4 border-orange-400 p-4 rounded-lg">
           <div className="flex items-start justify-between">
             <div className="flex items-start">
-              <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5 mr-3 flex-shrink-0" />
+              <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5 mr-3 shrink-0" />
               <div>
                 <h3 className="text-lg font-semibold text-orange-800">This Product is Archived</h3>
                 <p className="text-sm text-orange-700 mt-1">
@@ -363,7 +367,7 @@ export default function ProductFormPage() {
               type="button"
               onClick={handleUnarchive}
               disabled={deleting}
-              className="ml-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="ml-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {deleting ? (
                 <>
@@ -716,7 +720,7 @@ export default function ProductFormPage() {
         )}
 
         {/* Form Actions - Sticky Footer */}
-        <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-[5] mt-6">
+        <div className="sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-5 mt-6">
           <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 px-4 sm:px-6 py-3 sm:py-4">
             {/* Archive Button - Full width on mobile, left side on desktop */}
             {isEditMode && (
@@ -771,10 +775,10 @@ export default function ProductFormPage() {
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/30" onClick={() => !deleting && setShowDeleteModal(false)}>
-          <div className="bg-white rounded-lg max-w-md w-full p-6 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-lg max-w-md w-full max-h-[85vh] flex flex-col min-h-0 shadow-2xl" onClick={(e) => e.stopPropagation()}>
             {/* Header */}
-            <div className="flex items-center mb-4">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+            <div className="flex items-center p-6 border-b border-gray-200 shrink-0">
+              <div className="shrink-0 w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
                 <AlertTriangle className="w-6 h-6 text-red-600" />
               </div>
               <div className="ml-4">
@@ -784,7 +788,16 @@ export default function ProductFormPage() {
             </div>
 
             {/* Body */}
-            <div className="mb-6">
+            <div
+              ref={deleteModalContentRef}
+              className="flex-1 min-h-0 overflow-y-auto p-6 overscroll-contain"
+              onWheel={(event) => {
+                if (deleteModalContentRef.current) {
+                  deleteModalContentRef.current.scrollTop += event.deltaY;
+                }
+                event.stopPropagation();
+              }}
+            >
               <p className="text-gray-700 mb-2">
                 Are you sure you want to archive <strong>{formData.name}</strong>?
               </p>
@@ -805,7 +818,7 @@ export default function ProductFormPage() {
             </div>
 
             {/* Actions */}
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-end gap-3 p-6 border-t border-gray-200 shrink-0">
               <button
                 type="button"
                 onClick={() => setShowDeleteModal(false)}

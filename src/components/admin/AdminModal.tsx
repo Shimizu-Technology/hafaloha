@@ -1,5 +1,7 @@
-import { useEffect, type ReactNode } from 'react';
+import { useRef } from 'react';
+import type { ReactNode } from 'react';
 import { X } from 'lucide-react';
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 interface AdminModalProps {
   open: boolean;
@@ -25,17 +27,8 @@ export default function AdminModal({
   printable = false,
   children,
 }: AdminModalProps) {
-  // Prevent body scroll while open
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
-  }, [open]);
+  useLockBodyScroll(open);
+  const modalContentRef = useRef<HTMLDivElement | null>(null);
 
   if (!open) return null;
 
@@ -70,13 +63,13 @@ export default function AdminModal({
         `}</style>
       )}
       <div
-        className={`bg-white rounded-xl ${maxWidth} w-full max-h-[90vh] overflow-y-auto shadow-2xl ${
+        className={`bg-white rounded-xl ${maxWidth} w-full max-h-[90vh] flex flex-col min-h-0 shadow-2xl ${
           printable ? 'print:shadow-none print:max-h-none print:overflow-visible print-content' : ''
         }`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 bg-white px-6 py-4 border-b border-gray-200 flex justify-between items-center rounded-t-xl">
+        <div className="bg-white px-6 py-4 border-b border-gray-200 flex justify-between items-center rounded-t-xl shrink-0">
           <div>
             <h2 className="text-xl font-bold text-gray-900">{title}</h2>
             {subtitle && (
@@ -92,11 +85,24 @@ export default function AdminModal({
         </div>
 
         {/* Body */}
-        <div className="p-6">{children}</div>
+        <div
+          ref={modalContentRef}
+          className={`flex-1 min-h-0 overflow-y-auto p-6 overscroll-contain ${
+            printable ? 'print:overflow-visible' : ''
+          }`}
+          onWheel={(event) => {
+            if (modalContentRef.current) {
+              modalContentRef.current.scrollTop += event.deltaY;
+            }
+            event.stopPropagation();
+          }}
+        >
+          {children}
+        </div>
 
         {/* Footer */}
         {footer && (
-          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl print-hide">
+          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 rounded-b-xl print-hide shrink-0">
             {footer}
           </div>
         )}
