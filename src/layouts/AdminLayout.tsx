@@ -6,7 +6,7 @@ import { ChevronRight, ExternalLink, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AdminIcon from '../components/admin/AdminIconMap';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+import { API_BASE_URL } from '../config';
 
 interface NavItem {
   name: string;

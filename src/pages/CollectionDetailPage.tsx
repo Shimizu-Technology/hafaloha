@@ -112,8 +112,6 @@ export default function CollectionDetailPage() {
 
   const totalPages = meta ? Math.ceil(meta.total / meta.per_page) : 1;
 
-  const heroImage = collection.thumbnail_url || collection.image_url;
-
   return (
     <div className="min-h-screen bg-warm-50">
       {/* Breadcrumbs */}

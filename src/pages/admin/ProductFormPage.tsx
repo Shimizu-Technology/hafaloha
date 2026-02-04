@@ -7,7 +7,7 @@ import { ArrowLeft, Save, X, Archive, AlertTriangle } from 'lucide-react';
 import ImageUpload from '../../components/ImageUpload';
 import VariantManager from '../../components/VariantManager';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+import { API_BASE_URL } from '../../config';
 
 interface ProductImage {
   id: number;
