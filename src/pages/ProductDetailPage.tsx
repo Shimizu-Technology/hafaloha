@@ -438,13 +438,12 @@ export default function ProductDetailPage() {
           items={
             product.collections && product.collections.length > 0
               ? [
-                  { label: 'Home', path: '/' },
+                  { label: 'Shop', path: '/products' },
                   { label: product.collections[0].name, path: `/collections/${product.collections[0].slug}` },
                   { label: product.name }
                 ]
               : [
-                  { label: 'Home', path: '/' },
-                  { label: 'Products', path: '/products' },
+                  { label: 'Shop', path: '/products' },
                   { label: product.name }
                 ]
           }
@@ -654,8 +653,7 @@ export default function ProductDetailPage() {
                         const val = parseInt(e.target.value) || 1;
                         setQuantity(Math.min(Math.max(1, val), maxQuantity));
                       }}
-                      className="w-20 text-center text-lg font-semibold border-2 border-warm-300 rounded-lg py-2"
-                      style={{ textAlign: 'center' }}
+                      className="w-16 h-11 text-center text-lg font-semibold border-2 border-warm-300 rounded-lg [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                       min={1}
                       max={maxQuantity}
                     />
