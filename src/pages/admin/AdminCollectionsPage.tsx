@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Plus, Edit, Trash2, Eye, Package } from 'lucide-react';
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 import { API_BASE_URL } from '../../config';
 
@@ -30,6 +31,7 @@ export default function AdminCollectionsPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
+  const editModalContentRef = useRef<HTMLDivElement | null>(null);
   
   // Form data
   const [formData, setFormData] = useState({
@@ -151,6 +153,8 @@ export default function AdminCollectionsPage() {
     }
   };
 
+  useLockBodyScroll(showEditModal || showDeleteModal);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -169,7 +173,7 @@ export default function AdminCollectionsPage() {
         </div>
         <button
           onClick={handleCreate}
-          className="px-4 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition flex items-center"
+          className="btn-primary flex items-center"
         >
           <Plus className="w-5 h-5 mr-2" />
           Add Collection
@@ -244,14 +248,14 @@ export default function AdminCollectionsPage() {
                       <Link
                         to={`/collections/${collection.slug}`}
                         target="_blank"
-                        className="text-blue-600 hover:text-blue-900"
+                        className="btn-icon text-blue-600 hover:text-blue-900"
                         title="View"
                       >
                         <Eye className="w-5 h-5" />
                       </Link>
                       <button
                         onClick={() => handleEdit(collection)}
-                        className="text-indigo-600 hover:text-indigo-900"
+                        className="btn-icon text-indigo-600 hover:text-indigo-900"
                         title="Edit"
                       >
                         <Edit className="w-5 h-5" />
@@ -261,7 +265,7 @@ export default function AdminCollectionsPage() {
                           setSelectedCollection(collection);
                           setShowDeleteModal(true);
                         }}
-                        className="text-red-600 hover:text-red-900"
+                        className="btn-icon text-red-600 hover:text-red-900"
                         title="Delete"
                       >
                         <Trash2 className="w-5 h-5" />
@@ -278,96 +282,105 @@ export default function AdminCollectionsPage() {
       {/* Edit/Create Modal */}
       {showEditModal && (
         <div className="fixed inset-0 backdrop-blur-md flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col min-h-0">
+            <div className="p-6 border-b border-gray-200 shrink-0">
+              <h2 className="text-2xl font-bold text-gray-900">
                 {selectedCollection ? 'Edit Collection' : 'Create Collection'}
               </h2>
+            </div>
 
-              <div className="space-y-4">
-                {/* Name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Collection Name *
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
-                    placeholder="e.g., Summer Collection"
-                  />
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
-                    placeholder="Brief description of this collection"
-                  />
-                </div>
-
-                {/* Sort Order */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Sort Order
-                  </label>
-                  <input
-                    type="number"
-                    value={formData.sort_order ?? 0}
-                    onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
-                    placeholder="0"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">Lower numbers appear first</p>
-                </div>
-
-                {/* Checkboxes */}
-                <div className="space-y-2">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={formData.published}
-                      onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
-                      className="rounded border-gray-300 text-hafalohaRed focus:ring-hafalohaRed"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">Published (visible to customers)</span>
-                  </label>
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={formData.featured}
-                      onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-                      className="rounded border-gray-300 text-hafalohaRed focus:ring-hafalohaRed"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">Featured</span>
-                  </label>
-                </div>
+            <div
+              ref={editModalContentRef}
+              className="flex-1 min-h-0 overflow-y-auto p-6 space-y-4 overscroll-contain"
+              onWheel={(event) => {
+                if (editModalContentRef.current) {
+                  editModalContentRef.current.scrollTop += event.deltaY;
+                }
+                event.stopPropagation();
+              }}
+            >
+              {/* Name */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Collection Name *
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                  placeholder="e.g., Summer Collection"
+                />
               </div>
 
-              {/* Actions */}
-              <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
-                <button
-                  onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
-                  disabled={saving}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleSave}
-                  className="px-4 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50"
-                  disabled={saving}
-                >
-                  {saving ? 'Saving...' : selectedCollection ? 'Update' : 'Create'}
-                </button>
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <textarea
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                  placeholder="Brief description of this collection"
+                />
               </div>
+
+              {/* Sort Order */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Sort Order
+                </label>
+                <input
+                  type="number"
+                  value={formData.sort_order ?? 0}
+                  onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                  placeholder="0"
+                />
+                <p className="text-xs text-gray-500 mt-1">Lower numbers appear first</p>
+              </div>
+
+              {/* Checkboxes */}
+              <div className="space-y-2">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={formData.published}
+                    onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
+                    className="rounded border-gray-300 text-hafalohaRed focus:ring-hafalohaRed"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Published (visible to customers)</span>
+                </label>
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={formData.featured}
+                    onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                    className="rounded border-gray-300 text-hafalohaRed focus:ring-hafalohaRed"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Featured</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end gap-3 p-6 border-t border-gray-200 shrink-0">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+                disabled={saving}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSave}
+                className="px-4 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50"
+                disabled={saving}
+              >
+                {saving ? 'Saving...' : selectedCollection ? 'Update' : 'Create'}
+              </button>
             </div>
           </div>
         </div>

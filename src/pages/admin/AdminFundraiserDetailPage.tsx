@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { ArrowLeft, Users, Package, ShoppingCart, Settings, Plus, Trash2, Edit, ExternalLink } from 'lucide-react';
+import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 
@@ -218,7 +219,7 @@ export default function AdminFundraiserDetailPage() {
       <div className="flex items-center gap-4">
         <Link
           to="/admin/fundraisers"
-          className="p-2 hover:bg-gray-100 rounded-lg transition"
+          className="btn-icon hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2"
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
@@ -236,7 +237,7 @@ export default function AdminFundraiserDetailPage() {
               href={`/fundraisers/${fundraiser.slug}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-hafalohaRed hover:underline flex items-center gap-1"
+              className="text-sm link-primary flex items-center gap-1"
             >
               View Public Page <ExternalLink className="w-3 h-3" />
             </a>
@@ -244,7 +245,7 @@ export default function AdminFundraiserDetailPage() {
         </div>
         <Link
           to={`/admin/fundraisers/${id}/edit`}
-          className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition flex items-center gap-2"
+          className="btn-secondary flex items-center gap-2"
         >
           <Edit className="w-4 h-4" />
           Edit
@@ -258,7 +259,7 @@ export default function AdminFundraiserDetailPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 border-b-2 whitespace-nowrap transition ${
+              className={`flex items-center gap-2 px-4 py-3 border-b-2 whitespace-nowrap transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2 ${
                 activeTab === tab.id
                   ? 'border-hafalohaRed text-hafalohaRed'
                   : 'border-transparent text-gray-600 hover:text-gray-900'
@@ -425,7 +426,7 @@ export default function AdminFundraiserDetailPage() {
               <div className="space-y-3">
                 {products.map((fp) => (
                   <div key={fp.id} className="flex items-center gap-4 p-3 border rounded-lg">
-                    <div className="w-16 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                    <div className="w-16 h-16 bg-gray-100 rounded overflow-hidden shrink-0">
                       {fp.image_url ? (
                         <img src={fp.image_url} alt={fp.name} className="w-full h-full object-cover" />
                       ) : (
@@ -447,7 +448,7 @@ export default function AdminFundraiserDetailPage() {
                     </div>
                     <button
                       onClick={() => handleRemoveProduct(fp.id)}
-                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded transition"
+                      className="btn-icon text-gray-400 hover:text-red-600 hover:bg-red-50"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -465,7 +466,7 @@ export default function AdminFundraiserDetailPage() {
               <p>Orders will appear here once customers start ordering.</p>
               <Link
                 to={`/admin/orders?order_type=wholesale&fundraiser=${id}`}
-                className="text-hafalohaRed hover:underline text-sm mt-2 inline-block"
+                className="link-primary text-sm mt-2 inline-block"
               >
                 View in Orders Page →
               </Link>
@@ -508,6 +509,9 @@ function AddParticipantModal({
   onClose: () => void; 
   onSuccess: () => void;
 }) {
+  useLockBodyScroll(true);
+  const modalContentRef = useRef<HTMLDivElement | null>(null);
+
   const { getToken } = useAuth();
   const [form, setForm] = useState({
     name: '',
@@ -539,48 +543,61 @@ function AddParticipantModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-md w-full p-6">
-        <h3 className="text-lg font-semibold mb-4">Add Participant</h3>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
-            <input
-              type="text"
-              required
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-hafalohaRed"
-            />
+      <div className="bg-white rounded-lg max-w-md w-full max-h-[85vh] flex flex-col min-h-0">
+        <div className="px-6 py-4 border-b border-gray-200 shrink-0">
+          <h3 className="text-lg font-semibold">Add Participant</h3>
+        </div>
+        <form onSubmit={handleSubmit} className="flex-1 min-h-0 flex flex-col">
+          <div
+            ref={modalContentRef}
+            className="flex-1 min-h-0 overflow-y-auto p-6 space-y-4 overscroll-contain"
+            onWheel={(event) => {
+              if (modalContentRef.current) {
+                modalContentRef.current.scrollTop += event.deltaY;
+              }
+              event.stopPropagation();
+            }}
+          >
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+              <input
+                type="text"
+                required
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-hafalohaRed"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Participant #</label>
+              <input
+                type="text"
+                value={form.participant_number}
+                onChange={(e) => setForm({ ...form, participant_number: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-hafalohaRed"
+                placeholder="e.g., 001"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-hafalohaRed"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+              <input
+                type="tel"
+                value={form.phone}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-hafalohaRed"
+              />
+            </div>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Participant #</label>
-            <input
-              type="text"
-              value={form.participant_number}
-              onChange={(e) => setForm({ ...form, participant_number: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-hafalohaRed"
-              placeholder="e.g., 001"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-hafalohaRed"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-            <input
-              type="tel"
-              value={form.phone}
-              onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-hafalohaRed"
-            />
-          </div>
-          <div className="flex gap-3 pt-4">
+          <div className="flex gap-3 px-6 py-4 border-t border-gray-200 shrink-0">
             <button
               type="button"
               onClick={onClose}
@@ -612,6 +629,9 @@ function AddProductModal({
   onClose: () => void; 
   onAdd: (productId: number, priceCents: number) => void;
 }) {
+  useLockBodyScroll(true);
+  const modalContentRef = useRef<HTMLDivElement | null>(null);
+
   const [selectedProduct, setSelectedProduct] = useState<AvailableProduct | null>(null);
   const [price, setPrice] = useState('');
 
@@ -628,13 +648,22 @@ function AddProductModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-lg w-full max-h-[80vh] flex flex-col">
+      <div className="bg-white rounded-lg max-w-lg w-full max-h-[85vh] flex flex-col min-h-0">
         <div className="p-4 border-b">
           <h3 className="text-lg font-semibold">Add Product to Fundraiser</h3>
         </div>
         
         {selectedProduct ? (
-          <div className="p-4 space-y-4">
+          <div
+            ref={modalContentRef}
+            className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 overscroll-contain"
+            onWheel={(event) => {
+              if (modalContentRef.current) {
+                modalContentRef.current.scrollTop += event.deltaY;
+              }
+              event.stopPropagation();
+            }}
+          >
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-gray-100 rounded overflow-hidden">
                 {selectedProduct.image_url ? (
@@ -685,7 +714,16 @@ function AddProductModal({
           </div>
         ) : (
           <>
-            <div className="flex-1 overflow-y-auto p-4">
+            <div
+              ref={modalContentRef}
+              className="flex-1 min-h-0 overflow-y-auto p-4 overscroll-contain"
+              onWheel={(event) => {
+                if (modalContentRef.current) {
+                  modalContentRef.current.scrollTop += event.deltaY;
+                }
+                event.stopPropagation();
+              }}
+            >
               {availableProducts.length === 0 ? (
                 <div className="text-center py-8 text-gray-500">
                   <p>All products have been added to this fundraiser.</p>
@@ -698,7 +736,7 @@ function AddProductModal({
                       onClick={() => handleSelect(product)}
                       className="w-full flex items-center gap-4 p-3 border rounded-lg hover:bg-gray-50 text-left transition"
                     >
-                      <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                      <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden shrink-0">
                         {product.image_url ? (
                           <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
                         ) : (

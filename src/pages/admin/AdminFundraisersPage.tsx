@@ -107,7 +107,7 @@ export default function AdminFundraisersPage() {
         </div>
         <Link
           to="/admin/fundraisers/new"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition"
+          className="btn-primary inline-flex items-center gap-2"
         >
           <Plus className="w-5 h-5" />
           New Fundraiser
@@ -154,7 +154,7 @@ export default function AdminFundraisersPage() {
           <p className="text-gray-600 mb-4">Get started by creating your first fundraiser campaign.</p>
           <Link
             to="/admin/fundraisers/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition"
+            className="btn-primary inline-flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />
             Create Fundraiser
@@ -166,7 +166,7 @@ export default function AdminFundraisersPage() {
             <div key={fundraiser.id} className="bg-white rounded-lg shadow p-4 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center gap-4">
                 {/* Image */}
-                <div className="w-full sm:w-24 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                <div className="w-full sm:w-24 h-24 bg-gray-100 rounded-lg overflow-hidden shrink-0">
                   {fundraiser.image_url ? (
                     <img
                       src={fundraiser.image_url}
@@ -235,20 +235,20 @@ export default function AdminFundraisersPage() {
                 <div className="flex sm:flex-col gap-2">
                   <Link
                     to={`/admin/fundraisers/${fundraiser.id}`}
-                    className="flex-1 sm:flex-none px-4 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition text-center text-sm font-medium"
+                    className="btn-primary flex-1 sm:flex-none text-center text-sm font-medium"
                   >
                     Manage
                   </Link>
                   <Link
                     to={`/admin/fundraisers/${fundraiser.id}/edit`}
-                    className="p-2 text-gray-600 hover:text-hafalohaRed hover:bg-gray-100 rounded-lg transition"
+                    className="btn-icon text-gray-600 hover:text-hafalohaRed hover:bg-gray-100"
                     title="Edit"
                   >
                     <Edit className="w-5 h-5" />
                   </Link>
                   <button
                     onClick={() => handleDelete(fundraiser)}
-                    className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                    className="btn-icon text-gray-600 hover:text-red-600 hover:bg-red-50"
                     title="Delete"
                   >
                     <Trash2 className="w-5 h-5" />

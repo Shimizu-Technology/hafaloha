@@ -180,6 +180,13 @@ p {
   );
 }
 
+/* Admin sidebar smooth scrolling on iOS */
+.admin-sidebar-scroll {
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+}
+
 /* Navy color utilities */
 .bg-hafalohaNavy {
   background-color: var(--color-hafaloha-navy);
@@ -237,6 +244,12 @@ p {
   box-shadow: 0 2px 6px rgba(179, 27, 27, 0.2);
 }
 
+.btn-primary:focus-visible {
+  outline: 2px solid var(--color-hafaloha-red);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(193, 25, 31, 0.2);
+}
+
 .btn-secondary {
   background-color: transparent;
   color: var(--color-hafaloha-red);
@@ -258,6 +271,78 @@ p {
 .btn-secondary:active {
   transform: translateY(0);
   box-shadow: 0 2px 6px rgba(68, 63, 56, 0.15);
+}
+
+.btn-secondary:focus-visible {
+  outline: 2px solid var(--color-hafaloha-red);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(193, 25, 31, 0.15);
+}
+
+/* Link + icon button styling */
+.link-primary {
+  color: var(--color-hafaloha-red);
+  font-weight: 600;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.link-primary:hover {
+  color: var(--color-hafaloha-red-dark);
+  text-decoration: underline;
+}
+
+.link-primary:active {
+  color: var(--color-hafaloha-red-dark);
+}
+
+.link-primary:focus-visible {
+  outline: 2px solid var(--color-hafaloha-red);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-icon:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.btn-icon:active {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.btn-icon:focus-visible {
+  outline: 2px solid var(--color-hafaloha-red);
+  outline-offset: 2px;
+}
+
+/* Admin-wide focus/active feedback */
+.admin-scope a,
+.admin-scope button,
+.admin-scope [role="button"] {
+  transition: color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease, transform 0.05s ease;
+}
+
+.admin-scope a:focus-visible,
+.admin-scope button:focus-visible,
+.admin-scope [role="button"]:focus-visible {
+  outline: 2px solid var(--color-hafaloha-red);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+.admin-scope button:active,
+.admin-scope a:active,
+.admin-scope [role="button"]:active {
+  opacity: 0.9;
+  transform: translateY(1px);
 }
 
 /* Mega menu animation */

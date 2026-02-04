@@ -1,9 +1,10 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import type { ProductFull, ProductVariant } from '../services/api';
 import { productsApi, formatPrice } from '../services/api';
 import { useCartStore } from '../store/cartStore';
 import Breadcrumbs from '../components/Breadcrumbs';
+import useLockBodyScroll from '../hooks/useLockBodyScroll';
 
 // ── Color swatch mapping ────────────────────────────────────────────────────
 const CSS_COLOR_MAP: Record<string, string> = {
@@ -48,6 +49,7 @@ export default function ProductDetailPage() {
   const [isAdding, setIsAdding] = useState(false);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  const sizeGuideContentRef = useRef<HTMLDivElement | null>(null);
   
   const { addItem } = useCartStore();
   
@@ -225,6 +227,8 @@ export default function ProductDetailPage() {
     }
   };
 
+  useLockBodyScroll(showSizeGuide);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-warm-50 flex items-center justify-center">
@@ -350,7 +354,7 @@ export default function ProductDetailPage() {
                 />
               ) : (
                 /* Unknown colour — show first letter on a neutral swatch */
-                <span className="absolute inset-1 rounded-full bg-gradient-to-br from-warm-200 to-warm-300 flex items-center justify-center text-xs font-bold text-warm-600">
+                <span className="absolute inset-1 rounded-full bg-linear-to-br from-warm-200 to-warm-300 flex items-center justify-center text-xs font-bold text-warm-600">
                   {value.charAt(0).toUpperCase()}
                 </span>
               )}
@@ -466,7 +470,7 @@ export default function ProductDetailPage() {
                     }}
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-warm-50 to-warm-100">
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-linear-to-br from-warm-50 to-warm-100">
                     <img 
                       src="/images/hafaloha-logo.png" 
                       alt="Hafaloha" 
@@ -763,11 +767,11 @@ export default function ProductDetailPage() {
             onClick={() => setShowSizeGuide(false)}
           >
             <div 
-              className="relative bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-auto"
+              className="relative bg-white rounded-lg shadow-2xl max-w-4xl w-full max-h-[90vh] flex flex-col min-h-0"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
-              <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
+              <div className="bg-white border-b px-6 py-4 flex items-center justify-between z-10 shrink-0">
                 <h3 className="text-xl font-bold text-warm-900">Size Guide</h3>
                 <button
                   type="button"
@@ -781,7 +785,16 @@ export default function ProductDetailPage() {
               </div>
               
               {/* Image Content */}
-              <div className="p-6">
+              <div
+                ref={sizeGuideContentRef}
+                className="flex-1 min-h-0 overflow-y-auto p-6 overscroll-contain"
+                onWheel={(event) => {
+                  if (sizeGuideContentRef.current) {
+                    sizeGuideContentRef.current.scrollTop += event.deltaY;
+                  }
+                  event.stopPropagation();
+                }}
+              >
                 <img
                   src={sizeChartUrl}
                   alt="Size Chart"
