@@ -44,8 +44,7 @@ import { AnimatePresence } from 'framer-motion'; // Page transitions
 import NavDropdown from './components/NavDropdown'; // Import NavDropdown
 import MobileNavDropdown from './components/MobileNavDropdown'; // Import MobileNavDropdown
 import { useCartStore } from './store/cartStore'; // Import cart store
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+import { API_BASE_URL } from './config';
 
 // Custom UserButton with Admin Dashboard Link and My Orders
 function CustomUserButton({ isAdmin }: { isAdmin: boolean }) {
@@ -403,7 +402,7 @@ function AppContent() {
 
         {/* Routes with page transitions */}
         <AnimatePresence mode="wait">
-        <Routes key={location.pathname}>
+        <Routes location={location} key={location.pathname}>
           <Route path="/" element={<HomePage />} />
           <Route path="/products" element={<ProductsPage />} />
           <Route path="/products/:slug" element={<ProductDetailPage />} />

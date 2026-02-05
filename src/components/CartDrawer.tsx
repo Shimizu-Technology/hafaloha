@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCartStore } from '../store/cartStore';
 import type { CartItem } from '../types/cart';
+import useLockBodyScroll from '../hooks/useLockBodyScroll';
 
 export default function CartDrawer() {
   const navigate = useNavigate();
@@ -16,6 +17,8 @@ export default function CartDrawer() {
     clearCart,
     subtotal,
   } = useCartStore();
+
+  useLockBodyScroll(isOpen);
 
   // Fetch cart when component mounts or when cart opens
   useEffect(() => {

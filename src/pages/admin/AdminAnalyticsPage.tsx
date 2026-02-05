@@ -7,7 +7,7 @@ import {
 import { SkeletonBar, SkeletonStatCard } from '../../components/admin';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+import { API_BASE_URL } from '../../config';
 
 interface ChartPoint {
   date: string;

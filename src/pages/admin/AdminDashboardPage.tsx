@@ -8,7 +8,7 @@ import {
 } from 'lucide-react';
 import { StatCard, SkeletonDashboard } from '../../components/admin';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+import { API_BASE_URL } from '../../config';
 
 interface DashboardStats {
   total_orders: number;
@@ -87,7 +87,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
         <StatCard
           label="Total Orders"
           value={stats.total_orders}
@@ -122,32 +122,32 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-        <Link to="/admin/products/new" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+        <Link to="/admin/products/new" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2">
           <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
             <Plus className="w-5 h-5 text-gray-600 group-hover:text-hafalohaRed transition" />
           </div>
           <p className="text-sm font-medium text-gray-700">Add Product</p>
         </Link>
-        <Link to="/admin/orders" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group">
+        <Link to="/admin/orders" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2">
           <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
             <ClipboardList className="w-5 h-5 text-gray-600 group-hover:text-hafalohaRed transition" />
           </div>
           <p className="text-sm font-medium text-gray-700">View Orders</p>
         </Link>
-        <Link to="/admin/collections" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group">
+        <Link to="/admin/collections" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2">
           <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
             <FolderOpen className="w-5 h-5 text-gray-600 group-hover:text-hafalohaRed transition" />
           </div>
           <p className="text-sm font-medium text-gray-700">Collections</p>
         </Link>
-        <Link to="/admin/analytics" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group">
+        <Link to="/admin/analytics" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2">
           <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
             <BarChart3 className="w-5 h-5 text-gray-600 group-hover:text-hafalohaRed transition" />
           </div>
           <p className="text-sm font-medium text-gray-700">Analytics</p>
         </Link>
-        <Link to="/admin/settings" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group">
+        <Link to="/admin/settings" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2">
           <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
             <Settings className="w-5 h-5 text-gray-600 group-hover:text-hafalohaRed transition" />
           </div>
@@ -159,7 +159,7 @@ export default function AdminDashboardPage() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
           <h2 className="text-lg font-bold text-gray-900">Recent Orders</h2>
-          <Link to="/admin/orders" className="text-sm font-medium text-hafalohaRed hover:underline flex items-center gap-1">
+          <Link to="/admin/orders" className="text-sm link-primary flex items-center gap-1">
             View All
             <ArrowRight className="w-4 h-4" />
           </Link>
@@ -176,7 +176,7 @@ export default function AdminDashboardPage() {
               <Link
                 key={order.id}
                 to={`/admin/orders?id=${order.id}`}
-                className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition"
+                className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2 rounded"
               >
                 <div className="flex items-center gap-4">
                   <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-sm font-semibold text-gray-600">

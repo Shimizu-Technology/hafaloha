@@ -22,19 +22,22 @@ export default function StatCard({
   link,
 }: StatCardProps) {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md transition">
-      <div className="flex items-start justify-between">
-        <div>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md transition w-full xl:max-w-[280px]">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
           <p className="text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wider">
             {label}
           </p>
-          <p className={`text-2xl sm:text-3xl font-bold mt-2 ${valueColor}`}>
+          <p
+            className={`text-lg sm:text-xl md:text-2xl xl:text-3xl font-bold mt-2 ${valueColor} tabular-nums leading-tight wrap-break-word`}
+            title={typeof value === 'string' ? value : value.toString()}
+          >
             {value}
           </p>
           {link && (
             <Link
               to={link.to}
-              className="inline-block mt-3 text-xs font-medium text-hafalohaRed hover:underline"
+              className="inline-block mt-3 text-xs font-medium text-hafalohaRed hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2 rounded"
             >
               {link.text} &rarr;
             </Link>

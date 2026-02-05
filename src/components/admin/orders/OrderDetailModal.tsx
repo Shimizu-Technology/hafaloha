@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import useLockBodyScroll from '../../../hooks/useLockBodyScroll';
 import type { Order } from './orderUtils';
 import { formatCurrency, formatDate, getStatusBadge, formatStatus, getNextStatusAction } from './orderUtils';
 
@@ -21,10 +22,13 @@ export default function OrderDetailModal({
   onResendNotification,
   onOpenRefundModal,
 }: OrderDetailModalProps) {
+  useLockBodyScroll(true);
+
   const [isEditing, setIsEditing] = useState(false);
   const [editStatus, setEditStatus] = useState(order.status);
   const [editTracking, setEditTracking] = useState(order.tracking_number || '');
   const [editAdminNotes, setEditAdminNotes] = useState(order.admin_notes || '');
+  const modalContentRef = useRef<HTMLDivElement | null>(null);
 
   const nextAction = getNextStatusAction(order);
 
@@ -70,11 +74,11 @@ export default function OrderDetailModal({
       `}</style>
 
       <div
-        className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl print:shadow-none print:max-h-none print:overflow-visible print-content"
+        className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] flex flex-col min-h-0 shadow-2xl print:shadow-none print:max-h-none print:overflow-visible print-content"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-6 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10 print:static print:border-b-2 print:border-gray-400">
+        <div className="p-6 border-b border-gray-200 flex justify-between items-center bg-white z-10 print:static print:border-b-2 print:border-gray-400 shrink-0">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">
               <span className="print:hidden">Order #</span>
@@ -91,7 +95,17 @@ export default function OrderDetailModal({
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div
+          ref={modalContentRef}
+          className="flex-1 min-h-0 overflow-y-auto p-6 space-y-6 overscroll-contain print:overflow-visible"
+          onWheel={(event) => {
+            if (modalContentRef.current) {
+              modalContentRef.current.scrollTop += event.deltaY;
+            }
+            event.stopPropagation();
+            event.preventDefault();
+          }}
+        >
           {/* Order Management */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 print-hide">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">

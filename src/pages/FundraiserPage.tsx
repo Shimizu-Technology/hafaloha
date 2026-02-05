@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Users, Package, Calendar, MapPin, Phone, Mail, ShoppingCart, Plus, Minus, Trash2 } from 'lucide-react';
+import useLockBodyScroll from '../hooks/useLockBodyScroll';
 import api from '../services/api';
 import toast from 'react-hot-toast';
 
@@ -278,7 +279,7 @@ export default function FundraiserPage() {
               <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="font-semibold mb-3">Pickup Information</h3>
                 <div className="flex items-start gap-2 text-warm-700 mb-2">
-                  <MapPin className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                  <MapPin className="w-5 h-5 mt-0.5 shrink-0" />
                   <span>{fundraiser.pickup_location}</span>
                 </div>
                 {fundraiser.pickup_instructions && (
@@ -384,7 +385,7 @@ function ProductCard({
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <div className="flex flex-col sm:flex-row">
         {/* Image */}
-        <div className="w-full sm:w-40 h-40 bg-warm-100 flex-shrink-0">
+        <div className="w-full sm:w-40 h-40 bg-warm-100 shrink-0">
           {product.image_url ? (
             <img
               src={product.image_url}
@@ -468,6 +469,9 @@ function CartModal({
   onClose: () => void;
   onCheckout: () => void;
 }) {
+  useLockBodyScroll(true);
+  const modalContentRef = useRef<HTMLDivElement | null>(null);
+
   const formatPrice = (cents: number) => `$${(cents / 100).toFixed(2)}`;
   const total = cart.reduce((sum, item) => sum + item.price_cents * item.quantity, 0);
   const participant = participants.find(p => p.id === selectedParticipant);
@@ -480,7 +484,17 @@ function CartModal({
           <button onClick={onClose} className="p-2.5 hover:bg-warm-100 rounded-lg min-w-[44px] min-h-[44px] flex items-center justify-center">✕</button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div
+          ref={modalContentRef}
+          className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 overscroll-contain"
+          onWheel={(event) => {
+            if (modalContentRef.current) {
+              modalContentRef.current.scrollTop += event.deltaY;
+            }
+            event.stopPropagation();
+            event.preventDefault();
+          }}
+        >
           {participant && (
             <div className="bg-hafalohaGold/10 border border-hafalohaGold rounded-lg p-3">
               <p className="text-sm text-warm-700">

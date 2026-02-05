@@ -1,3 +1,6 @@
+import { useRef } from 'react';
+import useLockBodyScroll from '../../../hooks/useLockBodyScroll';
+
 interface ShipOrderModalProps {
   saving: boolean;
   carrier: string;
@@ -17,23 +20,36 @@ export default function ShipOrderModal({
   onShip,
   onClose,
 }: ShipOrderModalProps) {
+  useLockBodyScroll(true);
+  const modalContentRef = useRef<HTMLDivElement | null>(null);
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/30"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg max-w-md w-full shadow-2xl"
+        className="bg-white rounded-lg max-w-md w-full max-h-[85vh] flex flex-col min-h-0 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b border-gray-200 shrink-0">
           <h2 className="text-xl font-bold text-gray-900">Ship Order</h2>
           <p className="text-sm text-gray-500 mt-1">
             Add tracking information and mark as shipped
           </p>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div
+          ref={modalContentRef}
+          className="flex-1 min-h-0 overflow-y-auto p-6 space-y-4 overscroll-contain"
+          onWheel={(event) => {
+            if (modalContentRef.current) {
+              modalContentRef.current.scrollTop += event.deltaY;
+            }
+            event.stopPropagation();
+            event.preventDefault();
+          }}
+        >
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Shipping Carrier</label>
             <select
@@ -66,7 +82,7 @@ export default function ShipOrderModal({
           </p>
         </div>
 
-        <div className="p-6 border-t border-gray-200 flex gap-3">
+        <div className="p-6 border-t border-gray-200 flex gap-3 shrink-0">
           <button
             type="button"
             onClick={onShip}

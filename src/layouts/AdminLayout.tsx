@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useUser, useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
@@ -6,7 +6,7 @@ import { ChevronRight, ExternalLink, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AdminIcon from '../components/admin/AdminIconMap';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+import { API_BASE_URL } from '../config';
 
 interface NavItem {
   name: string;
@@ -88,6 +88,7 @@ export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [checkingAdmin, setCheckingAdmin] = useState(true);
+  const navScrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const checkAdminStatus = async () => {
@@ -162,7 +163,7 @@ export default function AdminLayout() {
               key={item.path}
               to={item.path}
               onClick={() => setSidebarOpen(false)}
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all ${
+              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2 ${
                 isActive
                   ? 'bg-hafalohaRed text-white shadow-md'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
@@ -187,7 +188,7 @@ export default function AdminLayout() {
     : '';
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 admin-scope">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
@@ -198,7 +199,7 @@ export default function AdminLayout() {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out md:translate-x-0 ${
+        className={`fixed top-0 left-0 z-50 h-dvh md:h-screen w-56 lg:w-64 bg-white shadow-xl transform transition-transform duration-300 ease-in-out md:translate-x-0 flex flex-col ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -209,23 +210,33 @@ export default function AdminLayout() {
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
-            className="md:hidden text-white/80 hover:text-white p-1"
+            className="md:hidden text-white/80 hover:text-white p-1 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-hafalohaRed"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="p-4 overflow-y-auto" style={{ height: 'calc(100% - 140px)' }}>
+        <nav
+          ref={navScrollRef}
+          className="p-4 overflow-y-auto flex-1 min-h-0 admin-sidebar-scroll overscroll-contain"
+          onWheel={(event) => {
+            if (navScrollRef.current) {
+              navScrollRef.current.scrollTop += event.deltaY;
+            }
+            event.stopPropagation();
+            event.preventDefault();
+          }}
+        >
           <NavSection title="Main" items={mainNavigation} />
           <NavSection title="Special" items={specialNavigation} />
           <NavSection title="System" items={systemNavigation} />
         </nav>
 
         {/* Admin info */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100 bg-gray-50">
+        <div className="mt-auto p-4 border-t border-gray-100 bg-gray-50">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-hafalohaRed to-hafalohaRed/80 flex items-center justify-center text-white font-bold shadow-md">
+            <div className="w-10 h-10 rounded-full bg-linear-to-br from-hafalohaRed to-hafalohaRed/80 flex items-center justify-center text-white font-bold shadow-md">
               {user?.firstName?.charAt(0) || 'A'}
             </div>
             <div className="flex-1 min-w-0">
@@ -239,13 +250,13 @@ export default function AdminLayout() {
       </aside>
 
       {/* Main content */}
-      <div className="md:pl-64">
+      <div className="md:pl-56 lg:pl-64">
         {/* Top bar */}
         <header className="sticky top-0 z-30 h-16 bg-white border-b border-gray-200 shadow-sm flex items-center justify-between px-4 lg:px-8">
           {/* Mobile menu button */}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition"
+            className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2"
           >
             <Menu className="w-6 h-6 text-gray-700" />
           </button>
@@ -260,7 +271,7 @@ export default function AdminLayout() {
                     {crumb.path ? (
                       <Link
                         to={crumb.path}
-                        className="text-sm text-gray-500 hover:text-hafalohaRed transition"
+                        className="text-sm text-gray-500 hover:text-hafalohaRed transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2 rounded"
                       >
                         {crumb.label}
                       </Link>
@@ -282,7 +293,7 @@ export default function AdminLayout() {
           <div className="flex items-center gap-3">
             <Link
               to="/"
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-hafalohaRed bg-gray-50 hover:bg-gray-100 rounded-lg transition"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-hafalohaRed bg-gray-50 hover:bg-gray-100 rounded-lg transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2"
             >
               <ExternalLink className="w-4 h-4" />
               View Store

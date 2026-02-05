@@ -3,7 +3,7 @@ import { useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+import { API_BASE_URL } from '../../config';
 
 interface User {
   id: number;
@@ -245,7 +245,7 @@ export default function AdminUsersPage() {
                       <button
                         onClick={() => toggleUserRole(user)}
                         disabled={updatingUserId === user.id}
-                        className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                        className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2 ${
                           user.is_admin
                             ? 'bg-red-100 text-red-700 hover:bg-red-200'
                             : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
@@ -300,7 +300,7 @@ export default function AdminUsersPage() {
                 <button
                   onClick={() => toggleUserRole(user)}
                   disabled={updatingUserId === user.id}
-                  className={`w-full py-2.5 text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                  className={`w-full py-2.5 text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2 ${
                     user.is_admin
                       ? 'bg-red-100 text-red-700 hover:bg-red-200'
                       : 'bg-indigo-600 text-white hover:bg-indigo-700'

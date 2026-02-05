@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import useLockBodyScroll from '../hooks/useLockBodyScroll';
 import variantPresetsService from '../services/variantPresets';
 import type { VariantPreset, PresetValue } from '../services/variantPresets';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+import { API_BASE_URL } from '../config';
 
 // Types
 interface Variant {
@@ -64,6 +65,7 @@ export default function VariantManager({ productId, basePriceCents, inventoryLev
   const [editAvailable, setEditAvailable] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingVariant, setEditingVariant] = useState<Variant | null>(null);
+  const editModalContentRef = useRef<HTMLDivElement | null>(null);
 
   // Load variants and presets on mount
   useEffect(() => {
@@ -407,6 +409,8 @@ export default function VariantManager({ productId, basePriceCents, inventoryLev
     return presets.filter(p => p.option_type.toLowerCase() === typeName.toLowerCase());
   };
 
+  useLockBodyScroll(showEditModal);
+
   if (loading) {
     return <div className="text-gray-600">Loading variants...</div>;
   }
@@ -716,82 +720,92 @@ export default function VariantManager({ productId, basePriceCents, inventoryLev
 
       {/* Edit Modal */}
       {showEditModal && editingVariant && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={cancelEdit} />
-            
-            <div className="relative inline-block w-full max-w-md p-6 my-8 text-left align-middle bg-white rounded-xl shadow-xl transform transition-all">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={cancelEdit} />
+          
+          <div className="relative w-full max-w-md bg-white rounded-xl shadow-xl flex flex-col min-h-0 max-h-[85vh]">
+            <div className="px-6 py-4 border-b border-gray-200 shrink-0">
+              <h3 className="text-lg font-semibold text-gray-900">
                 Edit Variant: {editingVariant.display_name || editingVariant.variant_name}
-                </h3>
-              
-            <div className="space-y-4">
+              </h3>
+            </div>
+            
+            <div
+              ref={editModalContentRef}
+              className="flex-1 min-h-0 overflow-y-auto p-6 space-y-4 overscroll-contain"
+              onWheel={(event) => {
+                if (editModalContentRef.current) {
+                  editModalContentRef.current.scrollTop += event.deltaY;
+                }
+                event.stopPropagation();
+                event.preventDefault();
+              }}
+            >
               <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    value={editPrice}
-                    onChange={(e) => setEditPrice(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-hafalohaRed"
-                  />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={editPrice}
+                  onChange={(e) => setEditPrice(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-hafalohaRed"
+                />
               </div>
 
               {inventoryLevel === 'variant' && (
                 <>
                   <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Stock Quantity</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Stock Quantity</label>
                     <input
                       type="number"
                       min="0"
                       value={editStock}
                       onChange={(e) => setEditStock(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-hafalohaRed"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-hafalohaRed"
                     />
                   </div>
 
                   <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Low Stock Threshold</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Low Stock Threshold</label>
                     <input
                       type="number"
                       min="0"
                       value={editLowStockThreshold}
                       onChange={(e) => setEditLowStockThreshold(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-hafalohaRed"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-hafalohaRed"
                     />
                   </div>
                 </>
               )}
 
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="edit-available"
-                    checked={editAvailable}
-                    onChange={(e) => setEditAvailable(e.target.checked)}
-                    className="h-4 w-4 text-hafalohaRed focus:ring-hafalohaRed border-gray-300 rounded"
-                  />
-                  <label htmlFor="edit-available" className="ml-2 block text-sm text-gray-700">
-                    Available for purchase
-                  </label>
-                </div>
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="edit-available"
+                  checked={editAvailable}
+                  onChange={(e) => setEditAvailable(e.target.checked)}
+                  className="h-4 w-4 text-hafalohaRed focus:ring-hafalohaRed border-gray-300 rounded"
+                />
+                <label htmlFor="edit-available" className="ml-2 block text-sm text-gray-700">
+                  Available for purchase
+                </label>
               </div>
-              
-              <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
-                <button
-                  onClick={cancelEdit}
-                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Cancel
+            </div>
+            
+            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-200 shrink-0">
+              <button
+                onClick={cancelEdit}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
               </button>
               <button
                 onClick={saveEdit}
-                  className="px-4 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="px-4 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition-colors"
               >
                 Save Changes
               </button>
-              </div>
             </div>
           </div>
         </div>
