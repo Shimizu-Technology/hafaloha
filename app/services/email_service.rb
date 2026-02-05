@@ -9,18 +9,18 @@ class EmailService
   # @param order [Order] - The completed order
   # @return [Hash] - { success: boolean, message_id: string, error: string }
   def self.send_order_confirmation(order)
-    return { success: false, error: "Resend API key not configured" } unless ENV['RESEND_API_KEY'].present?
+    return { success: false, error: "Resend API key not configured" } unless ENV["RESEND_API_KEY"].present?
 
     begin
       params = {
         from: from_address,
-        to: [order.email],
+        to: [ order.email ],
         subject: "Order Confirmation ##{order.id.to_s.rjust(6, '0')} - Hafaloha",
         html: order_confirmation_html(order)
       }
 
       response = Resend::Emails.send(params)
-      
+
       Rails.logger.info "✅ Order confirmation email sent to #{order.email} (Order ##{order.id})"
       { success: true, message_id: response["id"] }
 
@@ -37,10 +37,10 @@ class EmailService
   # @param order [Order] - The completed order
   # @return [Hash] - { success: boolean, message_id: string, error: string }
   def self.send_admin_notification(order)
-    return { success: false, error: "Resend API key not configured" } unless ENV['RESEND_API_KEY'].present?
+    return { success: false, error: "Resend API key not configured" } unless ENV["RESEND_API_KEY"].present?
 
     settings = SiteSetting.instance
-    admin_emails = settings.order_notification_emails || ['shimizutechnology@gmail.com']
+    admin_emails = settings.order_notification_emails || [ "shimizutechnology@gmail.com" ]
 
     begin
       params = {
@@ -51,7 +51,7 @@ class EmailService
       }
 
       response = Resend::Emails.send(params)
-      
+
       Rails.logger.info "✅ Admin notification email sent (Order ##{order.id})"
       { success: true, message_id: response["id"] }
 
@@ -73,18 +73,18 @@ class EmailService
   # @param order [Order] - The shipped order
   # @return [Hash] - { success: boolean, message_id: string, error: string }
   def self.send_order_shipped_email(order)
-    return { success: false, error: "Resend API key not configured" } unless ENV['RESEND_API_KEY'].present?
+    return { success: false, error: "Resend API key not configured" } unless ENV["RESEND_API_KEY"].present?
 
     begin
       params = {
         from: from_address,
-        to: [order.email],
+        to: [ order.email ],
         subject: "Your Order Has Shipped! 📦 - Order ##{order.order_number}",
         html: order_shipped_html(order)
       }
 
       response = Resend::Emails.send(params)
-      
+
       Rails.logger.info "✅ Shipped notification email sent to #{order.email} (Order ##{order.order_number})"
       { success: true, message_id: response["id"] }
 
@@ -101,21 +101,21 @@ class EmailService
   # @param order [Order] - The order that's ready for pickup
   # @return [Hash] - { success: boolean, message_id: string, error: string }
   def self.send_order_ready_email(order)
-    return { success: false, error: "Resend API key not configured" } unless ENV['RESEND_API_KEY'].present?
+    return { success: false, error: "Resend API key not configured" } unless ENV["RESEND_API_KEY"].present?
 
     begin
-      emoji = order.acai? ? '🍰' : '📦'
+      emoji = order.acai? ? "\u{1F370}" : "\u{1F4E6}"
       subject = "Your Order is Ready for Pickup! #{emoji} - Order ##{order.order_number}"
-      
+
       params = {
         from: from_address,
-        to: [order.email],
+        to: [ order.email ],
         subject: subject,
         html: order_ready_html(order)
       }
 
       response = Resend::Emails.send(params)
-      
+
       Rails.logger.info "✅ Ready for pickup email sent to #{order.email} (Order ##{order.order_number})"
       { success: true, message_id: response["id"] }
 
@@ -134,15 +134,15 @@ class EmailService
   # @param reason [String] - Reason for the refund
   # @return [Hash] - { success: boolean, message_id: string, error: string }
   def self.send_refund_notification(order, refund_amount, reason = nil)
-    return { success: false, error: "Resend API key not configured" } unless ENV['RESEND_API_KEY'].present?
+    return { success: false, error: "Resend API key not configured" } unless ENV["RESEND_API_KEY"].present?
 
     begin
       amount_formatted = "$#{'%.2f' % (refund_amount / 100.0)}"
-      refund_date = Time.current.strftime('%B %d, %Y')
+      refund_date = Time.current.strftime("%B %d, %Y")
 
       params = {
         from: from_address,
-        to: [order.email],
+        to: [ order.email ],
         subject: "Hafaloha — Refund Processed for Order ##{order.order_number}",
         html: refund_notification_html(order, amount_formatted, reason, refund_date)
       }
@@ -165,12 +165,12 @@ class EmailService
   # @param submission [ContactSubmission] - The contact form submission
   # @return [Hash] - { success: boolean, message_id: string, error: string }
   def self.send_contact_notification(submission)
-    return { success: false, error: "Resend API key not configured" } unless ENV['RESEND_API_KEY'].present?
+    return { success: false, error: "Resend API key not configured" } unless ENV["RESEND_API_KEY"].present?
 
     begin
       # Send to site admin emails (same as order notifications)
       settings = SiteSetting.instance
-      admin_emails = settings.order_notification_emails || ['shimizutechnology@gmail.com']
+      admin_emails = settings.order_notification_emails || [ "shimizutechnology@gmail.com" ]
 
       params = {
         from: from_address,
@@ -210,12 +210,12 @@ class EmailService
   # Generate customer confirmation HTML
   def self.order_confirmation_html(order)
     # Route to appropriate template based on order type
-    if order.order_type == 'acai'
+    if order.order_type == "acai"
       return acai_order_confirmation_html(order)
     end
-    
+
     settings = SiteSetting.instance
-    test_mode_badge = settings.test_mode? ? '<span style="background: #FEF3C7; color: #92400E; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">⚙️ TEST ORDER</span>' : ''
+    test_mode_badge = settings.test_mode? ? '<span style="background: #FEF3C7; color: #92400E; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">⚙️ TEST ORDER</span>' : ""
 
     <<~HTML
       <!DOCTYPE html>
@@ -230,7 +230,7 @@ class EmailService
           <tr>
             <td align="center">
               <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                
+      #{'          '}
                 <!-- Header -->
                 <tr>
                   <td style="background: linear-gradient(135deg, #C1191F 0%, #8B0000 100%); padding: 40px 30px; text-align: center;">
@@ -332,12 +332,12 @@ class EmailService
   # Generate admin notification HTML
   def self.admin_notification_html(order)
     # Route to appropriate template based on order type
-    if order.order_type == 'acai'
+    if order.order_type == "acai"
       return acai_admin_notification_html(order)
     end
-    
+
     settings = SiteSetting.instance
-    test_mode_badge = settings.test_mode? ? '<span style="background: #FEF3C7; color: #92400E; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">⚙️ TEST ORDER</span>' : ''
+    test_mode_badge = settings.test_mode? ? '<span style="background: #FEF3C7; color: #92400E; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">⚙️ TEST ORDER</span>' : ""
 
     <<~HTML
       <!DOCTYPE html>
@@ -352,7 +352,7 @@ class EmailService
           <tr>
             <td align="center">
               <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                
+      #{'          '}
                 <!-- Header -->
                 <tr>
                   <td style="background: linear-gradient(135deg, #1F2937 0%, #111827 100%); padding: 40px 30px; text-align: center;">
@@ -365,7 +365,7 @@ class EmailService
                 <tr>
                   <td style="padding: 30px;">
                     <h2 style="color: #111827; margin: 0 0 20px 0; font-size: 20px;">Order ##{order.id.to_s.rjust(6, '0')}</h2>
-                    
+      #{'              '}
                     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
                       <tr>
                         <td style="padding: 10px 0; border-bottom: 1px solid #E5E7EB;">
@@ -444,10 +444,10 @@ class EmailService
   def self.acai_admin_notification_html(order)
     settings = SiteSetting.instance
     acai_settings = AcaiSetting.instance
-    test_mode_badge = settings.test_mode? ? '<span style="background: #FEF3C7; color: #92400E; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">⚙️ TEST ORDER</span>' : ''
-    
-    pickup_date = order.acai_pickup_date&.strftime('%A, %B %d, %Y') || 'TBD'
-    pickup_time = order.acai_pickup_time || 'TBD'
+    test_mode_badge = settings.test_mode? ? '<span style="background: #FEF3C7; color: #92400E; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">⚙️ TEST ORDER</span>' : ""
+
+    pickup_date = order.acai_pickup_date&.strftime("%A, %B %d, %Y") || "TBD"
+    pickup_time = order.acai_pickup_time || "TBD"
 
     <<~HTML
       <!DOCTYPE html>
@@ -462,7 +462,7 @@ class EmailService
           <tr>
             <td align="center">
               <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                
+      #{'          '}
                 <!-- Header -->
                 <tr>
                   <td style="background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%); padding: 40px 30px; text-align: center;">
@@ -478,9 +478,9 @@ class EmailService
                       <p style="margin: 0 0 5px 0; font-size: 12px; opacity: 0.9;">⚡ PICKUP SCHEDULED</p>
                       <p style="margin: 0; font-size: 18px; font-weight: bold;">#{pickup_date} @ #{pickup_time}</p>
                     </div>
-                    
+      #{'              '}
                     <h2 style="color: #111827; margin: 0 0 20px 0; font-size: 20px;">Order ##{order.order_number}</h2>
-                    
+      #{'              '}
                     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
                       <tr>
                         <td style="padding: 10px 0; border-bottom: 1px solid #E5E7EB;">
@@ -555,10 +555,10 @@ class EmailService
   def self.acai_order_confirmation_html(order)
     settings = SiteSetting.instance
     acai_settings = AcaiSetting.instance
-    test_mode_badge = settings.test_mode? ? '<span style="background: #FEF3C7; color: #92400E; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">⚙️ TEST ORDER</span>' : ''
-    
-    pickup_date = order.acai_pickup_date&.strftime('%A, %B %d, %Y') || 'TBD'
-    pickup_time = order.acai_pickup_time || 'TBD'
+    test_mode_badge = settings.test_mode? ? '<span style="background: #FEF3C7; color: #92400E; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">⚙️ TEST ORDER</span>' : ""
+
+    pickup_date = order.acai_pickup_date&.strftime("%A, %B %d, %Y") || "TBD"
+    pickup_time = order.acai_pickup_time || "TBD"
 
     <<~HTML
       <!DOCTYPE html>
@@ -573,7 +573,7 @@ class EmailService
           <tr>
             <td align="center">
               <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                
+      #{'          '}
                 <!-- Header -->
                 <tr>
                   <td style="background: linear-gradient(135deg, #C1191F 0%, #8B0000 100%); padding: 40px 30px; text-align: center;">
@@ -685,7 +685,7 @@ class EmailService
 
   # Format price from cents to dollars
   def self.format_price(cents)
-    '%.2f' % (cents / 100.0)
+    "%.2f" % (cents / 100.0)
   end
 
   # Generate order shipped HTML
@@ -718,7 +718,7 @@ class EmailService
           <tr>
             <td align="center">
               <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                
+      #{'          '}
                 <!-- Header -->
                 <tr>
                   <td style="background: linear-gradient(135deg, #C1191F 0%, #8B0000 100%); padding: 40px 30px; text-align: center;">
@@ -793,9 +793,9 @@ class EmailService
   # Generate order ready for pickup HTML
   def self.order_ready_html(order)
     settings = AcaiSetting.instance rescue nil
-    pickup_location = settings&.pickup_location || 'Contact us for pickup location'
-    pickup_phone = settings&.pickup_phone || '(671) 777-1234'
-    
+    pickup_location = settings&.pickup_location || "Contact us for pickup location"
+    pickup_phone = settings&.pickup_phone || "(671) 777-1234"
+
     pickup_time_section = if order.acai? && order.acai_pickup_date.present?
       pickup_date = order.acai_pickup_date.is_a?(String) ? Date.parse(order.acai_pickup_date) : order.acai_pickup_date
       <<~HTML
@@ -813,8 +813,8 @@ class EmailService
       ""
     end
 
-    emoji = order.acai? ? '🍰' : '📦'
-    title = order.acai? ? 'Your Acai Cake is Ready!' : 'Your Order is Ready for Pickup!'
+    emoji = order.acai? ? "\u{1F370}" : "\u{1F4E6}"
+    title = order.acai? ? "Your Acai Cake is Ready!" : "Your Order is Ready for Pickup!"
 
     <<~HTML
       <!DOCTYPE html>
@@ -829,7 +829,7 @@ class EmailService
           <tr>
             <td align="center">
               <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                
+      #{'          '}
                 <!-- Header -->
                 <tr>
                   <td style="background: linear-gradient(135deg, #C1191F 0%, #8B0000 100%); padding: 40px 30px; text-align: center;">
@@ -1098,5 +1098,4 @@ class EmailService
       </html>
     HTML
   end
-
 end

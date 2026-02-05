@@ -14,11 +14,11 @@
 #
 allowed_origins = if ENV["ALLOWED_ORIGINS"].present?
                     ENV["ALLOWED_ORIGINS"].split(",").map(&:strip).reject(&:blank?)
-                  elsif ENV["FRONTEND_URL"].present?
-                    [ENV["FRONTEND_URL"].strip]
-                  else
-                    ["http://localhost:5173"]
-                  end
+elsif ENV["FRONTEND_URL"].present?
+                    [ ENV["FRONTEND_URL"].strip ]
+else
+                    [ "http://localhost:5173" ]
+end
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
@@ -26,7 +26,7 @@ Rails.application.config.middleware.insert_before 0, Rack::Cors do
 
     resource "*",
       headers: :any,
-      methods: [:get, :post, :put, :patch, :delete, :options, :head],
+      methods: [ :get, :post, :put, :patch, :delete, :options, :head ],
       credentials: true
   end
 end
