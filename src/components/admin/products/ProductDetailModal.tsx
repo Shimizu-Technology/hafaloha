@@ -50,6 +50,7 @@ export default function ProductDetailModal({ product, loading, onClose }: Produc
                   modalContentRef.current.scrollTop += event.deltaY;
                 }
                 event.stopPropagation();
+                event.preventDefault();
               }}
             >
               {/* Product Info Grid */}

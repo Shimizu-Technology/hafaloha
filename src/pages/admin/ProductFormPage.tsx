@@ -796,6 +796,7 @@ export default function ProductFormPage() {
                   deleteModalContentRef.current.scrollTop += event.deltaY;
                 }
                 event.stopPropagation();
+                event.preventDefault();
               }}
             >
               <p className="text-gray-700 mb-2">

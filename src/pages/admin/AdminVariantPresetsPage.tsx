@@ -352,6 +352,7 @@ export default function AdminVariantPresetsPage() {
                   modalContentRef.current.scrollTop += event.deltaY;
                 }
                 event.stopPropagation();
+                event.preventDefault();
               }}
             >
               {/* Basic Info */}

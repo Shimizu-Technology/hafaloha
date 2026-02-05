@@ -713,6 +713,7 @@ export default function AdminImportPage() {
                     modalContentRef.current.scrollTop += event.deltaY;
                   }
                   event.stopPropagation();
+                  event.preventDefault();
                 }}
               >
                   {/* Status */}

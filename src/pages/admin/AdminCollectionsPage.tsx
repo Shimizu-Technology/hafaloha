@@ -297,6 +297,7 @@ export default function AdminCollectionsPage() {
                   editModalContentRef.current.scrollTop += event.deltaY;
                 }
                 event.stopPropagation();
+                event.preventDefault();
               }}
             >
               {/* Name */}

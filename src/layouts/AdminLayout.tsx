@@ -225,6 +225,7 @@ export default function AdminLayout() {
               navScrollRef.current.scrollTop += event.deltaY;
             }
             event.stopPropagation();
+            event.preventDefault();
           }}
         >
           <NavSection title="Main" items={mainNavigation} />

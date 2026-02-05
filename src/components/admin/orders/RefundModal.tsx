@@ -52,6 +52,7 @@ export default function RefundModal({ order, processing, onProcess, onClose }: R
               modalContentRef.current.scrollTop += event.deltaY;
             }
             event.stopPropagation();
+            event.preventDefault();
           }}
         >
           {/* Refund Type Toggle */}

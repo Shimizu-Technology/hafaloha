@@ -103,6 +103,7 @@ export default function OrderDetailModal({
               modalContentRef.current.scrollTop += event.deltaY;
             }
             event.stopPropagation();
+            event.preventDefault();
           }}
         >
           {/* Order Management */}

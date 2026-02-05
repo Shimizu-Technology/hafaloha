@@ -47,6 +47,7 @@ export default function ShipOrderModal({
               modalContentRef.current.scrollTop += event.deltaY;
             }
             event.stopPropagation();
+            event.preventDefault();
           }}
         >
           <div>

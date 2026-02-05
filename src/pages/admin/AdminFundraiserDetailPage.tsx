@@ -556,6 +556,7 @@ function AddParticipantModal({
                 modalContentRef.current.scrollTop += event.deltaY;
               }
               event.stopPropagation();
+              event.preventDefault();
             }}
           >
             <div>
@@ -662,6 +663,7 @@ function AddProductModal({
                 modalContentRef.current.scrollTop += event.deltaY;
               }
               event.stopPropagation();
+              event.preventDefault();
             }}
           >
             <div className="flex items-center gap-4">
@@ -722,6 +724,7 @@ function AddProductModal({
                   modalContentRef.current.scrollTop += event.deltaY;
                 }
                 event.stopPropagation();
+                event.preventDefault();
               }}
             >
               {availableProducts.length === 0 ? (

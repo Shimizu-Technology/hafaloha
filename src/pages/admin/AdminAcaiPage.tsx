@@ -782,6 +782,7 @@ export default function AdminAcaiPage() {
                   crustModalContentRef.current.scrollTop += event.deltaY;
                 }
                 event.stopPropagation();
+                event.preventDefault();
               }}
             >
               <div>
@@ -869,6 +870,7 @@ export default function AdminAcaiPage() {
                   placardModalContentRef.current.scrollTop += event.deltaY;
                 }
                 event.stopPropagation();
+                event.preventDefault();
               }}
             >
               <div>
@@ -956,6 +958,7 @@ export default function AdminAcaiPage() {
                   windowModalContentRef.current.scrollTop += event.deltaY;
                 }
                 event.stopPropagation();
+                event.preventDefault();
               }}
             >
               <div>
@@ -1059,6 +1062,7 @@ export default function AdminAcaiPage() {
                   blockedModalContentRef.current.scrollTop += event.deltaY;
                 }
                 event.stopPropagation();
+                event.preventDefault();
               }}
             >
               <div>

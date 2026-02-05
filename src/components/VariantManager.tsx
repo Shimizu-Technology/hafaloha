@@ -738,6 +738,7 @@ export default function VariantManager({ productId, basePriceCents, inventoryLev
                   editModalContentRef.current.scrollTop += event.deltaY;
                 }
                 event.stopPropagation();
+                event.preventDefault();
               }}
             >
               <div>

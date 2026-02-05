@@ -95,6 +95,7 @@ export default function AdminModal({
               modalContentRef.current.scrollTop += event.deltaY;
             }
             event.stopPropagation();
+            event.preventDefault();
           }}
         >
           {children}

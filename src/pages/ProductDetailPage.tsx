@@ -793,6 +793,7 @@ export default function ProductDetailPage() {
                     sizeGuideContentRef.current.scrollTop += event.deltaY;
                   }
                   event.stopPropagation();
+                  event.preventDefault();
                 }}
               >
                 <img
