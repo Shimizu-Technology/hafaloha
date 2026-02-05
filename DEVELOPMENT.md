@@ -13,11 +13,11 @@ git clone git@github.com:Shimizu-Technology/hafaloha-api.git
 cd hafaloha-api
 bundle install
 rails db:create db:migrate db:seed
-cp .env.example .env   # Add Clerk + Stripe keys
+cp .env.example .env   # See .env.example for full list of required vars
 rails s -p 3000
 ```
 
-> Requires `.env` with Clerk and Stripe API keys configured.
+> Requires `.env` — see `.env.example` for all required environment variables (Clerk, Stripe, Resend, AWS, etc.).
 
 ---
 
@@ -30,9 +30,12 @@ rails s -p 3000
 ```
 
 This runs:
-1. **RSpec tests** — 30 tests
+1. **RSpec tests** — full test suite
 2. **RuboCop lint** — style/correctness checks
-3. **Brakeman security scan** — static analysis for vulnerabilities
+3. **Brakeman** — static analysis for security vulnerabilities
+4. **Bundle Audit** — checks gems for known CVEs
+5. **Secrets Check** — scans for hardcoded API keys/passwords
+6. **Debug Statements** — detects leftover `binding.pry`, `debugger`, etc.
 
 ❌ If the gate fails, fix the issues before creating a PR. No exceptions.
 
@@ -117,4 +120,4 @@ All work is tracked on the **HAF** board in [Plane](https://plane.shimizu-techno
 - **Auth:** Clerk (JWT verification via `clerk-sdk-ruby`)
 - **Payments:** Stripe integration for orders
 - **This is the long-term product** — replaces Shopify for Hafaloha's ordering needs
-- Paired with [hafaloha-web](../hafaloha-web/DEVELOPMENT.md)
+- Paired with [hafaloha-web](https://github.com/Shimizu-Technology/hafaloha-web/blob/main/DEVELOPMENT.md)
