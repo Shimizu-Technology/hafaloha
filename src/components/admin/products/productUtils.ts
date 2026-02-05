@@ -16,6 +16,8 @@ export interface Product {
   total_variant_stock: number | null;
   in_stock: boolean;
   actually_available: boolean;
+  needs_attention?: boolean;
+  import_notes?: string | null;
 }
 
 export interface ProductVariant {

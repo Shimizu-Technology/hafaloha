@@ -3,12 +3,30 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { ArrowLeft, Save, X, Archive, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Save, X, Archive, AlertTriangle, History } from 'lucide-react';
 import ImageUpload from '../../components/ImageUpload';
 import VariantManager from '../../components/VariantManager';
 import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 
 import { API_BASE_URL } from '../../config';
+
+interface InventoryAudit {
+  id: number;
+  audit_type: string;
+  quantity_change: number;
+  formatted_change: string;
+  previous_quantity: number;
+  new_quantity: number;
+  reason: string;
+  created_at: string;
+  display_name: string;
+  user: string;
+  variant?: {
+    id: number;
+    sku: string;
+    display_name: string;
+  };
+}
 
 interface ProductImage {
   id: number;
@@ -40,6 +58,8 @@ interface ProductFormData {
   product_stock_quantity?: number;
   product_low_stock_threshold?: number;
   collection_ids: number[];
+  needs_attention?: boolean;
+  import_notes?: string;
 }
 
 export default function ProductFormPage() {
@@ -56,6 +76,12 @@ export default function ProductFormPage() {
   const [images, setImages] = useState<ProductImage[]>([]);
   const deleteModalContentRef = useRef<HTMLDivElement | null>(null);
   const [allCollections, setAllCollections] = useState<Collection[]>([]);
+  
+  // Inventory History Modal state
+  const [showInventoryModal, setShowInventoryModal] = useState(false);
+  const [inventoryAudits, setInventoryAudits] = useState<InventoryAudit[]>([]);
+  const [loadingAudits, setLoadingAudits] = useState(false);
+  const inventoryModalContentRef = useRef<HTMLDivElement | null>(null);
   const [formData, setFormData] = useState<ProductFormData>({
     name: '',
     description: '',
@@ -121,6 +147,8 @@ export default function ProductFormPage() {
         product_stock_quantity: product.product_stock_quantity,
         product_low_stock_threshold: product.product_low_stock_threshold || 5,
         collection_ids: product.collection_ids || [],
+        needs_attention: product.needs_attention || false,
+        import_notes: product.import_notes || '',
       });
       
       // Load images
@@ -164,6 +192,30 @@ export default function ProductFormPage() {
         [name]: value,
       }));
     }
+  };
+
+  const fetchInventoryAudits = async () => {
+    if (!id) return;
+    
+    setLoadingAudits(true);
+    try {
+      const token = await getToken();
+      const response = await axios.get(
+        `${API_BASE_URL}/api/v1/admin/products/${id}/inventory_audits`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setInventoryAudits(response.data.audits || []);
+    } catch (err) {
+      console.error('Failed to fetch inventory audits:', err);
+      toast.error('Failed to load inventory history');
+    } finally {
+      setLoadingAudits(false);
+    }
+  };
+
+  const handleOpenInventoryModal = () => {
+    setShowInventoryModal(true);
+    fetchInventoryAudits();
   };
 
   const handleCollectionToggle = (collectionId: number) => {
@@ -220,7 +272,9 @@ export default function ProductFormPage() {
           inventory_level: updatedProduct.inventory_level || 'none',
           product_stock_quantity: updatedProduct.product_stock_quantity,
           product_low_stock_threshold: updatedProduct.product_low_stock_threshold || 5,
-          collection_ids: updatedProduct.collection_ids || [], // Added this line!
+          collection_ids: updatedProduct.collection_ids || [],
+          needs_attention: updatedProduct.needs_attention || false,
+          import_notes: updatedProduct.import_notes || '',
         });
         
         toast.success('Product updated successfully!', {
@@ -324,7 +378,7 @@ export default function ProductFormPage() {
     }
   };
 
-  useLockBodyScroll(showDeleteModal);
+  useLockBodyScroll(showDeleteModal || showInventoryModal);
 
   if (loading) {
     return (
@@ -345,9 +399,21 @@ export default function ProductFormPage() {
           <ArrowLeft className="w-5 h-5 mr-2" />
           Back to Products
         </button>
-        <h1 className="text-3xl font-bold text-gray-900">
-          {isEditMode ? 'Edit Product' : 'Add New Product'}
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold text-gray-900">
+            {isEditMode ? 'Edit Product' : 'Add New Product'}
+          </h1>
+          {isEditMode && (
+            <button
+              type="button"
+              onClick={handleOpenInventoryModal}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+            >
+              <History className="w-4 h-4" />
+              View Inventory History
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Archived Banner */}
@@ -380,6 +446,26 @@ export default function ProductFormPage() {
                   Unarchive Product
                 </>
               )}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Needs Attention Banner */}
+      {id && formData.needs_attention && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="font-medium text-amber-800">This product needs attention</p>
+            {formData.import_notes && (
+              <p className="text-sm text-amber-700 mt-1">{formData.import_notes}</p>
+            )}
+            <button
+              type="button"
+              onClick={() => setFormData(prev => ({ ...prev, needs_attention: false, import_notes: '' }))}
+              className="mt-2 text-sm font-medium text-amber-600 hover:text-amber-800 underline"
+            >
+              Mark as resolved
             </button>
           </div>
         </div>
@@ -466,7 +552,7 @@ export default function ProductFormPage() {
 
               <div>
                 <label htmlFor="weight_oz" className="block text-sm font-medium text-gray-700 mb-1">
-                  Weight (oz)
+                  Weight * (oz)
                 </label>
                 <input
                   type="number"
@@ -475,10 +561,12 @@ export default function ProductFormPage() {
                   value={formData.weight_oz}
                   onChange={handleChange}
                   step="0.1"
-                  min="0"
+                  min="0.1"
+                  required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
                   placeholder="8.0"
                 />
+                <p className="text-xs text-gray-500 mt-1">Required for shipping calculations</p>
               </div>
             </div>
 
@@ -836,6 +924,126 @@ export default function ProductFormPage() {
               >
                 <Archive className="w-4 h-4 mr-2" />
                 {deleting ? 'Archiving...' : 'Archive Product'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Inventory History Modal */}
+      {showInventoryModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/30" onClick={() => setShowInventoryModal(false)}>
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[85vh] flex flex-col min-h-0 shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="shrink-0 w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                  <History className="w-5 h-5 text-blue-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Inventory History</h3>
+                  <p className="text-sm text-gray-500">{formData.name}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowInventoryModal(false)}
+                className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div
+              ref={inventoryModalContentRef}
+              className="flex-1 min-h-0 overflow-y-auto p-6 overscroll-contain"
+              onWheel={(event) => {
+                if (inventoryModalContentRef.current) {
+                  inventoryModalContentRef.current.scrollTop += event.deltaY;
+                }
+                event.stopPropagation();
+                event.preventDefault();
+              }}
+            >
+              {loadingAudits ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-hafalohaRed"></div>
+                </div>
+              ) : inventoryAudits.length === 0 ? (
+                <div className="text-center py-12">
+                  <History className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                  <p className="text-gray-500">No inventory changes recorded yet.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-3 px-2 font-medium text-gray-600">Date</th>
+                        <th className="text-left py-3 px-2 font-medium text-gray-600">User</th>
+                        <th className="text-left py-3 px-2 font-medium text-gray-600">Action</th>
+                        <th className="text-left py-3 px-2 font-medium text-gray-600">Variant</th>
+                        <th className="text-center py-3 px-2 font-medium text-gray-600">Change</th>
+                        <th className="text-left py-3 px-2 font-medium text-gray-600">Notes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {inventoryAudits.map((audit) => (
+                        <tr key={audit.id} className="border-b border-gray-100 hover:bg-gray-50">
+                          <td className="py-3 px-2 text-gray-700 whitespace-nowrap">
+                            {new Date(audit.created_at).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </td>
+                          <td className="py-3 px-2 text-gray-600">{audit.user}</td>
+                          <td className="py-3 px-2">
+                            <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                              audit.audit_type === 'order_placed' ? 'bg-orange-100 text-orange-700' :
+                              audit.audit_type === 'order_cancelled' ? 'bg-red-100 text-red-700' :
+                              audit.audit_type === 'restock' ? 'bg-green-100 text-green-700' :
+                              audit.audit_type === 'manual_adjustment' ? 'bg-blue-100 text-blue-700' :
+                              'bg-gray-100 text-gray-700'
+                            }`}>
+                              {audit.audit_type.replace(/_/g, ' ')}
+                            </span>
+                          </td>
+                          <td className="py-3 px-2 text-gray-600">
+                            {audit.variant?.display_name || '-'}
+                          </td>
+                          <td className="py-3 px-2 text-center">
+                            <span className={`font-medium ${
+                              audit.quantity_change > 0 ? 'text-green-600' :
+                              audit.quantity_change < 0 ? 'text-red-600' : 'text-gray-600'
+                            }`}>
+                              {audit.formatted_change}
+                            </span>
+                            <span className="text-gray-400 text-xs ml-1">
+                              ({audit.previous_quantity} → {audit.new_quantity})
+                            </span>
+                          </td>
+                          <td className="py-3 px-2 text-gray-600 max-w-xs truncate" title={audit.reason}>
+                            {audit.reason}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end p-4 border-t border-gray-200 shrink-0">
+              <button
+                type="button"
+                onClick={() => setShowInventoryModal(false)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
+              >
+                Close
               </button>
             </div>
           </div>

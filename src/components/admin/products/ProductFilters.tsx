@@ -1,8 +1,8 @@
 interface ProductFiltersProps {
   searchQuery: string;
   onSearchChange: (query: string) => void;
-  filterPublished: 'all' | 'true' | 'false' | 'archived';
-  onPublishedChange: (value: 'all' | 'true' | 'false' | 'archived') => void;
+  filterPublished: 'all' | 'true' | 'false' | 'archived' | 'attention';
+  onPublishedChange: (value: 'all' | 'true' | 'false' | 'archived' | 'attention') => void;
   filterType: string;
   onTypeChange: (type: string) => void;
   productTypes: string[];
@@ -49,13 +49,14 @@ export default function ProductFilters({
           <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Status</label>
           <select
             value={filterPublished}
-            onChange={(e) => onPublishedChange(e.target.value as 'all' | 'true' | 'false' | 'archived')}
+            onChange={(e) => onPublishedChange(e.target.value as 'all' | 'true' | 'false' | 'archived' | 'attention')}
             className="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent hover:border-gray-300 transition text-sm"
           >
             <option value="all">All Products</option>
             <option value="true">Published</option>
             <option value="false">Draft</option>
             <option value="archived">Archived</option>
+            <option value="attention">⚠ Needs Attention</option>
           </select>
         </div>
 

@@ -379,8 +379,8 @@ export default function AdminAcaiPage() {
       <h1 className="text-2xl font-bold text-gray-900 mb-6">Acai Cakes Management</h1>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="flex gap-4 overflow-x-auto">
+      <div className="mb-6">
+        <nav className="flex flex-wrap gap-2">
           {[
             { id: 'settings', label: 'Settings' },
             { id: 'crust', label: 'Crust Options' },
@@ -391,10 +391,10 @@ export default function AdminAcaiPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as TabType)}
-              className={`py-3 px-4 border-b-2 font-medium transition whitespace-nowrap ${
+              className={`py-2 px-4 rounded-lg font-medium transition-all duration-200 whitespace-nowrap ${
                 activeTab === tab.id
-                  ? 'border-hafalohaRed text-hafalohaRed'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'bg-hafalohaRed text-white shadow-sm'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
               }`}
             >
               {tab.label}
@@ -523,65 +523,105 @@ export default function AdminAcaiPage() {
 
       {/* Crust Options Tab */}
       {activeTab === 'crust' && (
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6 border-b flex justify-between items-center">
-            <h2 className="text-lg font-semibold">Crust/Base Options</h2>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Crust/Base Options</h2>
+              <p className="text-sm text-gray-500 mt-1">Customize the crust or base options available for açaí cakes</p>
+            </div>
             <button
               onClick={() => {
                 setEditingCrust({ id: 0, name: '', description: '', price_cents: 0, available: true, position: crustOptions.length });
                 setShowCrustModal(true);
               }}
-              className="bg-hafalohaRed text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center"
+              className="bg-hafalohaRed text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center shadow-sm"
             >
               <Plus className="w-5 h-5 mr-2" />
               Add Option
             </button>
           </div>
 
-          <div className="divide-y">
-            {crustOptions.length === 0 ? (
-              <p className="p-6 text-gray-500 text-center">No crust options yet. Add one above!</p>
-            ) : (
-              crustOptions.map((crust) => (
-                <div key={crust.id} className="p-4 flex items-center justify-between">
-                  <div>
-                    <div className="font-medium text-gray-900">{crust.name}</div>
-                    {crust.description && <div className="text-sm text-gray-500">{crust.description}</div>}
-                    <div className="text-sm text-gray-600 mt-1">
-                      {crust.price_cents > 0 ? `+$${(crust.price_cents / 100).toFixed(2)}` : 'Included'}
-                      {!crust.available && <span className="ml-2 text-red-500">(Unavailable)</span>}
+          {crustOptions.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Plus className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No crust options yet</h3>
+              <p className="text-gray-500 mb-4">Add crust options for customers to choose from when ordering açaí cakes.</p>
+              <button
+                onClick={() => {
+                  setEditingCrust({ id: 0, name: '', description: '', price_cents: 0, available: true, position: crustOptions.length });
+                  setShowCrustModal(true);
+                }}
+                className="text-hafalohaRed hover:text-red-700 font-medium"
+              >
+                Add your first option →
+              </button>
+            </div>
+          ) : (
+            <div className="grid gap-3">
+              {crustOptions.map((crust) => (
+                <div 
+                  key={crust.id} 
+                  className={`bg-white rounded-xl shadow-sm border p-4 flex items-center justify-between transition hover:shadow-md ${
+                    crust.available ? 'border-gray-200' : 'border-red-200 bg-red-50/30'
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      crust.available ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+                    }`}>
+                      <span className="font-bold text-lg">{crust.name.charAt(0)}</span>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-gray-900">{crust.name}</span>
+                        {crust.price_cents > 0 && (
+                          <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                            +${(crust.price_cents / 100).toFixed(2)}
+                          </span>
+                        )}
+                        {!crust.available && (
+                          <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded-full">
+                            Unavailable
+                          </span>
+                        )}
+                      </div>
+                      {crust.description && (
+                        <p className="text-sm text-gray-500 mt-0.5">{crust.description}</p>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <button
                       onClick={() => {
                         setEditingCrust(crust);
                         setShowCrustModal(true);
                       }}
-                      className="p-2 text-gray-500 hover:text-gray-700"
+                      className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
                     >
-                      <Edit2 className="w-5 h-5" />
+                      <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => deleteCrustOption(crust.id)}
-                      className="btn-icon text-red-500 hover:text-red-700"
+                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                     >
-                      <Trash2 className="w-5 h-5" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {/* Placard Options Tab */}
       {activeTab === 'placards' && (
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6 border-b flex justify-between items-center">
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-lg font-semibold">Placard Options</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Placard Options</h2>
               <p className="text-sm text-gray-500 mt-1">Message placard options for customers to choose from</p>
             </div>
             <button
@@ -589,111 +629,192 @@ export default function AdminAcaiPage() {
                 setEditingPlacard({ id: 0, name: '', description: '', price_cents: 0, available: true, position: placardOptions.length });
                 setShowPlacardModal(true);
               }}
-              className="bg-hafalohaRed text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center"
+              className="bg-hafalohaRed text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center shadow-sm"
             >
               <Plus className="w-5 h-5 mr-2" />
               Add Placard
             </button>
           </div>
 
-          <div className="divide-y">
-            {placardOptions.length === 0 ? (
-              <p className="p-6 text-gray-500 text-center">No placard options yet. Add one above!</p>
-            ) : (
-              placardOptions.map((placard) => (
-                <div key={placard.id} className="p-4 flex items-center justify-between">
-                  <div>
-                    <div className="font-medium text-gray-900">{placard.name}</div>
-                    {placard.description && <div className="text-sm text-gray-500">{placard.description}</div>}
-                    <div className="text-sm text-gray-600 mt-1">
-                      {placard.price_cents > 0 ? `+$${(placard.price_cents / 100).toFixed(2)}` : 'Included'}
-                      {!placard.available && <span className="ml-2 text-red-500">(Unavailable)</span>}
+          {placardOptions.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Plus className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No placard options yet</h3>
+              <p className="text-gray-500 mb-4">Add message placard options like "Happy Birthday" or "Congratulations".</p>
+              <button
+                onClick={() => {
+                  setEditingPlacard({ id: 0, name: '', description: '', price_cents: 0, available: true, position: placardOptions.length });
+                  setShowPlacardModal(true);
+                }}
+                className="text-hafalohaRed hover:text-red-700 font-medium"
+              >
+                Add your first placard →
+              </button>
+            </div>
+          ) : (
+            <div className="grid gap-3">
+              {placardOptions.map((placard) => (
+                <div 
+                  key={placard.id} 
+                  className={`bg-white rounded-xl shadow-sm border p-4 flex items-center justify-between transition hover:shadow-md ${
+                    placard.available ? 'border-gray-200' : 'border-red-200 bg-red-50/30'
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                      placard.available ? 'bg-purple-100 text-purple-600' : 'bg-red-100 text-red-600'
+                    }`}>
+                      <span className="font-bold text-lg">✉</span>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-gray-900">{placard.name}</span>
+                        {placard.price_cents > 0 && (
+                          <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-medium rounded-full">
+                            +${(placard.price_cents / 100).toFixed(2)}
+                          </span>
+                        )}
+                        {placard.price_cents === 0 && (
+                          <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                            Included
+                          </span>
+                        )}
+                        {!placard.available && (
+                          <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded-full">
+                            Unavailable
+                          </span>
+                        )}
+                      </div>
+                      {placard.description && (
+                        <p className="text-sm text-gray-500 mt-0.5">{placard.description}</p>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <button
                       onClick={() => {
                         setEditingPlacard(placard);
                         setShowPlacardModal(true);
                       }}
-                      className="p-2 text-gray-500 hover:text-gray-700"
+                      className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
                     >
-                      <Edit2 className="w-5 h-5" />
+                      <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => deletePlacardOption(placard.id)}
-                      className="btn-icon text-red-500 hover:text-red-700"
+                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                     >
-                      <Trash2 className="w-5 h-5" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {/* Pickup Windows Tab */}
       {activeTab === 'windows' && (
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6 border-b flex justify-between items-center">
-            <h2 className="text-lg font-semibold">Pickup Windows</h2>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Pickup Windows</h2>
+              <p className="text-sm text-gray-500 mt-1">Set available days and times for açaí cake pickups</p>
+            </div>
             <button
               onClick={() => {
                 setEditingWindow({ id: 0, day_of_week: 6, day_name: 'Saturday', start_time: '13:30', end_time: '15:30', capacity: 5, active: true, display_name: '' });
                 setShowWindowModal(true);
               }}
-              className="bg-hafalohaRed text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center"
+              className="bg-hafalohaRed text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center shadow-sm"
             >
               <Plus className="w-5 h-5 mr-2" />
               Add Window
             </button>
           </div>
 
-          <div className="divide-y">
-            {pickupWindows.length === 0 ? (
-              <p className="p-6 text-gray-500 text-center">No pickup windows yet. Add one above!</p>
-            ) : (
-              pickupWindows.map((window) => (
-                <div key={window.id} className="p-4 flex items-center justify-between">
-                  <div>
-                    <div className="font-medium text-gray-900">{window.display_name}</div>
-                    <div className="text-sm text-gray-500">
-                      Max {window.capacity} orders per slot
-                      {!window.active && <span className="ml-2 text-red-500">(Inactive)</span>}
+          {pickupWindows.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Plus className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No pickup windows configured</h3>
+              <p className="text-gray-500 mb-4">Add pickup windows to let customers know when they can pick up their orders.</p>
+              <button
+                onClick={() => {
+                  setEditingWindow({ id: 0, day_of_week: 6, day_name: 'Saturday', start_time: '13:30', end_time: '15:30', capacity: 5, active: true, display_name: '' });
+                  setShowWindowModal(true);
+                }}
+                className="text-hafalohaRed hover:text-red-700 font-medium"
+              >
+                Add your first window →
+              </button>
+            </div>
+          ) : (
+            <div className="grid gap-3">
+              {pickupWindows.map((window) => (
+                <div 
+                  key={window.id} 
+                  className={`bg-white rounded-xl shadow-sm border p-4 flex items-center justify-between transition hover:shadow-md ${
+                    window.active ? 'border-gray-200' : 'border-red-200 bg-red-50/30'
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-lg flex flex-col items-center justify-center ${
+                      window.active ? 'bg-blue-100 text-blue-600' : 'bg-red-100 text-red-600'
+                    }`}>
+                      <span className="text-xs font-medium uppercase">{DAYS[window.day_of_week]?.slice(0, 3)}</span>
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-gray-900">{window.display_name || `${DAYS[window.day_of_week]} ${window.start_time} - ${window.end_time}`}</span>
+                        {!window.active && (
+                          <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded-full">
+                            Inactive
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-gray-500 mt-0.5">
+                        <span className="flex items-center gap-1">
+                          <span className="w-2 h-2 bg-green-400 rounded-full"></span>
+                          Max {window.capacity} orders
+                        </span>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
                     <button
                       onClick={() => {
                         setEditingWindow(window);
                         setShowWindowModal(true);
                       }}
-                      className="p-2 text-gray-500 hover:text-gray-700"
+                      className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
                     >
-                      <Edit2 className="w-5 h-5" />
+                      <Edit2 className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => deletePickupWindow(window.id)}
-                      className="btn-icon text-red-500 hover:text-red-700"
+                      className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                     >
-                      <Trash2 className="w-5 h-5" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
                 </div>
-              ))
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
       {/* Blocked Dates Tab */}
       {activeTab === 'blocked' && (
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6 border-b flex justify-between items-center">
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
             <div>
-              <h2 className="text-lg font-semibold">Blocked Dates</h2>
+              <h2 className="text-lg font-semibold text-gray-900">Blocked Dates</h2>
               <p className="text-sm text-gray-500 mt-1">Block specific dates or times when orders cannot be placed</p>
             </div>
             <button
@@ -710,56 +831,93 @@ export default function AdminAcaiPage() {
                 });
                 setShowBlockedModal(true);
               }}
-              className="bg-hafalohaRed text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center"
+              className="bg-hafalohaRed text-white px-4 py-2 rounded-lg hover:bg-red-700 transition flex items-center shadow-sm"
             >
               <Plus className="w-5 h-5 mr-2" />
               Block Date
             </button>
           </div>
 
-          <div className="divide-y">
-            {blockedSlots.length === 0 ? (
-              <p className="p-6 text-gray-500 text-center">No blocked dates. All configured pickup windows are available.</p>
-            ) : (
-              blockedSlots.map((slot) => (
-                <div key={slot.id} className="p-4 flex items-center justify-between">
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      {new Date(slot.blocked_date + 'T00:00:00').toLocaleDateString('en-US', { 
-                        weekday: 'long', 
-                        month: 'long', 
-                        day: 'numeric',
-                        year: 'numeric'
-                      })}
+          {blockedSlots.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">✓</span>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No blocked dates</h3>
+              <p className="text-gray-500">All configured pickup windows are currently available for orders.</p>
+            </div>
+          ) : (
+            <div className="grid gap-3">
+              {blockedSlots.map((slot) => {
+                const dateObj = new Date(slot.blocked_date + 'T00:00:00');
+                const isPast = dateObj < new Date(new Date().setHours(0,0,0,0));
+                const isFullDay = slot.start_time === '00:00' && slot.end_time === '23:59';
+                
+                return (
+                  <div 
+                    key={slot.id} 
+                    className={`bg-white rounded-xl shadow-sm border p-4 flex items-center justify-between transition hover:shadow-md ${
+                      isPast ? 'border-gray-200 opacity-60' : 'border-orange-200 bg-orange-50/30'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-14 h-14 rounded-lg flex flex-col items-center justify-center ${
+                        isPast ? 'bg-gray-100 text-gray-500' : 'bg-orange-100 text-orange-600'
+                      }`}>
+                        <span className="text-xs font-medium uppercase">
+                          {dateObj.toLocaleDateString('en-US', { month: 'short' })}
+                        </span>
+                        <span className="text-xl font-bold leading-none">
+                          {dateObj.getDate()}
+                        </span>
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-gray-900">
+                            {dateObj.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric' })}
+                          </span>
+                          {isFullDay ? (
+                            <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-medium rounded-full">
+                              Full Day
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">
+                              {slot.start_time} - {slot.end_time}
+                            </span>
+                          )}
+                          {isPast && (
+                            <span className="px-2 py-0.5 bg-gray-100 text-gray-500 text-xs font-medium rounded-full">
+                              Past
+                            </span>
+                          )}
+                        </div>
+                        {slot.reason && (
+                          <p className="text-sm text-gray-500 mt-0.5">{slot.reason}</p>
+                        )}
+                      </div>
                     </div>
-                    <div className="text-sm text-gray-500">
-                      {slot.start_time === '00:00' && slot.end_time === '23:59' 
-                        ? 'Full day blocked' 
-                        : `${slot.start_time} - ${slot.end_time}`}
-                      {slot.reason && <span className="ml-2">- {slot.reason}</span>}
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => {
+                          setEditingBlocked(slot);
+                          setShowBlockedModal(true);
+                        }}
+                        className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteBlockedSlot(slot.id)}
+                        className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => {
-                        setEditingBlocked(slot);
-                        setShowBlockedModal(true);
-                      }}
-                      className="p-2 text-gray-500 hover:text-gray-700"
-                    >
-                      <Edit2 className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={() => deleteBlockedSlot(slot.id)}
-                      className="btn-icon text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 

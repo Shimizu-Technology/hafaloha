@@ -1,10 +1,11 @@
 import { useRef, useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
-import { ArrowLeft, Users, Package, ShoppingCart, Settings, Plus, Trash2, Edit, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Users, Package, ShoppingCart, Settings, Plus, Trash2, Edit, ExternalLink, Upload, Copy, Check } from 'lucide-react';
 import useLockBodyScroll from '../../hooks/useLockBodyScroll';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import { BulkImportModal } from '../../components/admin/fundraisers';
 
 interface Fundraiser {
   id: number;
@@ -81,6 +82,7 @@ export default function AdminFundraiserDetailPage() {
   // Modal states
   const [showAddParticipant, setShowAddParticipant] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
+  const [showBulkImport, setShowBulkImport] = useState(false);
   const [_editingParticipant, _setEditingParticipant] = useState<Participant | null>(null);
   void _editingParticipant; void _setEditingParticipant; // Reserved for future edit functionality
 
@@ -350,15 +352,24 @@ export default function AdminFundraiserDetailPage() {
 
         {activeTab === 'participants' && (
           <div className="p-6">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
               <h3 className="font-medium text-gray-900">Participants ({participants.length})</h3>
-              <button
-                onClick={() => setShowAddParticipant(true)}
-                className="flex items-center gap-2 px-3 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition text-sm"
-              >
-                <Plus className="w-4 h-4" />
-                Add Participant
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowBulkImport(true)}
+                  className="flex items-center gap-2 px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition text-sm"
+                >
+                  <Upload className="w-4 h-4" />
+                  Bulk Import CSV
+                </button>
+                <button
+                  onClick={() => setShowAddParticipant(true)}
+                  className="flex items-center gap-2 px-3 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition text-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Participant
+                </button>
+              </div>
             </div>
 
             {participants.length === 0 ? (
@@ -388,12 +399,19 @@ export default function AdminFundraiserDetailPage() {
                         <td className="py-2 px-3 text-right">{p.order_count}</td>
                         <td className="py-2 px-3 text-right font-medium">{formatCurrency(p.total_raised_cents)}</td>
                         <td className="py-2 px-3 text-right">
-                          <button
-                            onClick={() => handleDeleteParticipant(p)}
-                            className="p-1 text-gray-400 hover:text-red-600"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center justify-end gap-1">
+                            <CopyLinkButton 
+                              fundraiserSlug={fundraiser.slug} 
+                              participantNumber={p.participant_number} 
+                            />
+                            <button
+                              onClick={() => handleDeleteParticipant(p)}
+                              className="p-1 text-gray-400 hover:text-red-600"
+                              title="Delete participant"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -493,6 +511,24 @@ export default function AdminFundraiserDetailPage() {
           availableProducts={availableProducts}
           onClose={() => setShowAddProduct(false)}
           onAdd={handleAddProduct}
+        />
+      )}
+
+      {/* Bulk Import Modal */}
+      {showBulkImport && (
+        <BulkImportModal
+          onClose={() => setShowBulkImport(false)}
+          onImport={async (csvContent: string) => {
+            const token = await getToken();
+            const response = await api.post(
+              `/admin/fundraisers/${id}/participants/bulk_import`,
+              { csv: csvContent },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            loadParticipants();
+            loadFundraiser();
+            return response.data;
+          }}
         />
       )}
     </div>
@@ -772,5 +808,55 @@ function AddProductModal({
         )}
       </div>
     </div>
+  );
+}
+
+// Copy Link Button for participant shareable links
+function CopyLinkButton({ 
+  fundraiserSlug, 
+  participantNumber 
+}: { 
+  fundraiserSlug: string; 
+  participantNumber: string | null;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const getShareableUrl = () => {
+    const baseUrl = window.location.origin;
+    const url = `${baseUrl}/fundraisers/${fundraiserSlug}`;
+    return participantNumber ? `${url}?p=${participantNumber}` : url;
+  };
+
+  const handleCopy = async () => {
+    const url = getShareableUrl();
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = url;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className={`p-1 rounded transition ${
+        copied 
+          ? 'text-green-600 bg-green-50' 
+          : 'text-gray-400 hover:text-hafalohaRed hover:bg-gray-100'
+      }`}
+      title={copied ? 'Copied!' : 'Copy shareable link'}
+    >
+      {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+    </button>
   );
 }

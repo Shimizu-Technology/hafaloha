@@ -24,7 +24,7 @@ export default function AdminProductsPage() {
   // Pagination & Filters
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterPublished, setFilterPublished] = useState<'all' | 'true' | 'false' | 'archived'>('all');
+  const [filterPublished, setFilterPublished] = useState<'all' | 'true' | 'false' | 'archived' | 'attention'>('all');
   const [filterType, setFilterType] = useState('all');
   const [productTypes, setProductTypes] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'stock' | 'created'>('name');
@@ -136,6 +136,8 @@ export default function AdminProductsPage() {
     if (searchQuery && !product.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     if (filterPublished === 'archived') {
       if (!product.archived) return false;
+    } else if (filterPublished === 'attention') {
+      if (!product.needs_attention) return false;
     } else if (filterPublished !== 'all') {
       if (product.archived) return false;
       if (product.published.toString() !== filterPublished) return false;

@@ -26,10 +26,17 @@ import AdminFundraiserFormPage from './pages/admin/AdminFundraiserFormPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
+import AccountPage from './pages/AccountPage';
 import AcaiCakesPage from './pages/AcaiCakesPage';
 import FundraiserPage from './pages/FundraiserPage';
 import FundraisersListPage from './pages/FundraisersListPage';
 import NotFoundPage from './pages/NotFoundPage';
+// Fundraiser Public Storefront Pages
+import FundraiserPublicPage from './pages/fundraiser/FundraiserPage';
+import FundraiserProductPage from './pages/fundraiser/FundraiserProductPage';
+import FundraiserCartPage from './pages/fundraiser/FundraiserCartPage';
+import FundraiserCheckoutPage from './pages/fundraiser/FundraiserCheckoutPage';
+import FundraiserOrderConfirmationPage from './pages/fundraiser/FundraiserOrderConfirmationPage';
 import ContactPage from './pages/ContactPage';
 import ShippingInfoPage from './pages/ShippingInfoPage';
 import ReturnsPage from './pages/ReturnsPage';
@@ -53,6 +60,16 @@ function CustomUserButton({ isAdmin }: { isAdmin: boolean }) {
   return (
     <UserButton afterSignOutUrl="/">
       <UserButton.MenuItems>
+        {/* My Account - available to all signed-in users */}
+        <UserButton.Action
+          label="My Account"
+          labelIcon={
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+            </svg>
+          }
+          onClick={() => navigate('/account')}
+        />
         {/* My Orders - available to all signed-in users */}
         <UserButton.Action
           label="My Orders"
@@ -389,7 +406,13 @@ function AppContent() {
                   </SignedOut>
                   <SignedIn>
                     <div className="flex items-center justify-between py-2">
-                      <span className="text-warm-700 font-medium">My Account</span>
+                      <Link
+                        to="/account"
+                        className="text-warm-700 hover:text-hafalohaRed font-medium transition"
+                        onClick={handleNavClick}
+                      >
+                        My Account
+                      </Link>
                       <CustomUserButton isAdmin={isAdmin} />
                     </div>
                   </SignedIn>
@@ -412,7 +435,16 @@ function AppContent() {
           <Route path="/acai-cakes" element={<AcaiCakesPage />} />
           <Route path="/fundraisers" element={<FundraisersListPage />} />
           <Route path="/fundraisers/:slug" element={<FundraiserPage />} />
+          
+          {/* Fundraiser Public Storefront Routes */}
+          <Route path="/f/:slug" element={<FundraiserPublicPage />} />
+          <Route path="/f/:slug/products/:productSlug" element={<FundraiserProductPage />} />
+          <Route path="/f/:slug/cart" element={<FundraiserCartPage />} />
+          <Route path="/f/:slug/checkout" element={<FundraiserCheckoutPage />} />
+          <Route path="/f/:slug/order/:orderId" element={<FundraiserOrderConfirmationPage />} />
+          
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/account" element={<AccountPage />} />
           <Route path="/orders" element={<OrderHistoryPage />} />
           <Route path="/orders/:id" element={<OrderConfirmationPage />} />
           <Route path="/contact" element={<ContactPage />} />
@@ -497,12 +529,12 @@ function AppContent() {
                     </Link>
                   </li>
                   <li>
-                    <Link to="/products?category=mens" className="text-warm-500 hover:text-warm-900 transition text-sm">
+                    <Link to="/products?collection=mens" className="text-warm-500 hover:text-warm-900 transition text-sm">
                       Mens
                     </Link>
                   </li>
                   <li>
-                    <Link to="/products?category=womens" className="text-warm-500 hover:text-warm-900 transition text-sm">
+                    <Link to="/products?collection=womens" className="text-warm-500 hover:text-warm-900 transition text-sm">
                       Womens
                     </Link>
                   </li>

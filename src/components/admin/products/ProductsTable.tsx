@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, Edit, MoreVertical, Archive, ArchiveRestore, Copy, Globe, GlobeLock, ArrowUpDown } from 'lucide-react';
+import { Eye, Edit, MoreVertical, Archive, ArchiveRestore, Copy, Globe, GlobeLock, ArrowUpDown, AlertTriangle } from 'lucide-react';
 import type { Product } from './productUtils';
 import { formatCurrency, getStockDisplay } from './productUtils';
 
@@ -146,7 +146,15 @@ export default function ProductsTable({
                   <div className="flex items-center gap-3">
                     <ProductImage product={product} />
                     <div>
-                      <p className="font-medium text-gray-900">{product.name}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="font-medium text-gray-900">{product.name}</p>
+                        {product.needs_attention && (
+                          <span title={product.import_notes || 'Needs attention'} className="inline-flex items-center">
+                            <AlertTriangle className="w-4 h-4 text-amber-500" aria-hidden="true" />
+                            <span className="sr-only">{product.import_notes || 'Needs attention'}</span>
+                          </span>
+                        )}
+                      </div>
                       {product.featured && (
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">Featured</span>
                       )}
@@ -181,7 +189,15 @@ export default function ProductsTable({
             <div className="flex gap-3 mb-3">
               <ProductImage product={product} size="w-16 h-16" />
               <div className="flex-1">
-                <p className="font-semibold text-gray-900">{product.name}</p>
+                <div className="flex items-center gap-1.5">
+                  <p className="font-semibold text-gray-900">{product.name}</p>
+                  {product.needs_attention && (
+                    <span title={product.import_notes || 'Needs attention'} className="inline-flex items-center">
+                      <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" aria-hidden="true" />
+                      <span className="sr-only">{product.import_notes || 'Needs attention'}</span>
+                    </span>
+                  )}
+                </div>
                 <p className="text-sm text-gray-600">{formatCurrency(product.base_price_cents)}</p>
               </div>
               <StatusBadge product={product} />

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import type { Product } from '../services/api';
 import { formatPrice } from '../services/api';
 import ProductBadge from './ProductBadge';
+import PlaceholderImage from './ui/PlaceholderImage';
 
 interface ProductCardProps {
   product: Product;
@@ -12,7 +13,7 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       to={`/products/${product.slug}`}
-      className="group bg-white overflow-hidden flex flex-col h-full"
+      className="group bg-white overflow-hidden flex flex-col h-full border border-warm-200 rounded-lg shadow-sm hover:shadow-md transition-shadow"
     >
       <motion.div
         className="flex flex-col h-full rounded-lg"
@@ -29,15 +30,7 @@ export default function ProductCard({ product }: ProductCardProps) {
               loading="lazy"
             />
           ) : (
-            <div className="w-full h-full flex flex-col items-center justify-center bg-warm-50">
-              <img 
-                src="/images/hafaloha-logo.png" 
-                alt="Hafaloha" 
-                className="w-24 opacity-20 mb-2"
-                style={{ objectFit: 'contain', maxHeight: '6rem' }}
-              />
-              <span className="text-warm-400 text-sm font-medium">No Image</span>
-            </div>
+            <PlaceholderImage variant="card" />
           )}
           
           {/* Badges - Only essential ones */}

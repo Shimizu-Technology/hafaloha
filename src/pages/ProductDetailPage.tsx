@@ -4,6 +4,7 @@ import type { ProductFull, ProductVariant } from '../services/api';
 import { productsApi, formatPrice } from '../services/api';
 import { useCartStore } from '../store/cartStore';
 import Breadcrumbs from '../components/Breadcrumbs';
+import PlaceholderImage from '../components/ui/PlaceholderImage';
 import useLockBodyScroll from '../hooks/useLockBodyScroll';
 
 // ── Color swatch mapping ────────────────────────────────────────────────────
@@ -470,15 +471,7 @@ export default function ProductDetailPage() {
                     }}
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center bg-linear-to-br from-warm-50 to-warm-100">
-                    <img 
-                      src="/images/hafaloha-logo.png" 
-                      alt="Hafaloha" 
-                      className="w-32 opacity-20 mb-4"
-                      style={{ objectFit: 'contain', maxHeight: '8rem' }}
-                    />
-                    <span className="text-warm-400 text-lg font-medium">No Image Available</span>
-                  </div>
+                  <PlaceholderImage variant="detail" text="No Image Available" />
                 )}
               </div>
 
