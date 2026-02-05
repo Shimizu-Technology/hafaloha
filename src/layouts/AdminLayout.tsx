@@ -204,7 +204,7 @@ export default function AdminLayout() {
         }`}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-6 border-b border-gray-100 bg-linear-to-r from-hafalohaRed to-hafalohaRed/90">
+        <div className="h-16 flex items-center justify-between px-6 border-b border-gray-100 bg-gradient-to-r from-hafalohaRed to-hafalohaRed/90">
           <Link to="/admin" className="flex items-center gap-2">
             <span className="text-xl font-bold text-white">Hafaloha Admin</span>
           </Link>

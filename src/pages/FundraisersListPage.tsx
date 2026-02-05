@@ -255,7 +255,7 @@ export default function FundraisersListPage() {
 
         {/* CTA for Organizations */}
         <section className="mt-16">
-          <div className="bg-linear-to-r from-hafalohaRed to-hafalohaRed/90 rounded-2xl p-8 sm:p-12 text-center text-white">
+          <div className="bg-gradient-to-r from-hafalohaRed to-hafalohaRed/90 rounded-2xl p-8 sm:p-12 text-center text-white">
             <h2 className="text-2xl sm:text-3xl font-bold mb-4">
               Want to Start a Fundraiser?
             </h2>
