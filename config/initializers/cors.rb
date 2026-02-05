@@ -13,7 +13,7 @@
 #   FRONTEND_URL=https://hafaloha-v2.netlify.app  (legacy single-origin)
 #
 allowed_origins = if ENV["ALLOWED_ORIGINS"].present?
-                    ENV["ALLOWED_ORIGINS"].split(",").map(&:strip)
+                    ENV["ALLOWED_ORIGINS"].split(",").map(&:strip).reject(&:blank?)
                   elsif ENV["FRONTEND_URL"].present?
                     [ENV["FRONTEND_URL"].strip]
                   else
