@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "cgi"
+
 class EmailService
   class EmailError < StandardError; end
 
@@ -921,6 +923,12 @@ class EmailService
     }
     subject_display = subject_labels[submission.subject] || submission.subject
 
+    # Escape user-provided content to prevent XSS in email HTML
+    escaped_name = CGI.escapeHTML(submission.name.to_s)
+    escaped_email = CGI.escapeHTML(submission.email.to_s)
+    escaped_message = CGI.escapeHTML(submission.message.to_s)
+    escaped_subject = CGI.escapeHTML(subject_display.to_s)
+
     <<~HTML
       <!DOCTYPE html>
       <html>
@@ -949,21 +957,21 @@ class EmailService
                       <tr>
                         <td style="padding: 10px 0; border-bottom: 1px solid #E5E7EB;">
                           <strong style="color: #6B7280; font-size: 14px;">From:</strong>
-                          <span style="color: #111827; font-size: 14px; float: right;">#{submission.name}</span>
+                          <span style="color: #111827; font-size: 14px; float: right;">#{escaped_name}</span>
                         </td>
                       </tr>
                       <tr>
                         <td style="padding: 10px 0; border-bottom: 1px solid #E5E7EB;">
                           <strong style="color: #6B7280; font-size: 14px;">Email:</strong>
                           <span style="color: #111827; font-size: 14px; float: right;">
-                            <a href="mailto:#{submission.email}" style="color: #C1191F; text-decoration: none;">#{submission.email}</a>
+                            <a href="mailto:#{escaped_email}" style="color: #C1191F; text-decoration: none;">#{escaped_email}</a>
                           </span>
                         </td>
                       </tr>
                       <tr>
                         <td style="padding: 10px 0; border-bottom: 1px solid #E5E7EB;">
                           <strong style="color: #6B7280; font-size: 14px;">Subject:</strong>
-                          <span style="color: #111827; font-size: 14px; float: right;">#{subject_display}</span>
+                          <span style="color: #111827; font-size: 14px; float: right;">#{escaped_subject}</span>
                         </td>
                       </tr>
                       <tr>
@@ -976,11 +984,11 @@ class EmailService
 
                     <div style="background-color: #F9FAFB; border-left: 4px solid #C1191F; padding: 20px; border-radius: 0 4px 4px 0;">
                       <h3 style="color: #111827; margin: 0 0 10px 0; font-size: 16px; font-weight: 600;">Message</h3>
-                      <p style="color: #374151; margin: 0; font-size: 14px; line-height: 1.8; white-space: pre-wrap;">#{submission.message}</p>
+                      <p style="color: #374151; margin: 0; font-size: 14px; line-height: 1.8; white-space: pre-wrap;">#{escaped_message}</p>
                     </div>
 
                     <div style="margin-top: 24px; text-align: center;">
-                      <a href="mailto:#{submission.email}?subject=Re: #{subject_display}" style="display: inline-block; background-color: #C1191F; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px;">Reply to #{submission.name}</a>
+                      <a href="mailto:#{escaped_email}?subject=Re: #{escaped_subject}" style="display: inline-block; background-color: #C1191F; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 14px;">Reply to #{escaped_name}</a>
                     </div>
                   </td>
                 </tr>
