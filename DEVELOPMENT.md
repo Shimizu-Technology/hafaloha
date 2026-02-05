@@ -67,7 +67,7 @@ The gate script accounts for these. New code must not introduce *additional* iss
 Required in `.env`:
 ```
 VITE_CLERK_PUBLISHABLE_KEY=pk_...
-VITE_API_URL=http://localhost:3000
+VITE_API_BASE_URL=http://localhost:3000
 ```
 
 ---
