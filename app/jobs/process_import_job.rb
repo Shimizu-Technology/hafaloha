@@ -74,7 +74,7 @@ class ProcessImportJob < ApplicationJob
         update_inventory(inventory_csv_path, stats)
       end
       
-      stats[:collections_created] = Collection.count
+      stats[:total_collections] = Collection.count
       Rails.logger.info "✅ Import complete: #{stats}"
       import.complete!(stats)
       
