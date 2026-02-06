@@ -1,0 +1,95 @@
+class SiteSetting < ApplicationRecord
+  # Singleton pattern - only one record should ever exist
+  validates :payment_processor, presence: true, inclusion: { in: %w[stripe paypal] }
+  validates :payment_test_mode, inclusion: { in: [ true, false ] }
+  validate :validate_shipping_origin_address
+
+  # Singleton accessor
+  def self.instance
+    first_or_create!(
+      payment_test_mode: true,
+      payment_processor: "stripe",
+      send_customer_emails: false, # Legacy field - kept for backwards compatibility
+      send_retail_emails: false,   # Off by default for development
+      send_acai_emails: false,     # Off by default for development
+      send_wholesale_emails: false, # Off by default for development
+      store_name: "Hafaloha",
+      store_email: "info@hafaloha.com",
+      store_phone: "671-777-1234",
+      placeholder_image_url: "/images/hafaloha-logo.png",
+      acai_gallery_image_a_url: "/images/acai-cake-set-a.webp",
+      acai_gallery_image_b_url: "/images/acai-cake-set-b.webp",
+      acai_gallery_heading: "Featured Sets",
+      acai_gallery_subtext: "Seasonal & special requests",
+      acai_gallery_show_image_a: true,
+      acai_gallery_show_image_b: true,
+      order_notification_emails: [ "shimizutechnology@gmail.com" ],
+      shipping_origin_address: {
+        company: "Hafaloha",
+        street1: "215 Rojas Street",
+        street2: "Ixora Industrial Park, Unit 104",
+        city: "Tamuning",
+        state: "GU",
+        zip: "96913",
+        country: "US",
+        phone: "671-989-3444"
+      }
+    )
+  end
+
+  # Check if customer emails are enabled for a specific order type
+  def send_emails_for?(order_type)
+    case order_type
+    when "acai" then send_acai_emails
+    when "wholesale" then send_wholesale_emails
+    else send_retail_emails # retail is default
+    end
+  end
+
+  # Prevent deletion of the singleton record
+  before_destroy :prevent_destroy
+
+  # Helper methods
+  def test_mode?
+    payment_test_mode
+  end
+
+  def production_mode?
+    !payment_test_mode
+  end
+
+  def using_stripe?
+    payment_processor == "stripe"
+  end
+
+  def using_paypal?
+    payment_processor == "paypal"
+  end
+
+  def shipping_origin_complete?
+    missing = missing_shipping_origin_fields
+    missing.empty?
+  end
+
+  private
+
+  def prevent_destroy
+    raise ActiveRecord::RecordNotDestroyed, "Cannot delete the site settings record"
+  end
+
+  def validate_shipping_origin_address
+    missing = missing_shipping_origin_fields
+    return if missing.empty?
+
+    errors.add(:shipping_origin_address, "is missing required fields: #{missing.join(', ')}")
+  end
+
+  def missing_shipping_origin_fields
+    address = shipping_origin_address || {}
+    required = %w[company street1 city state zip country phone]
+
+    required.select do |field|
+      address[field].blank? && address[field.to_sym].blank?
+    end
+  end
+end
