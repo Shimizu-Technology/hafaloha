@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import api from '../services/api';
+import api, { configApi } from '../services/api';
+import type { AppConfig } from '../types/order';
 
 interface OrderItem {
   id: number;
@@ -58,6 +59,7 @@ export default function OrderConfirmationPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -79,6 +81,7 @@ export default function OrderConfirmationPage() {
     };
 
     fetchOrder();
+    configApi.getConfig().then(setAppConfig).catch(console.error);
   }, [orderId]);
 
   const formatPrice = (cents: number) => {
@@ -180,6 +183,9 @@ export default function OrderConfirmationPage() {
 
   const isAcaiOrder = order.order_type === 'acai';
   const isPickupOrder = order.shipping_method === 'pickup' || isAcaiOrder;
+
+  const storePhone = appConfig?.store_info?.phone || '671-777-1234';
+  const storePhoneTel = `tel:${storePhone.replace(/[^\d+]/g, '')}`;
 
   return (
     <>
@@ -549,13 +555,13 @@ export default function OrderConfirmationPage() {
               Questions about your order?
             </p>
             <a 
-              href="tel:671-989-3444" 
+              href={storePhoneTel}
               className="inline-flex items-center gap-2 text-hafalohaRed font-bold hover:underline"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
               </svg>
-              (671) 989-3444
+              {storePhone}
             </a>
           </div>
         </div>

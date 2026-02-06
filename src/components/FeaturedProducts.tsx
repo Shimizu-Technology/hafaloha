@@ -6,6 +6,8 @@ import ProductBadge from './ProductBadge';
 import FadeIn from './animations/FadeIn';
 import { StaggerContainer, StaggerItem } from './animations/StaggerContainer';
 import { ProductGridSkeleton } from './Skeleton';
+import PlaceholderImage from './ui/PlaceholderImage';
+import OptimizedImage from './ui/OptimizedImage';
 
 export default function FeaturedProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -95,22 +97,14 @@ export default function FeaturedProducts() {
                 {/* Image */}
                 <div className="relative bg-warm-50 overflow-hidden rounded-lg" style={{ aspectRatio: '1/1' }}>
                   {product.primary_image_url ? (
-                    <img
+                    <OptimizedImage
                       src={product.primary_image_url}
                       alt={product.name}
-                      className="w-full h-full group-hover:scale-105 transition-transform duration-500"
-                      style={{ objectFit: 'contain' }}
-                      loading="lazy"
+                      context="featured"
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-warm-50">
-                      <img
-                        src="/images/hafaloha-logo.png"
-                        alt="Hafaloha"
-                        className="w-1/3 opacity-20"
-                        style={{ objectFit: 'contain' }}
-                      />
-                    </div>
+                    <PlaceholderImage variant="detail" className="bg-warm-50" />
                   )}
 
                   {/* Badges */}

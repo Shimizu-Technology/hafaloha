@@ -214,7 +214,7 @@ export default function AdminVariantPresetsPage() {
         </div>
         <button
           onClick={handleCreate}
-          className="px-4 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center gap-2"
+          className="px-5 py-2.5 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center gap-2"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
@@ -225,7 +225,7 @@ export default function AdminVariantPresetsPage() {
 
       {/* Presets by Option Type */}
       {optionTypes.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-sm border p-12 text-center">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
           <div className="text-gray-400 mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -245,8 +245,8 @@ export default function AdminVariantPresetsPage() {
       ) : (
         <div className="space-y-8">
           {optionTypes.map(optionType => (
-            <div key={optionType} className="bg-white rounded-lg shadow-sm border overflow-hidden">
-              <div className="bg-gray-50 px-6 py-4 border-b">
+            <div key={optionType} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+              <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
                 <h2 className="text-lg font-semibold text-gray-900">
                   {optionType} Presets
                 </h2>

@@ -12,6 +12,12 @@ import {
 import type { AppConfig } from '../types/order';
 import toast from 'react-hot-toast';
 import FadeIn from '../components/animations/FadeIn';
+import OptimizedImage from '../components/ui/OptimizedImage';
+
+const DEFAULT_ACAI_GALLERY_IMAGE_A = '/images/acai-cake-set-a.webp';
+const DEFAULT_ACAI_GALLERY_IMAGE_B = '/images/acai-cake-set-b.webp';
+const DEFAULT_ACAI_GALLERY_HEADING = 'Featured Sets';
+const DEFAULT_ACAI_GALLERY_SUBTEXT = 'Seasonal & special requests';
 
 // Step configuration
 type StepId = 'date' | 'time' | 'crust' | 'quantity' | 'placard' | 'contact';
@@ -441,7 +447,7 @@ export default function AcaiCakesPage() {
             Please call us to place an order!
           </p>
           <a 
-            href={`tel:${config?.settings.pickup_phone || '671-989-3444'}`}
+            href={`tel:${config?.settings.pickup_phone || appConfig?.store_info?.phone || '671-777-1234'}`}
             className="inline-block bg-hafalohaRed text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-700 transition"
           >
             Call to Order
@@ -454,6 +460,8 @@ export default function AcaiCakesPage() {
   const selectedCrustOption = config.crust_options.find(c => c.id === selectedCrust);
   const completedStepsCount = steps.filter(s => isStepComplete(s.id)).length;
   const progressPercent = (completedStepsCount / steps.length) * 100;
+  const showGalleryImageA = appConfig?.acai_gallery_show_image_a ?? true;
+  const showGalleryImageB = appConfig?.acai_gallery_show_image_b ?? true;
 
   // Helper to get step card props
   const getStepCardProps = (step: Step) => {
@@ -526,6 +534,58 @@ export default function AcaiCakesPage() {
           </FadeIn>
         </div>
       </div>
+
+      {/* Gallery */}
+      {(showGalleryImageA || showGalleryImageB) && (
+        <div className="bg-white">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10">
+            <FadeIn>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl sm:text-2xl font-semibold text-warm-900">
+                  {appConfig?.acai_gallery_heading || DEFAULT_ACAI_GALLERY_HEADING}
+                </h2>
+                <span className="text-xs sm:text-sm text-warm-500">
+                  {appConfig?.acai_gallery_subtext || DEFAULT_ACAI_GALLERY_SUBTEXT}
+                </span>
+              </div>
+              {(() => {
+                const galleryItems = [
+                  showGalleryImageA && {
+                    src: appConfig?.acai_gallery_image_a_url || DEFAULT_ACAI_GALLERY_IMAGE_A,
+                    alt: 'Acai cake set A',
+                  },
+                  showGalleryImageB && {
+                    src: appConfig?.acai_gallery_image_b_url || DEFAULT_ACAI_GALLERY_IMAGE_B,
+                    alt: 'Acai cake set B',
+                  },
+                ].filter(Boolean) as Array<{ src: string; alt: string }>;
+
+                const isSingle = galleryItems.length === 1;
+
+                return (
+                  <div className={`grid grid-cols-1 ${isSingle ? 'sm:grid-cols-1' : 'sm:grid-cols-2'} gap-5`}>
+                    {galleryItems.map((item, index) => (
+                      <div
+                        key={index}
+                        className={`rounded-2xl border border-warm-100 overflow-hidden shadow-sm bg-white ${
+                          isSingle ? 'sm:max-w-[520px] sm:mx-auto w-full' : ''
+                        }`}
+                      >
+                        <OptimizedImage
+                          src={item.src}
+                          alt={item.alt}
+                          context="card"
+                          className="w-full h-64 sm:h-72 object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </FadeIn>
+          </div>
+        </div>
+      )}
 
       {/* Progress Bar */}
       <div className="sticky top-0 z-20 bg-white border-b border-warm-100 shadow-sm">

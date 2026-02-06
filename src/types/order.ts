@@ -73,9 +73,21 @@ export interface AppConfig {
   app_mode: 'test' | 'production';
   stripe_enabled: boolean;
   stripe_publishable_key?: string;
+  placeholder_image_url?: string | null;
+  acai_gallery_image_a_url?: string | null;
+  acai_gallery_image_b_url?: string | null;
+  acai_gallery_heading?: string | null;
+  acai_gallery_subtext?: string | null;
+  acai_gallery_show_image_a?: boolean | null;
+  acai_gallery_show_image_b?: boolean | null;
   features: {
     payments: boolean;
     shipping: boolean;
+  };
+  store_info?: {
+    name: string;
+    email: string;
+    phone: string;
   };
 }
 

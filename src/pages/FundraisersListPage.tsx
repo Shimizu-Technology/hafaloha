@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Calendar, ArrowRight } from 'lucide-react';
-import api from '../services/api';
+import api, { configApi } from '../services/api';
 import { FundraiserCardSkeleton } from '../components/Skeleton';
 import FadeIn from '../components/animations/FadeIn';
 import { StaggerContainer, StaggerItem } from '../components/animations/StaggerContainer';
+import type { AppConfig } from '../types/order';
 
 interface Fundraiser {
   id: number;
@@ -27,10 +28,14 @@ export default function FundraisersListPage() {
   const [fundraisers, setFundraisers] = useState<Fundraiser[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
 
   useEffect(() => {
     loadFundraisers();
+    configApi.getConfig().then(setAppConfig).catch(console.error);
   }, []);
+
+  const storeEmail = appConfig?.store_info?.email || 'info@hafaloha.com';
 
   const loadFundraisers = async () => {
     try {
@@ -255,7 +260,7 @@ export default function FundraisersListPage() {
 
         {/* CTA for Organizations */}
         <section className="mt-16">
-          <div className="bg-gradient-to-r from-hafalohaRed to-hafalohaRed/90 rounded-2xl p-8 sm:p-12 text-center text-white">
+          <div className="bg-linear-to-r from-hafalohaRed to-hafalohaRed/90 rounded-2xl p-8 sm:p-12 text-center text-white">
             <h2 className="text-2xl sm:text-3xl font-bold mb-4">
               Want to Start a Fundraiser?
             </h2>
@@ -264,7 +269,7 @@ export default function FundraisersListPage() {
               We'll help you set up a custom fundraising page with exclusive merchandise.
             </p>
             <a
-              href="mailto:info@hafaloha.com?subject=Fundraiser Inquiry"
+              href={`mailto:${storeEmail}?subject=Fundraiser Inquiry`}
               className="group inline-flex items-center px-6 py-3 bg-white text-hafalohaRed font-semibold rounded-lg hover:bg-warm-100 transition-colors"
             >
               Contact Us

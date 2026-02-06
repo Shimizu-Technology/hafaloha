@@ -5,6 +5,7 @@ import { productsApi, formatPrice } from '../services/api';
 import { useCartStore } from '../store/cartStore';
 import Breadcrumbs from '../components/Breadcrumbs';
 import PlaceholderImage from '../components/ui/PlaceholderImage';
+import OptimizedImage from '../components/ui/OptimizedImage';
 import useLockBodyScroll from '../hooks/useLockBodyScroll';
 
 // ── Color swatch mapping ────────────────────────────────────────────────────
@@ -91,6 +92,8 @@ export default function ProductDetailPage() {
       v => v.options && typeof v.options === 'object' && Object.keys(v.options).length > 0
     );
   }, [product]);
+
+  const showVariantSelectors = (product?.variants?.length || 0) > 1;
 
   /** Map of optionKey → ordered unique values (e.g. "size" → ["S","M","L"]) */
   const optionTypes = useMemo(() => {
@@ -461,17 +464,16 @@ export default function ProductDetailPage() {
               {/* Main Image */}
               <div className="bg-white rounded-xl overflow-hidden mb-4 shadow-sm border border-warm-100" style={{ aspectRatio: '1/1' }}>
                 {displayImages[selectedImageIndex].url ? (
-                  <img
+                  <OptimizedImage
                     src={displayImages[selectedImageIndex].url}
                     alt={displayImages[selectedImageIndex].alt_text}
-                    className="w-full h-full hover:scale-105 transition-transform duration-500"
-                    style={{
-                      objectFit: 'contain',
-                      backgroundColor: 'white'
-                    }}
+                    context="detail"
+                    priority={selectedImageIndex === 0}
+                    fetchPriority={selectedImageIndex === 0 ? 'high' : 'auto'}
+                    className="w-full h-full object-contain bg-white hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
-                  <PlaceholderImage variant="detail" text="No Image Available" />
+                  <PlaceholderImage variant="detail" />
                 )}
               </div>
 
@@ -487,14 +489,11 @@ export default function ProductDetailPage() {
                       }`}
                       style={{ aspectRatio: '1/1' }}
                     >
-                      <img
+                      <OptimizedImage
                         src={image.url}
                         alt={image.alt_text}
-                        className="w-full h-full"
-                        style={{
-                          objectFit: 'contain',
-                          backgroundColor: 'white'
-                        }}
+                        context="thumb"
+                        className="w-full h-full object-contain bg-white"
                       />
                     </button>
                   ))}
@@ -557,77 +556,78 @@ export default function ProductDetailPage() {
               </div>
 
               {/* ── Variant / Option Selectors ────────────────────────── */}
-              {hasFlexibleOptions ? (
-                /* Grouped option selectors (Size, Color, Material, etc.) */
-                <div className="mb-8 space-y-5">
-                  {Array.from(optionTypes.entries()).map(([optionKey, values]) => (
-                    <div key={optionKey}>
-                      <label className="block text-sm font-semibold text-warm-900 mb-2">
-                        {formatOptionLabel(optionKey)}
-                        {selectedOptions[optionKey] && (
-                          <span className="ml-2 font-normal text-warm-600">
-                            — {selectedOptions[optionKey]}
-                          </span>
-                        )}
-                      </label>
+              {showVariantSelectors &&
+                (hasFlexibleOptions ? (
+                  /* Grouped option selectors (Size, Color, Material, etc.) */
+                  <div className="mb-8 space-y-5">
+                    {Array.from(optionTypes.entries()).map(([optionKey, values]) => (
+                      <div key={optionKey}>
+                        <label className="block text-sm font-semibold text-warm-900 mb-2">
+                          {formatOptionLabel(optionKey)}
+                          {selectedOptions[optionKey] && (
+                            <span className="ml-2 font-normal text-warm-600">
+                              — {selectedOptions[optionKey]}
+                            </span>
+                          )}
+                        </label>
 
-                      {isColorOptionType(optionKey)
-                        ? renderColorSelector(optionKey, values)
-                        : renderButtonSelector(optionKey, values)}
-                    </div>
-                  ))}
+                        {isColorOptionType(optionKey)
+                          ? renderColorSelector(optionKey, values)
+                          : renderButtonSelector(optionKey, values)}
+                      </div>
+                    ))}
 
-                  {/* Warning when matched variant is out of stock */}
-                  {matchedVariant && matchedVariant.actually_available === false && (
-                    <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-                      <p className="text-sm text-red-600 font-medium">
-                        This combination is currently out of stock.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                /* Legacy flat variant grid (backward compatibility) */
-                product.variants.length > 0 && (
-                  <div className="mb-8">
-                    <label className="block text-sm font-semibold text-warm-900 mb-3">
-                      Select Option:
-                    </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {product.variants.map((variant) => {
-                        const variantAvailable = variant.actually_available !== false;
-                        const showStockWarning = product.inventory_level === 'variant' && 
-                                               variant.stock_quantity !== undefined && 
-                                               variant.stock_quantity > 0 && 
-                                               variant.stock_quantity <= 5;
-                        
-                        return (
-                          <button
-                            key={variant.id}
-                            onClick={() => handleVariantChange(variant)}
-                            disabled={!variantAvailable}
-                            className={`px-4 py-3 rounded-lg border-2 transition-all ${
-                              selectedVariant?.id === variant.id
-                                ? 'border-hafalohaRed bg-red-50 text-hafalohaRed'
-                                : variantAvailable
-                                ? 'border-warm-300 hover:border-hafalohaRed'
-                                : 'border-warm-200 bg-warm-50 text-warm-400 cursor-not-allowed'
-                            }`}
-                          >
-                            <div className="text-sm font-medium">{variant.display_name}</div>
-                            {!variantAvailable && (
-                              <div className="text-xs">Out of Stock</div>
-                            )}
-                            {variantAvailable && showStockWarning && (
-                              <div className="text-xs text-orange-600">Only {variant.stock_quantity} left</div>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
+                    {/* Warning when matched variant is out of stock */}
+                    {matchedVariant && matchedVariant.actually_available === false && (
+                      <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p className="text-sm text-red-600 font-medium">
+                          This combination is currently out of stock.
+                        </p>
+                      </div>
+                    )}
                   </div>
-                )
-              )}
+                ) : (
+                  /* Legacy flat variant grid (backward compatibility) */
+                  product.variants.length > 0 && (
+                    <div className="mb-8">
+                      <label className="block text-sm font-semibold text-warm-900 mb-3">
+                        Select Option:
+                      </label>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                        {product.variants.map((variant) => {
+                          const variantAvailable = variant.actually_available !== false;
+                          const showStockWarning = product.inventory_level === 'variant' && 
+                                                 variant.stock_quantity !== undefined && 
+                                                 variant.stock_quantity > 0 && 
+                                                 variant.stock_quantity <= 5;
+                          
+                          return (
+                            <button
+                              key={variant.id}
+                              onClick={() => handleVariantChange(variant)}
+                              disabled={!variantAvailable}
+                              className={`px-4 py-3 rounded-lg border-2 transition-all ${
+                                selectedVariant?.id === variant.id
+                                  ? 'border-hafalohaRed bg-red-50 text-hafalohaRed'
+                                  : variantAvailable
+                                  ? 'border-warm-300 hover:border-hafalohaRed'
+                                  : 'border-warm-200 bg-warm-50 text-warm-400 cursor-not-allowed'
+                              }`}
+                            >
+                              <div className="text-sm font-medium">{variant.display_name}</div>
+                              {!variantAvailable && (
+                                <div className="text-xs">Out of Stock</div>
+                              )}
+                              {variantAvailable && showStockWarning && (
+                                <div className="text-xs text-orange-600">Only {variant.stock_quantity} left</div>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )
+                ))}
 
               {/* Quantity Selector */}
               {isVariantAvailable && selectedVariant && (

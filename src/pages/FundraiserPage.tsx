@@ -4,6 +4,7 @@ import { Users, Package, Calendar, MapPin, Phone, Mail, ShoppingCart, Plus, Minu
 import useLockBodyScroll from '../hooks/useLockBodyScroll';
 import api from '../services/api';
 import toast from 'react-hot-toast';
+import OptimizedImage from '../components/ui/OptimizedImage';
 
 interface Fundraiser {
   id: number;
@@ -387,11 +388,11 @@ function ProductCard({
         {/* Image */}
         <div className="w-full sm:w-40 h-40 bg-warm-100 shrink-0">
           {product.image_url ? (
-            <img
+            <OptimizedImage
               src={product.image_url}
               alt={product.name}
+              context="fundraiser"
               className="w-full h-full object-contain"
-              loading="lazy"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-warm-400">

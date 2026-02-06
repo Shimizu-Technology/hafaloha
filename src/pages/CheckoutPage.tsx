@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import StripeProvider from '../components/payment/StripeProvider';
 import PaymentForm from '../components/payment/PaymentForm';
 import type { ShippingAddress, ShippingMethod, AppConfig } from '../types/order';
+import PlaceholderImage from '../components/ui/PlaceholderImage';
+import OptimizedImage from '../components/ui/OptimizedImage';
 
 function CheckoutForm() {
   const navigate = useNavigate();
@@ -296,7 +298,7 @@ function CheckoutForm() {
         {isTestMode && (
           <div className="mb-6 bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4">
             <div className="flex items-start">
-              <svg className="w-6 h-6 text-yellow-600 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-yellow-600 mr-3 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
               </svg>
               <div>
@@ -444,7 +446,7 @@ function CheckoutForm() {
                           <strong>Pickup Location:</strong><br />
                           121 E. Marine Corps Dr, Suite 1-103 & Suite 1-104<br />
                           Hagåtña, Guam 96910<br />
-                          +1 (671) 472-7733
+                          {appConfig?.store_info?.phone || '671-777-1234'}
                         </p>
                         <p className="text-sm text-blue-700 mt-2">
                           You'll receive an email when your order is ready for pickup.
@@ -625,7 +627,7 @@ function CheckoutForm() {
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                   <div className="flex items-start">
-                    <svg className="w-5 h-5 text-red-600 mr-2 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-red-600 mr-2 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <div className="text-sm text-red-700 whitespace-pre-line">{error}</div>
@@ -663,20 +665,19 @@ function CheckoutForm() {
               <div className="space-y-4 mb-4 max-h-64 overflow-y-auto">
                 {items.map((item) => (
                   <div key={item.id} className="flex items-center">
-                    <div className="flex-shrink-0 w-16 h-16 rounded-md overflow-hidden border border-gray-200">
+                    <div className="shrink-0 w-16 h-16 rounded-md overflow-hidden border border-gray-200">
                       {item.product.primary_image_url ? (
-                        <img
+                        <OptimizedImage
                           src={item.product.primary_image_url}
                           alt={item.product.name}
+                          context="cart"
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs">
-                          No Image
-                        </div>
+                        <PlaceholderImage variant="thumbnail" className="bg-gray-100" />
                       )}
                     </div>
-                    <div className="ml-4 flex-grow">
+                    <div className="ml-4 grow">
                       <p className="text-sm font-medium text-gray-900">{item.product.name}</p>
                       <p className="text-xs text-gray-500">{item.product_variant.display_name}</p>
                       <p className="text-xs text-gray-500">Qty: {item.quantity}</p>

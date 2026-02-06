@@ -14,6 +14,8 @@ import {
 import { SkeletonListPage } from '../../components/admin';
 
 import { API_BASE_URL } from '../../config';
+import { configApi } from '../../services/api';
+import type { AppConfig } from '../../types/order';
 
 export default function AdminOrdersPage() {
   const { getToken } = useAuth();
@@ -22,11 +24,25 @@ export default function AdminOrdersPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
 
   // Filters
   const [statusFilter, setStatusFilter] = useState('all');
   const [orderTypeFilter, setOrderTypeFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [datePreset, setDatePreset] = useState('today');
+  const [startDate, setStartDate] = useState(() => {
+    const today = new Date();
+    const month = `${today.getMonth() + 1}`.padStart(2, '0');
+    const day = `${today.getDate()}`.padStart(2, '0');
+    return `${today.getFullYear()}-${month}-${day}`;
+  });
+  const [endDate, setEndDate] = useState(() => {
+    const today = new Date();
+    const month = `${today.getMonth() + 1}`.padStart(2, '0');
+    const day = `${today.getDate()}`.padStart(2, '0');
+    return `${today.getFullYear()}-${month}-${day}`;
+  });
 
   // Selected order
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -51,6 +67,8 @@ export default function AdminOrdersPage() {
       if (statusFilter !== 'all') params.status = statusFilter;
       if (orderTypeFilter !== 'all') params.order_type = orderTypeFilter;
       if (searchQuery) params.search = searchQuery;
+      if (startDate) params.start_date = startDate;
+      if (endDate) params.end_date = endDate;
 
       const response = await axios.get(`${API_BASE_URL}/api/v1/orders`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -69,7 +87,11 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     fetchOrders();
-  }, [page, statusFilter, orderTypeFilter]);
+  }, [page, statusFilter, orderTypeFilter, startDate, endDate]);
+
+  useEffect(() => {
+    configApi.getConfig().then(setAppConfig).catch(console.error);
+  }, []);
 
   // ── Fetch single order details ────────────────────────────────
   const fetchOrderDetails = async (orderId: number) => {
@@ -210,7 +232,51 @@ export default function AdminOrdersPage() {
     fetchOrders();
   };
 
+  const updateDatePreset = (preset: string) => {
+    setDatePreset(preset);
+    const today = new Date();
+    const format = (date: Date) => {
+      const month = `${date.getMonth() + 1}`.padStart(2, '0');
+      const day = `${date.getDate()}`.padStart(2, '0');
+      return `${date.getFullYear()}-${month}-${day}`;
+    };
+
+    if (preset === 'today') {
+      const todayString = format(today);
+      setStartDate(todayString);
+      setEndDate(todayString);
+      setPage(1);
+      return;
+    }
+
+    if (preset === 'last_7_days') {
+      const start = new Date(today);
+      start.setDate(today.getDate() - 6);
+      setStartDate(format(start));
+      setEndDate(format(today));
+      setPage(1);
+      return;
+    }
+
+    if (preset === 'this_month') {
+      const start = new Date(today.getFullYear(), today.getMonth(), 1);
+      const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      setStartDate(format(start));
+      setEndDate(format(end));
+      setPage(1);
+      return;
+    }
+
+    if (preset === 'all_time') {
+      setStartDate('');
+      setEndDate('');
+      setPage(1);
+    }
+  };
+
   // ── Render ────────────────────────────────────────────────────
+  const storeEmail = appConfig?.store_info?.email || 'info@hafaloha.com';
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -232,6 +298,12 @@ export default function AdminOrdersPage() {
         onStatusFilterChange={(v) => { setStatusFilter(v); setPage(1); }}
         orderTypeFilter={orderTypeFilter}
         onOrderTypeFilterChange={(v) => { setOrderTypeFilter(v); setPage(1); }}
+        datePreset={datePreset}
+        onDatePresetChange={updateDatePreset}
+        startDate={startDate}
+        endDate={endDate}
+        onStartDateChange={(value) => { setStartDate(value); setDatePreset('custom'); setPage(1); }}
+        onEndDateChange={(value) => { setEndDate(value); setDatePreset('custom'); setPage(1); }}
       />
 
       {/* Orders List */}
@@ -263,6 +335,7 @@ export default function AdminOrdersPage() {
           onQuickUpdateStatus={quickUpdateStatus}
           onResendNotification={resendNotification}
           onOpenRefundModal={() => setShowRefundModal(true)}
+          storeEmail={storeEmail}
         />
       )}
 

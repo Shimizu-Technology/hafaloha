@@ -6,6 +6,12 @@ interface OrderFiltersProps {
   onStatusFilterChange: (status: string) => void;
   orderTypeFilter: string;
   onOrderTypeFilterChange: (type: string) => void;
+  datePreset: string;
+  onDatePresetChange: (preset: string) => void;
+  startDate: string;
+  endDate: string;
+  onStartDateChange: (value: string) => void;
+  onEndDateChange: (value: string) => void;
 }
 
 export default function OrderFilters({
@@ -16,6 +22,12 @@ export default function OrderFilters({
   onStatusFilterChange,
   orderTypeFilter,
   onOrderTypeFilterChange,
+  datePreset,
+  onDatePresetChange,
+  startDate,
+  endDate,
+  onStartDateChange,
+  onEndDateChange,
 }: OrderFiltersProps) {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
@@ -70,8 +82,8 @@ export default function OrderFilters({
         </select>
       </div>
 
-      {/* Order Type Filter */}
-      <div className="flex gap-2 mt-4">
+      {/* Order Type and Date Filters */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
         <select
           value={orderTypeFilter}
           onChange={(e) => onOrderTypeFilterChange(e.target.value)}
@@ -82,6 +94,35 @@ export default function OrderFilters({
           <option value="acai">Acai Cakes</option>
           <option value="wholesale">Wholesale</option>
         </select>
+
+        <select
+          value={datePreset}
+          onChange={(e) => onDatePresetChange(e.target.value)}
+          className="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent hover:border-gray-300 transition text-sm"
+        >
+          <option value="today">Today</option>
+          <option value="last_7_days">Last 7 days</option>
+          <option value="this_month">This month</option>
+          <option value="all_time">All time</option>
+          <option value="custom">Custom range</option>
+        </select>
+
+        <div className="grid grid-cols-2 gap-2">
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => onStartDateChange(e.target.value)}
+            className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent text-sm"
+            aria-label="Start date"
+          />
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => onEndDateChange(e.target.value)}
+            className="px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent text-sm"
+            aria-label="End date"
+          />
+        </div>
       </div>
     </div>
   );

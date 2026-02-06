@@ -1,11 +1,10 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { collectionsApi } from '../services/api';
 import type { Collection as ApiCollection, Product } from '../services/api';
 import ProductCard from '../components/ProductCard';
 import { ProductGridSkeleton, PageHeaderSkeleton } from '../components/Skeleton';
 import FadeIn from '../components/animations/FadeIn';
-import { StaggerContainer, StaggerItem } from '../components/animations/StaggerContainer';
 import Breadcrumbs from '../components/Breadcrumbs';
 
 type Collection = ApiCollection;
@@ -28,6 +27,7 @@ export default function CollectionDetailPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [productType, setProductType] = useState('');
+  const didScrollRef = useRef(false);
 
   // Derive product type filter options from actual products
   const productTypes = useMemo(() => {
@@ -43,6 +43,14 @@ export default function CollectionDetailPage() {
       fetchCollectionData();
     }
   }, [slug, currentPage, searchQuery, productType]);
+
+  useEffect(() => {
+    if (!didScrollRef.current) {
+      didScrollRef.current = true;
+      return;
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
 
   const fetchCollectionData = async () => {
     if (!slug) return;
@@ -128,8 +136,8 @@ export default function CollectionDetailPage() {
       {/* Hero Banner - Clean design with Hafaloha branding */}
       <div className="relative overflow-hidden bg-hafalohaRed">
         {/* Subtle pattern overlay */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,_rgba(255,255,255,0.1)_0%,_transparent_50%)]" />
-        <div className="absolute inset-0 bg-gradient-to-r from-hafalohaRed via-red-700 to-hafalohaRed" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(255,255,255,0.1)_0%,transparent_50%)]" />
+        <div className="absolute inset-0 bg-linear-to-r from-hafalohaRed via-red-700 to-hafalohaRed" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
           <FadeIn>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-white mb-3 drop-shadow-md">
@@ -209,13 +217,11 @@ export default function CollectionDetailPage() {
         ) : (
           <>
             {/* Product Grid */}
-            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8" staggerDelay={0.05}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
               {products.map((product) => (
-                <StaggerItem key={product.id}>
-                  <ProductCard product={product} />
-                </StaggerItem>
+                <ProductCard key={product.id} product={product} />
               ))}
-            </StaggerContainer>
+            </div>
 
             {/* Pagination */}
             {totalPages > 1 && (

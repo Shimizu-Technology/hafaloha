@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Eye, Edit, MoreVertical, Archive, ArchiveRestore, Copy, Globe, GlobeLock, ArrowUpDown, AlertTriangle } from 'lucide-react';
 import type { Product } from './productUtils';
 import { formatCurrency, getStockDisplay } from './productUtils';
+import PlaceholderImage from '../../ui/PlaceholderImage';
 
 interface ProductsTableProps {
   products: Product[];
@@ -98,8 +99,8 @@ export default function ProductsTable({
     product.primary_image_url ? (
       <img src={product.primary_image_url} alt={product.name} className={`${size} object-cover rounded`} />
     ) : (
-      <div className={`${size} bg-gray-100 border border-gray-300 rounded flex items-center justify-center`}>
-        <img src="/images/hafaloha-logo.png" alt="Placeholder" className="w-8 opacity-40" style={{ objectFit: 'contain', maxHeight: '2rem' }} />
+      <div className={`${size} border border-gray-300 rounded overflow-hidden`}>
+        <PlaceholderImage variant="thumbnail" className="bg-gray-100" />
       </div>
     )
   );
@@ -193,7 +194,7 @@ export default function ProductsTable({
                   <p className="font-semibold text-gray-900">{product.name}</p>
                   {product.needs_attention && (
                     <span title={product.import_notes || 'Needs attention'} className="inline-flex items-center">
-                      <AlertTriangle className="w-4 h-4 text-amber-500 flex-shrink-0" aria-hidden="true" />
+                      <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" aria-hidden="true" />
                       <span className="sr-only">{product.import_notes || 'Needs attention'}</span>
                     </span>
                   )}

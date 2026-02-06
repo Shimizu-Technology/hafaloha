@@ -1,15 +1,14 @@
 import { ImageOff, ShoppingBag } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import useAppConfig from '../../hooks/useAppConfig';
 
 // ── Configuration ────────────────────────────────────────────────────────────
 // Easy to swap: change the icon, colors, or opacity in one place.
 const PLACEHOLDER_DEFAULTS = {
-  icon: ShoppingBag as LucideIcon,
   bgClass: 'bg-warm-100',
-  iconColor: 'text-warm-400',
+  logoSrc: '/images/hafaloha-logo.png',
   textColor: 'text-warm-400',
-  iconOpacity: 'opacity-50',
-  text: 'No Image',
+  text: '',
 };
 
 // ── Variant presets ──────────────────────────────────────────────────────────
@@ -55,20 +54,33 @@ export default function PlaceholderImage({
   icon: IconOverride,
   text,
 }: PlaceholderImageProps) {
+  const appConfig = useAppConfig();
   const styles = VARIANT_STYLES[variant];
-  const Icon = IconOverride ?? PLACEHOLDER_DEFAULTS.icon;
   const label = text ?? PLACEHOLDER_DEFAULTS.text;
+  const logoSrc = appConfig?.placeholder_image_url || PLACEHOLDER_DEFAULTS.logoSrc;
+  const isDefaultPlaceholder = logoSrc === PLACEHOLDER_DEFAULTS.logoSrc;
+  const logoClassName = isDefaultPlaceholder
+    ? 'w-full h-full object-contain p-6'
+    : 'w-full h-full object-cover';
 
   return (
     <div
       className={`w-full h-full flex flex-col items-center justify-center ${PLACEHOLDER_DEFAULTS.bgClass} ${className}`}
     >
-      <Icon
-        className={`${styles.iconSize} ${PLACEHOLDER_DEFAULTS.iconColor} ${PLACEHOLDER_DEFAULTS.iconOpacity} ${iconClassName}`}
-        strokeWidth={1.5}
-        aria-hidden="true"
-      />
-      {styles.showText && (
+      {IconOverride ? (
+        <IconOverride
+          className={`${styles.iconSize} ${iconClassName}`}
+          strokeWidth={1.5}
+          aria-hidden="true"
+        />
+      ) : (
+        <img
+          src={logoSrc}
+          alt="Hafaloha"
+          className={`${logoClassName} ${iconClassName}`}
+        />
+      )}
+      {styles.showText && label && (
         <span
           className={`${styles.textSize} ${PLACEHOLDER_DEFAULTS.textColor} font-medium mt-1 select-none`}
         >

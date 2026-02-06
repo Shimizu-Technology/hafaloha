@@ -1,7 +1,20 @@
+import { useEffect, useState } from 'react';
 import FadeIn from '../components/animations/FadeIn';
 import Breadcrumbs from '../components/Breadcrumbs';
+import { configApi } from '../services/api';
+import type { AppConfig } from '../types/order';
 
 export default function TermsOfServicePage() {
+  const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
+
+  useEffect(() => {
+    configApi.getConfig().then(setAppConfig).catch(console.error);
+  }, []);
+
+  const storeEmail = appConfig?.store_info?.email || 'info@hafaloha.com';
+  const storePhone = appConfig?.store_info?.phone || '671-777-1234';
+  const storePhoneTel = `tel:${storePhone.replace(/[^\d+]/g, '')}`;
+
   return (
     <div className="min-h-screen bg-white">
       {/* Breadcrumbs */}
@@ -226,14 +239,14 @@ export default function TermsOfServicePage() {
             <div className="space-y-2 text-warm-500">
               <p>
                 <span className="font-medium text-warm-800">Email:</span>{' '}
-                <a href="mailto:info@hafaloha.com" className="text-hafalohaRed hover:text-red-700 transition">
-                  info@hafaloha.com
+                <a href={`mailto:${storeEmail}`} className="text-hafalohaRed hover:text-red-700 transition">
+                  {storeEmail}
                 </a>
               </p>
               <p>
                 <span className="font-medium text-warm-800">Phone:</span>{' '}
-                <a href="tel:+16714727733" className="text-hafalohaRed hover:text-red-700 transition">
-                  +1 (671) 472-7733
+                <a href={storePhoneTel} className="text-hafalohaRed hover:text-red-700 transition">
+                  {storePhone}
                 </a>
               </p>
               <p>

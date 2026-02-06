@@ -1,8 +1,19 @@
+import { useEffect, useState } from 'react';
 import FadeIn from '../components/animations/FadeIn';
 import { StaggerContainer, StaggerItem } from '../components/animations/StaggerContainer';
 import Breadcrumbs from '../components/Breadcrumbs';
+import { configApi } from '../services/api';
+import type { AppConfig } from '../types/order';
 
 export default function ReturnsPage() {
+  const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
+
+  useEffect(() => {
+    configApi.getConfig().then(setAppConfig).catch(console.error);
+  }, []);
+
+  const storeEmail = appConfig?.store_info?.email || 'info@hafaloha.com';
+
   return (
     <div className="min-h-screen bg-white">
       {/* Breadcrumbs */}
@@ -72,25 +83,25 @@ export default function ReturnsPage() {
                 </h3>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-2 text-warm-600">
-                    <svg className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     <span>Items in original, unworn condition</span>
                   </li>
                   <li className="flex items-start gap-2 text-warm-600">
-                    <svg className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     <span>Items with original tags attached</span>
                   </li>
                   <li className="flex items-start gap-2 text-warm-600">
-                    <svg className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     <span>Items in original packaging</span>
                   </li>
                   <li className="flex items-start gap-2 text-warm-600">
-                    <svg className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-green-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     <span>Defective or damaged items (with photos)</span>
@@ -110,25 +121,25 @@ export default function ReturnsPage() {
                 </h3>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-2 text-warm-600">
-                    <svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-red-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                     <span>Worn, washed, or altered items</span>
                   </li>
                   <li className="flex items-start gap-2 text-warm-600">
-                    <svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-red-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                     <span>Items without original tags or packaging</span>
                   </li>
                   <li className="flex items-start gap-2 text-warm-600">
-                    <svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-red-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                     <span>Sale or clearance items (final sale)</span>
                   </li>
                   <li className="flex items-start gap-2 text-warm-600">
-                    <svg className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-red-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                     <span>Food items (açaí cakes, etc.)</span>
@@ -148,7 +159,7 @@ export default function ReturnsPage() {
                 {
                   step: '1',
                   title: 'Email us',
-                  desc: 'Send an email to info@hafaloha.com with your order number, the item(s) you wish to return, and the reason for the return.',
+                  desc: `Send an email to ${storeEmail} with your order number, the item(s) you wish to return, and the reason for the return.`,
                 },
                 {
                   step: '2',
@@ -167,7 +178,7 @@ export default function ReturnsPage() {
                 },
               ].map((item) => (
                 <div key={item.step} className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 bg-warm-900 text-white rounded-full flex items-center justify-center font-bold">
+                  <div className="shrink-0 w-10 h-10 bg-warm-900 text-white rounded-full flex items-center justify-center font-bold">
                     {item.step}
                   </div>
                   <div>
@@ -204,8 +215,8 @@ export default function ReturnsPage() {
             <div className="prose prose-lg max-w-none">
               <p className="text-lg text-warm-700 leading-relaxed mb-4">
                 Need a different size or color? We're happy to help with exchanges! Simply email us at{' '}
-                <a href="mailto:info@hafaloha.com" className="text-hafalohaRed hover:text-red-700 transition font-medium">
-                  info@hafaloha.com
+                <a href={`mailto:${storeEmail}`} className="text-hafalohaRed hover:text-red-700 transition font-medium">
+                  {storeEmail}
                 </a>{' '}
                 with your order number and the item you'd like instead.
               </p>
@@ -234,10 +245,10 @@ export default function ReturnsPage() {
                 </svg>
               </a>
               <a
-                href="mailto:info@hafaloha.com"
+                href={`mailto:${storeEmail}`}
                 className="inline-flex items-center justify-center gap-2 border border-warm-300 text-warm-700 px-6 py-3 rounded-lg font-medium hover:bg-warm-50 transition"
               >
-                Email info@hafaloha.com
+                Email {storeEmail}
               </a>
             </div>
           </div>

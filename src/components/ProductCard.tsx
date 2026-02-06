@@ -4,6 +4,7 @@ import type { Product } from '../services/api';
 import { formatPrice } from '../services/api';
 import ProductBadge from './ProductBadge';
 import PlaceholderImage from './ui/PlaceholderImage';
+import OptimizedImage from './ui/OptimizedImage';
 
 interface ProductCardProps {
   product: Product;
@@ -23,11 +24,11 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Image */}
         <div className="relative bg-warm-50 overflow-hidden rounded-lg" style={{ aspectRatio: '1/1' }}>
           {product.primary_image_url ? (
-            <img
+            <OptimizedImage
               src={product.primary_image_url}
               alt={product.name}
+              context="card"
               className="w-full h-full object-contain bg-warm-50 group-hover:scale-105 transition-transform duration-500"
-              loading="lazy"
             />
           ) : (
             <PlaceholderImage variant="card" />

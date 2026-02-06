@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { collectionsApi } from '../services/api';
 import type { Collection as ApiCollection } from '../services/api';
 import { CollectionCardSkeleton, PageHeaderSkeleton } from '../components/Skeleton';
 import FadeIn from '../components/animations/FadeIn';
-import { StaggerContainer, StaggerItem } from '../components/animations/StaggerContainer';
+import OptimizedImage from '../components/ui/OptimizedImage';
 
 type Collection = ApiCollection;
 
@@ -22,10 +22,19 @@ export default function CollectionsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchInput, setSearchInput] = useState(''); // For controlled input
+  const didScrollRef = useRef(false);
 
   useEffect(() => {
     fetchCollections();
   }, [currentPage, searchQuery]);
+
+  useEffect(() => {
+    if (!didScrollRef.current) {
+      didScrollRef.current = true;
+      return;
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
 
   const fetchCollections = async () => {
     try {
@@ -60,14 +69,13 @@ export default function CollectionsPage() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-warm-50">
         <div className="relative bg-warm-100 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--color-hafaloha-cream)_0%,_transparent_50%)] opacity-60" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,var(--color-hafaloha-cream)_0%,transparent_50%)] opacity-60" />
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
             <PageHeaderSkeleton />
           </div>
@@ -89,7 +97,7 @@ export default function CollectionsPage() {
       <div className="min-h-screen bg-warm-50">
         {/* Header */}
         <div className="relative bg-warm-100 overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--color-hafaloha-cream)_0%,_transparent_50%)] opacity-60" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,var(--color-hafaloha-cream)_0%,transparent_50%)] opacity-60" />
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 mb-4">Collections</h1>
             <p className="text-lg text-warm-500 max-w-2xl">
@@ -136,7 +144,7 @@ export default function CollectionsPage() {
     <div className="min-h-screen bg-warm-50">
       {/* Themed Header */}
       <div className="relative bg-warm-100 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--color-hafaloha-cream)_0%,_transparent_50%)] opacity-60" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,var(--color-hafaloha-cream)_0%,transparent_50%)] opacity-60" />
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24">
           <FadeIn>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 mb-4">
@@ -158,11 +166,12 @@ export default function CollectionsPage() {
               className="group block bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
             >
               <div className="grid grid-cols-1 md:grid-cols-2">
-                <div className="aspect-[4/3] md:aspect-auto bg-warm-100 relative overflow-hidden">
+                <div className="aspect-4/3 md:aspect-auto bg-warm-100 relative overflow-hidden">
                   {featuredCollection.thumbnail_url ? (
-                    <img
+                    <OptimizedImage
                       src={featuredCollection.thumbnail_url}
                       alt={featuredCollection.name}
+                      context="hero"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
@@ -279,74 +288,74 @@ export default function CollectionsPage() {
               </FadeIn>
             )}
 
-            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-8">
               {(searchQuery ? collections : regularCollections).map((collection) => (
-                <StaggerItem key={collection.id}>
-                  <Link
-                    to={`/collections/${collection.slug}`}
-                    className="group bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 block border border-warm-100"
-                  >
-                    {/* Thumbnail */}
-                    <div className="aspect-[4/3] bg-warm-100 relative overflow-hidden">
-                      {collection.thumbnail_url ? (
-                        <img
-                          src={collection.thumbnail_url}
-                          alt={collection.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <svg
-                            className="w-20 h-20 text-warm-300"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={1.5}
-                              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-                            />
-                          </svg>
-                        </div>
-                      )}
-                      {collection.featured && (
-                        <div className="absolute top-3 right-3 inline-flex items-center gap-1 bg-hafalohaGold text-gray-900 px-3 py-1 rounded-full text-xs font-bold shadow-lg">
-                          <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                          </svg>
-                          Featured
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Collection Info */}
-                    <div className="p-5 sm:p-6">
-                      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 group-hover:text-hafalohaRed transition-colors">
-                        {collection.name}
-                      </h3>
-                      {collection.description && (
-                        <p className="text-sm text-warm-500 mb-3 line-clamp-2">
-                          {collection.description}
-                        </p>
-                      )}
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm text-warm-400">
-                          {collection.product_count} {collection.product_count === 1 ? 'product' : 'products'}
-                        </p>
-                        <span className="text-hafalohaRed opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium flex items-center gap-1">
-                          Browse
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                          </svg>
-                        </span>
+                <Link
+                  key={collection.id}
+                  to={`/collections/${collection.slug}`}
+                  className="group bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 block border border-warm-100"
+                >
+                  {/* Thumbnail */}
+                  <div className="aspect-4/3 bg-warm-100 relative overflow-hidden">
+                    {collection.thumbnail_url ? (
+                      <OptimizedImage
+                        src={collection.thumbnail_url}
+                        alt={collection.name}
+                        context="card"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <svg
+                          className="w-20 h-20 text-warm-300"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                          />
+                        </svg>
                       </div>
+                    )}
+                    {collection.featured && (
+                      <div className="absolute top-3 right-3 inline-flex items-center gap-1 bg-hafalohaGold text-gray-900 px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                        Featured
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Collection Info */}
+                  <div className="p-5 sm:p-6">
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 group-hover:text-hafalohaRed transition-colors">
+                      {collection.name}
+                    </h3>
+                    {collection.description && (
+                      <p className="text-sm text-warm-500 mb-3 line-clamp-2">
+                        {collection.description}
+                      </p>
+                    )}
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-warm-400">
+                        {collection.product_count} {collection.product_count === 1 ? 'product' : 'products'}
+                      </p>
+                      <span className="text-hafalohaRed opacity-0 group-hover:opacity-100 transition-opacity text-sm font-medium flex items-center gap-1">
+                        Browse
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </span>
                     </div>
-                  </Link>
-                </StaggerItem>
+                  </div>
+                </Link>
               ))}
-            </StaggerContainer>
+            </div>
 
             {/* Pagination */}
             {totalPages > 1 && (

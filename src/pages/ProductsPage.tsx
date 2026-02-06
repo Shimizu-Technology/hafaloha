@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { Product } from '../services/api';
 import { productsApi, collectionsApi } from '../services/api';
 import ProductCard from '../components/ProductCard';
 import FadeIn from '../components/animations/FadeIn';
 import { PageHeaderSkeleton, ProductGridSkeleton } from '../components/Skeleton';
-import { StaggerContainer, StaggerItem } from '../components/animations/StaggerContainer';
 
 interface Collection {
   id: number;
@@ -20,6 +19,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [meta, setMeta] = useState({ page: 1, per_page: 12, total: 0 });
+  const didScrollRef = useRef(false);
 
   const page = parseInt(searchParams.get('page') || '1');
   const search = searchParams.get('search') || '';
@@ -34,6 +34,14 @@ export default function ProductsPage() {
   useEffect(() => {
     fetchProducts();
   }, [page, search, collection, productType, sort]);
+
+  useEffect(() => {
+    if (!didScrollRef.current) {
+      didScrollRef.current = true;
+      return;
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [page]);
 
   const fetchCollections = async () => {
     try {
@@ -107,7 +115,6 @@ export default function ProductsPage() {
     if (productType) params.type = productType;
     if (sort) params.sort = sort;
     setSearchParams(params);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   if (loading && products.length === 0) {
@@ -376,13 +383,11 @@ export default function ProductsPage() {
           </div>
         ) : (
           <>
-            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 mb-12" staggerDelay={0.05}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 mb-12">
               {products.map((product) => (
-                <StaggerItem key={product.id}>
-                  <ProductCard product={product} />
-                </StaggerItem>
+                <ProductCard key={product.id} product={product} />
               ))}
-            </StaggerContainer>
+            </div>
 
             {/* Pagination */}
             {totalPages > 1 && (

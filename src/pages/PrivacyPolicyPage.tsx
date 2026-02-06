@@ -1,7 +1,20 @@
+import { useEffect, useState } from 'react';
 import FadeIn from '../components/animations/FadeIn';
 import Breadcrumbs from '../components/Breadcrumbs';
+import { configApi } from '../services/api';
+import type { AppConfig } from '../types/order';
 
 export default function PrivacyPolicyPage() {
+  const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
+
+  useEffect(() => {
+    configApi.getConfig().then(setAppConfig).catch(console.error);
+  }, []);
+
+  const storeEmail = appConfig?.store_info?.email || 'info@hafaloha.com';
+  const storePhone = appConfig?.store_info?.phone || '671-777-1234';
+  const storePhoneTel = `tel:${storePhone.replace(/[^\d+]/g, '')}`;
+
   return (
     <div className="min-h-screen bg-white">
       {/* Breadcrumbs */}
@@ -104,7 +117,7 @@ export default function PrivacyPolicyPage() {
                 'Prevent fraud and ensure the security of our platform',
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-2 text-warm-600">
-                  <svg className="w-5 h-5 text-hafalohaRed flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-hafalohaRed shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                   <span>{item}</span>
@@ -166,7 +179,7 @@ export default function PrivacyPolicyPage() {
                 'Limited employee access to personal information',
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-2 text-warm-600">
-                  <svg className="w-5 h-5 text-hafalohaRed flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-hafalohaRed shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                   </svg>
                   <span>{item}</span>
@@ -226,14 +239,14 @@ export default function PrivacyPolicyPage() {
             <div className="space-y-2 text-warm-600">
               <p>
                 <span className="font-medium text-warm-900">Email:</span>{' '}
-                <a href="mailto:info@hafaloha.com" className="text-hafalohaRed hover:text-red-700 transition">
-                  info@hafaloha.com
+                <a href={`mailto:${storeEmail}`} className="text-hafalohaRed hover:text-red-700 transition">
+                  {storeEmail}
                 </a>
               </p>
               <p>
                 <span className="font-medium text-warm-900">Phone:</span>{' '}
-                <a href="tel:+16714727733" className="text-hafalohaRed hover:text-red-700 transition">
-                  +1 (671) 472-7733
+                <a href={storePhoneTel} className="text-hafalohaRed hover:text-red-700 transition">
+                  {storePhone}
                 </a>
               </p>
               <p>

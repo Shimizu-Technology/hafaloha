@@ -11,6 +11,7 @@ interface OrderDetailModalProps {
   onQuickUpdateStatus: (orderId: number, newStatus: string) => void;
   onResendNotification: (orderId: number) => void;
   onOpenRefundModal: () => void;
+  storeEmail?: string;
 }
 
 export default function OrderDetailModal({
@@ -21,6 +22,7 @@ export default function OrderDetailModal({
   onQuickUpdateStatus,
   onResendNotification,
   onOpenRefundModal,
+  storeEmail = 'info@hafaloha.com',
 }: OrderDetailModalProps) {
   useLockBodyScroll(true);
 
@@ -404,7 +406,7 @@ export default function OrderDetailModal({
           <div className="hidden print:block text-center pt-8 border-t border-gray-300 mt-4">
             <p className="text-lg font-semibold text-gray-800">Thank you for your order!</p>
             <p className="text-sm text-gray-600 mt-2">Hafaloha - Chamorro Pride. Island Style.</p>
-            <p className="text-xs text-gray-500 mt-1">Questions? Contact us at info@hafaloha.com</p>
+            <p className="text-xs text-gray-500 mt-1">Questions? Contact us at {storeEmail}</p>
           </div>
 
           {/* Action Buttons */}

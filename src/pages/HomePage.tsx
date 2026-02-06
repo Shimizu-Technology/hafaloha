@@ -12,11 +12,19 @@ const stripEmoji = (text: string): string =>
 
 // Default fallback content
 const defaultHero = {
-  title: "Island Living Apparel for All",
-  subtitle: "Premium Chamorro pride merchandise celebrating island culture and heritage",
+  title: "H\u00e5faloha",
+  subtitle: "Chamorro pride. Island style. Premium quality merchandise.",
+  badge_text: "Island Living Apparel",
   button_text: "Shop Now",
   button_link: "/products",
-  background_image_url: "/images/hafaloha-hero-beach.jpg" as string | null,
+  secondary_button_text: "Browse Collections",
+  secondary_button_link: "/collections",
+  background_image_url: "/images/hafaloha-hero-v2.jpg" as string | null,
+  settings: {
+    badge_text: "Island Living Apparel",
+    secondary_button_text: "Browse Collections",
+    secondary_button_link: "/collections",
+  },
 };
 
 const defaultCategoryCards: Array<{
@@ -74,9 +82,25 @@ export default function HomePage() {
   }, []);
 
   // Use dynamic or fallback content
-  const heroContent = hero || defaultHero;
+  const isHeroReady = !loading;
+  const heroContent = isHeroReady ? (hero || defaultHero) : null;
   const cardsContent = categoryCards.length > 0 ? categoryCards : defaultCategoryCards;
-  const heroImageUrl = heroContent.background_image_url || defaultHero.background_image_url;
+  const heroImageUrl = isHeroReady
+    ? heroContent?.background_image_url || defaultHero.background_image_url
+    : null;
+  const heroSettings = heroContent?.settings || defaultHero.settings;
+  const heroBadgeText =
+    typeof heroSettings.badge_text === 'string'
+      ? heroSettings.badge_text
+      : defaultHero.settings.badge_text;
+  const secondaryButtonText =
+    typeof heroSettings.secondary_button_text === 'string'
+      ? heroSettings.secondary_button_text
+      : defaultHero.settings.secondary_button_text;
+  const secondaryButtonLink =
+    typeof heroSettings.secondary_button_link === 'string'
+      ? heroSettings.secondary_button_link
+      : defaultHero.settings.secondary_button_link;
 
   // Animation helper — skip motion when user prefers reduced motion
   const heroMotion = (delay: number) =>
@@ -123,58 +147,66 @@ export default function HomePage() {
 
         {/* Content — text-on-dark with strong text shadows */}
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-28 w-full text-center">
-          {/* Badge */}
-          <motion.div {...heroMotion(0)}>
-            <span
-              className="inline-block px-5 py-2 bg-black/40 backdrop-blur-md border border-white/20 text-sm font-semibold rounded-full mb-8 text-white"
-              style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
-            >
-              Hafa Adai &mdash; Island Living Apparel
-            </span>
-          </motion.div>
+          {!isHeroReady || !heroContent ? null : (
+            <>
+              {/* Badge */}
+              {heroBadgeText && (
+                <motion.div {...heroMotion(0)}>
+                  <span
+                    className="inline-block px-5 py-2 bg-black/40 backdrop-blur-md border border-white/20 text-sm font-semibold rounded-full mb-8 text-white"
+                    style={{ textShadow: '0 1px 4px rgba(0,0,0,0.8)' }}
+                  >
+                    {stripEmoji(heroBadgeText)}
+                  </span>
+                </motion.div>
+              )}
 
-          {/* Heading */}
-          <motion.h1
-            {...heroMotion(0.15)}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-[1.1] tracking-tight"
-            style={{ color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.9), 0 4px 25px rgba(0,0,0,0.5), 0 0 40px rgba(0,0,0,0.3)' }}
-          >
-            {stripEmoji(heroContent.title || defaultHero.title)}
-          </motion.h1>
+              {/* Heading */}
+              <motion.h1
+                {...heroMotion(0.15)}
+                className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-[1.1] tracking-tight"
+                style={{ color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.9), 0 4px 25px rgba(0,0,0,0.5), 0 0 40px rgba(0,0,0,0.3)' }}
+              >
+                {stripEmoji(heroContent.title || defaultHero.title)}
+              </motion.h1>
 
-          {/* Subtitle */}
-          {heroContent.subtitle && (
-            <motion.p
-              {...heroMotion(0.3)}
-              className="text-lg sm:text-xl mb-12 max-w-2xl mx-auto leading-relaxed font-medium"
-              style={{ color: '#ffffff', textShadow: '0 1px 6px rgba(0,0,0,0.9), 0 2px 15px rgba(0,0,0,0.5)' }}
-            >
-              {stripEmoji(heroContent.subtitle)}
-            </motion.p>
+              {/* Subtitle */}
+              {heroContent.subtitle && (
+                <motion.p
+                  {...heroMotion(0.3)}
+                  className="text-lg sm:text-xl mb-12 max-w-2xl mx-auto leading-relaxed font-medium"
+                  style={{ color: '#ffffff', textShadow: '0 1px 6px rgba(0,0,0,0.9), 0 2px 15px rgba(0,0,0,0.5)' }}
+                >
+                  {stripEmoji(heroContent.subtitle)}
+                </motion.p>
+              )}
+
+              {/* CTA Buttons */}
+              <motion.div
+                {...heroMotion(0.45)}
+                className="flex flex-col sm:flex-row gap-4 justify-center"
+              >
+                <Link
+                  to={heroContent.button_link || "/products"}
+                  className="group btn-primary text-lg px-10 py-4 inline-flex items-center justify-center gap-2"
+                >
+                  {heroContent.button_text || "Shop Now"}
+                  <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                </Link>
+                {secondaryButtonText && secondaryButtonLink && (
+                  <Link
+                    to={secondaryButtonLink}
+                    className="border-2 border-white/50 text-white hover:bg-white/15 rounded-xl text-lg px-8 py-4 inline-flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5 font-medium"
+                    style={{ textShadow: '0 1px 4px rgba(0,0,0,0.6)' }}
+                  >
+                    {secondaryButtonText}
+                  </Link>
+                )}
+              </motion.div>
+            </>
           )}
-
-          {/* CTA Buttons */}
-          <motion.div
-            {...heroMotion(0.45)}
-            className="flex flex-col sm:flex-row gap-4 justify-center"
-          >
-            <Link
-              to={heroContent.button_link || "/products"}
-              className="group btn-primary text-lg px-10 py-4 inline-flex items-center justify-center gap-2"
-            >
-              {heroContent.button_text || "Shop Now"}
-              <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </Link>
-            <Link
-              to="/collections"
-              className="border-2 border-white/50 text-white hover:bg-white/15 rounded-xl text-lg px-8 py-4 inline-flex items-center justify-center transition-all duration-200 hover:-translate-y-0.5 font-medium"
-              style={{ textShadow: '0 1px 4px rgba(0,0,0,0.6)' }}
-            >
-              Browse Collections
-            </Link>
-          </motion.div>
         </div>
       </section>
 
@@ -196,17 +228,17 @@ export default function HomePage() {
             {/* Bento grid — layout adapts to number of cards */}
             {cardsContent.length === 1 && (
               <FadeIn>
-                <CategoryCard card={cardsContent[0]} className="aspect-[16/9] md:aspect-[21/9]" />
+                <CategoryCard card={cardsContent[0]} className="aspect-video md:aspect-21/9" />
               </FadeIn>
             )}
 
             {cardsContent.length === 2 && (
               <StaggerContainer className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                <StaggerItem className="md:col-span-7">
-                  <CategoryCard card={cardsContent[0]} className="aspect-[4/3] md:aspect-auto md:h-full min-h-[280px]" />
+                <StaggerItem className="md:col-span-6">
+                  <CategoryCard card={cardsContent[0]} className="aspect-4/3 min-h-[280px]" />
                 </StaggerItem>
-                <StaggerItem className="md:col-span-5">
-                  <CategoryCard card={cardsContent[1]} className="aspect-[4/3]" />
+                <StaggerItem className="md:col-span-6">
+                  <CategoryCard card={cardsContent[1]} className="aspect-4/3 min-h-[280px]" />
                 </StaggerItem>
               </StaggerContainer>
             )}
@@ -214,17 +246,17 @@ export default function HomePage() {
             {cardsContent.length >= 3 && (
               <StaggerContainer className="grid grid-cols-1 md:grid-cols-12 gap-6">
                 <StaggerItem className="md:col-span-7 md:row-span-2">
-                  <CategoryCard card={cardsContent[0]} className="aspect-[4/3] md:aspect-auto md:h-full min-h-[280px]" />
+                  <CategoryCard card={cardsContent[0]} className="aspect-4/3 md:aspect-auto md:h-full min-h-[280px]" />
                 </StaggerItem>
                 <StaggerItem className="md:col-span-5">
-                  <CategoryCard card={cardsContent[1]} className="aspect-[4/3]" />
+                  <CategoryCard card={cardsContent[1]} className="aspect-4/3" />
                 </StaggerItem>
                 <StaggerItem className="md:col-span-5">
-                  <CategoryCard card={cardsContent[2]} className="aspect-[4/3]" />
+                  <CategoryCard card={cardsContent[2]} className="aspect-4/3" />
                 </StaggerItem>
                 {cardsContent.slice(3).map((card, i) => (
                   <StaggerItem key={card.id || i + 3} className="md:col-span-4">
-                    <CategoryCard card={card} className="aspect-[4/3]" />
+                    <CategoryCard card={card} className="aspect-4/3" />
                   </StaggerItem>
                 ))}
               </StaggerContainer>
@@ -256,7 +288,7 @@ export default function HomePage() {
                   loading="lazy"
                 />
                 {/* Decorative offset rectangle */}
-                <div className="absolute -z-0 -bottom-4 -right-4 w-full h-full bg-warm rounded-2xl" />
+                <div className="absolute z-0 -bottom-4 -right-4 w-full h-full bg-warm rounded-2xl" />
               </div>
             </FadeIn>
 
@@ -325,7 +357,7 @@ function CategoryCard({ card, className = '' }: CategoryCardProps) {
         loading="lazy"
       />
       {/* Dark overlay — deepens on hover */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/70 transition-all duration-500" />
+      <div className="absolute inset-0 bg-linear-to-t from-black/60 via-black/20 to-transparent group-hover:from-black/70 transition-all duration-500" />
       {/* Text overlay */}
       <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-8">
         <h3 className="text-xl sm:text-2xl font-bold text-white drop-shadow-lg mb-1">

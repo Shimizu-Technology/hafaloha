@@ -82,6 +82,7 @@ export default function ProductFormPage() {
   const [inventoryAudits, setInventoryAudits] = useState<InventoryAudit[]>([]);
   const [loadingAudits, setLoadingAudits] = useState(false);
   const inventoryModalContentRef = useRef<HTMLDivElement | null>(null);
+  const collectionsScrollRef = useRef<HTMLDivElement | null>(null);
   const [formData, setFormData] = useState<ProductFormData>({
     name: '',
     description: '',
@@ -454,7 +455,7 @@ export default function ProductFormPage() {
       {/* Needs Attention Banner */}
       {id && formData.needs_attention && (
         <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+          <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
           <div className="flex-1">
             <p className="font-medium text-amber-800">This product needs attention</p>
             {formData.import_notes && (
@@ -738,12 +739,15 @@ export default function ProductFormPage() {
             <p className="text-gray-500 italic">No collections available. Create collections first.</p>
           ) : (
             <div>
-              <div 
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 border border-gray-300 rounded-lg p-4 bg-gray-50"
-                style={{ 
-                  maxHeight: '240px',  // Show ~6 rows (60 collections = 20 rows, so plenty to scroll)
-                  overflowY: 'scroll',
-                  WebkitOverflowScrolling: 'touch' 
+              <div
+                ref={collectionsScrollRef}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 border border-gray-300 rounded-lg p-4 bg-gray-50 max-h-60 overflow-y-auto overscroll-contain touch-pan-y"
+                onWheel={(event) => {
+                  const container = collectionsScrollRef.current;
+                  if (!container) return;
+                  if (container.scrollHeight <= container.clientHeight) return;
+                  container.scrollTop += event.deltaY;
+                  event.stopPropagation();
                 }}
               >
                 {allCollections.map((collection) => (

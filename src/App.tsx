@@ -52,6 +52,8 @@ import NavDropdown from './components/NavDropdown'; // Import NavDropdown
 import MobileNavDropdown from './components/MobileNavDropdown'; // Import MobileNavDropdown
 import { useCartStore } from './store/cartStore'; // Import cart store
 import { API_BASE_URL } from './config';
+import { configApi } from './services/api';
+import type { AppConfig } from './types/order';
 
 // Custom UserButton with Admin Dashboard Link and My Orders
 function CustomUserButton({ isAdmin }: { isAdmin: boolean }) {
@@ -106,6 +108,7 @@ function AppContent() {
   const { user, isLoaded } = useUser();
   const { getToken } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
+  const [appConfig, setAppConfig] = useState<AppConfig | null>(null);
   const { closeCart } = useCartStore(); // Get closeCart function
 
   // Close cart and mobile menu on route change (handles back/forward, programmatic navigation, etc.)
@@ -113,6 +116,10 @@ function AppContent() {
     setMobileMenuOpen(false);
     closeCart();
   }, [location.pathname, closeCart]);
+
+  useEffect(() => {
+    configApi.getConfig().then(setAppConfig).catch(console.error);
+  }, []);
 
   // Helper to close both mobile menu and cart (for explicit link clicks)
   const handleNavClick = () => {
@@ -166,6 +173,9 @@ function AppContent() {
 
   // Check if we're on admin pages
   const isAdminPage = location.pathname.startsWith('/admin');
+
+  const storePhone = appConfig?.store_info?.phone || '671-777-1234';
+  const storePhoneTel = `tel:${storePhone.replace(/[^\d+]/g, '')}`;
 
   return (
     <>
@@ -579,8 +589,8 @@ function AppContent() {
                   Suite 1-103 & Suite 1-104<br />
                   Hagåtña, Guam 96910<br />
                   <br />
-                  <a href="tel:+16714727733" className="hover:text-warm-900 transition">
-                    +1 (671) 472-7733
+                  <a href={storePhoneTel} className="hover:text-warm-900 transition">
+                    {storePhone}
                   </a>
                 </address>
               </div>
