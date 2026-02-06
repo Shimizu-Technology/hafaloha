@@ -28,7 +28,7 @@ import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
 import AccountPage from './pages/AccountPage';
 import AcaiCakesPage from './pages/AcaiCakesPage';
-import FundraiserPage from './pages/FundraiserPage';
+// OLD: import FundraiserPage from './pages/FundraiserPage'; // Replaced by FundraiserPublicPage
 import FundraisersListPage from './pages/FundraisersListPage';
 import NotFoundPage from './pages/NotFoundPage';
 // Fundraiser Public Storefront Pages
@@ -444,9 +444,13 @@ function AppContent() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/acai-cakes" element={<AcaiCakesPage />} />
           <Route path="/fundraisers" element={<FundraisersListPage />} />
-          <Route path="/fundraisers/:slug" element={<FundraiserPage />} />
-          
-          {/* Fundraiser Public Storefront Routes */}
+          {/* Fundraiser routes - both /fundraisers/:slug and /f/:slug patterns */}
+          <Route path="/fundraisers/:slug" element={<FundraiserPublicPage />} />
+          <Route path="/fundraisers/:slug/products/:productSlug" element={<FundraiserProductPage />} />
+          <Route path="/fundraisers/:slug/cart" element={<FundraiserCartPage />} />
+          <Route path="/fundraisers/:slug/checkout" element={<FundraiserCheckoutPage />} />
+          <Route path="/fundraisers/:slug/order/:orderId" element={<FundraiserOrderConfirmationPage />} />
+          {/* Short URL pattern for fundraisers */}
           <Route path="/f/:slug" element={<FundraiserPublicPage />} />
           <Route path="/f/:slug/products/:productSlug" element={<FundraiserProductPage />} />
           <Route path="/f/:slug/cart" element={<FundraiserCartPage />} />
