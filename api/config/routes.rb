@@ -128,6 +128,7 @@ Rails.application.routes.draw do
             end
             collection do
               post :generate
+              post :auto_detect_options
             end
           end
 

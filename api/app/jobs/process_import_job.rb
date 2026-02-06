@@ -180,6 +180,7 @@ class ProcessImportJob < ApplicationJob
     # Process variants
     variants_for_this_product = 0
     skipped_for_missing_sku = 0
+    missing_options_count = 0
 
     existing_variant_skus = ProductVariant.where(sku: rows.map { |r| r["Variant SKU"] }.compact).pluck(:sku).to_set
 
@@ -219,6 +220,7 @@ class ProcessImportJob < ApplicationJob
       end
 
       options = build_variant_options(row)
+      missing_options_count += 1 if options.blank?
       legacy_attrs = legacy_variant_attrs(row, options)
 
       variant = product.product_variants.new(
@@ -281,6 +283,14 @@ class ProcessImportJob < ApplicationJob
     # Warn about auto-generated SKUs
     if skipped_for_missing_sku > 0
       stats[:warnings] << "#{product.name}: Auto-generated #{skipped_for_missing_sku} SKU(s) — admin should verify and update with real SKUs"
+    end
+
+    if missing_options_count > 0
+      options_note = "⚠️ #{missing_options_count} variant(s) imported without option labels (size/color). Please review and update variants."
+      existing_notes = product.import_notes.presence || ""
+      new_notes = [ existing_notes, options_note ].reject(&:blank?).join("\n")
+      product.update!(needs_attention: true, import_notes: new_notes)
+      stats[:warnings] << "#{product.name}: #{missing_options_count} variant(s) missing option labels"
     end
 
     # Warn if product has no variants after processing (critical issue!)
@@ -380,7 +390,30 @@ class ProcessImportJob < ApplicationJob
       options[normalized_name] = normalized_value
     end
 
+    if options.empty?
+      inferred_size = infer_size_from_row(row)
+      options["Size"] = inferred_size if inferred_size.present?
+    end
+
     options
+  end
+
+  def infer_size_from_row(row)
+    option_value = row["Option1 Value"].to_s.strip
+    variant_title = row["Variant Title"].to_s.strip
+
+    candidate = option_value
+    if candidate.blank? || ProductVariant.size_like_default?(candidate)
+      candidate = variant_title
+    end
+
+    return nil if candidate.blank? || ProductVariant.size_like_default?(candidate)
+
+    size = ProductVariant.extract_size_from_text(candidate)
+    return size if size.present?
+
+    # As a last fallback, try SKU
+    ProductVariant.extract_size_from_text(row["Variant SKU"].to_s)
   end
 
   def legacy_variant_attrs(row, options)

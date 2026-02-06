@@ -100,7 +100,7 @@ class FundraiserProductVariant < ApplicationRecord
   def generate_variant_key
     if options.present?
       parts = options.values.compact.map { |v| v.to_s.parameterize }
-      self.variant_key = parts.join("-")
+      self.variant_key = parts.any? ? parts.join("-") : "default"
     else
       parts = [ size, color, material ].compact.map(&:parameterize)
       self.variant_key = parts.any? ? parts.join("-") : "default"
