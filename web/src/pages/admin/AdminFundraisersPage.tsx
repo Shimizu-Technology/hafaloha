@@ -76,8 +76,9 @@ export default function AdminFundraisersPage() {
     return new Date(dateStr).toLocaleDateString();
   };
 
-  const formatCurrency = (cents: number | null) => {
-    if (cents === null) return '-';
+  // HAF-121: Handle null/undefined/NaN to prevent $NaN display
+  const formatCurrency = (cents: number | null | undefined) => {
+    if (cents === null || cents === undefined || isNaN(cents)) return '-';
     return `$${(cents / 100).toFixed(2)}`;
   };
 

@@ -196,7 +196,13 @@ export default function AdminFundraiserDetailPage() {
     }
   };
 
-  const formatCurrency = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+  // HAF-121: Handle null/undefined to prevent $NaN display
+  const formatCurrency = (cents: number | null | undefined) => {
+    if (cents === null || cents === undefined || isNaN(cents)) {
+      return '$0.00';
+    }
+    return `$${(cents / 100).toFixed(2)}`;
+  };
 
   if (loading) {
     return (
@@ -674,7 +680,9 @@ function AddProductModal({
 
   const handleSelect = (product: AvailableProduct) => {
     setSelectedProduct(product);
-    setPrice((product.base_price_cents / 100).toFixed(2));
+    // HAF-121: Handle null/undefined base_price_cents
+    const priceCents = product.base_price_cents ?? 0;
+    setPrice((priceCents / 100).toFixed(2));
   };
 
   const handleAdd = () => {
@@ -715,7 +723,7 @@ function AddProductModal({
               <div>
                 <h4 className="font-medium">{selectedProduct.name}</h4>
                 <p className="text-sm text-gray-600">
-                  Original: ${(selectedProduct.base_price_cents / 100).toFixed(2)}
+                  Original: ${((selectedProduct.base_price_cents ?? 0) / 100).toFixed(2)}
                 </p>
               </div>
             </div>
@@ -787,7 +795,7 @@ function AddProductModal({
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium truncate">{product.name}</h4>
                         <p className="text-sm text-gray-600">
-                          ${(product.base_price_cents / 100).toFixed(2)}
+                          ${((product.base_price_cents ?? 0) / 100).toFixed(2)}
                         </p>
                       </div>
                       <Plus className="w-5 h-5 text-gray-400" />
