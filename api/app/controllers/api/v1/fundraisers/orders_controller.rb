@@ -145,8 +145,8 @@ module Api
             # Clear cart
             clear_cart
 
-            # TODO: Send confirmation emails
-            # SendFundraiserOrderConfirmationJob.perform_later(@order.id)
+            # Send confirmation emails
+            send_order_emails(@order)
 
             render json: {
               success: true,
@@ -247,6 +247,24 @@ module Api
         def clear_cart
           cart_key = "fundraiser_cart_#{@fundraiser.id}"
           session.delete(cart_key)
+        end
+
+        def send_order_emails(order)
+          # Send confirmation to customer
+          result = EmailService.send_fundraiser_order_confirmation(order)
+          if result[:success]
+            Rails.logger.info "Sent order confirmation email for order ##{order.order_number}"
+          else
+            Rails.logger.warn "Failed to send order confirmation email: #{result[:error]}"
+          end
+
+          # Send notification to fundraiser contact
+          result = EmailService.send_fundraiser_order_notification(order)
+          if result[:success]
+            Rails.logger.info "Sent order notification email for order ##{order.order_number}"
+          else
+            Rails.logger.warn "Failed to send order notification email: #{result[:error]}"
+          end
         end
 
         def serialize_order(order)

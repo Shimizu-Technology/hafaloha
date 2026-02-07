@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { ArrowLeft, Users, Package, ShoppingCart, Settings, Plus, Trash2, Edit, ExternalLink, Upload, Copy, Check } from 'lucide-react';
 import useLockBodyScroll from '../../hooks/useLockBodyScroll';
@@ -43,6 +43,24 @@ interface Participant {
   order_count: number;
 }
 
+interface FundraiserOrder {
+  id: number;
+  order_number: string;
+  customer_name: string;
+  customer_email: string;
+  status: string;
+  payment_status: string;
+  total_cents: number;
+  created_at: string;
+  items: Array<{
+    id: number;
+    product_name: string;
+    variant_name: string | null;
+    quantity: number;
+    price_cents: number;
+  }>;
+}
+
 interface FundraiserProduct {
   id: number;
   product_id: number;
@@ -57,31 +75,27 @@ interface FundraiserProduct {
   in_stock: boolean;
 }
 
-interface AvailableProduct {
-  id: number;
-  name: string;
-  slug: string;
-  base_price_cents: number;
-  image_url: string | null;
-}
-
 type TabType = 'overview' | 'participants' | 'products' | 'orders';
 
 export default function AdminFundraiserDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { getToken } = useAuth();
   
   const [fundraiser, setFundraiser] = useState<Fundraiser | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [products, setProducts] = useState<FundraiserProduct[]>([]);
-  const [availableProducts, setAvailableProducts] = useState<AvailableProduct[]>([]);
+  const [orders, setOrders] = useState<FundraiserOrder[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  
+  // Initialize tab from URL query param or default to 'overview'
+  const initialTab = (searchParams.get('tab') as TabType) || 'overview';
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   
   // Modal states
   const [showAddParticipant, setShowAddParticipant] = useState(false);
-  const [showAddProduct, setShowAddProduct] = useState(false);
   const [showBulkImport, setShowBulkImport] = useState(false);
   const [_editingParticipant, _setEditingParticipant] = useState<Participant | null>(null);
   void _editingParticipant; void _setEditingParticipant; // Reserved for future edit functionality
@@ -92,10 +106,8 @@ export default function AdminFundraiserDetailPage() {
 
   useEffect(() => {
     if (fundraiser && activeTab === 'participants') loadParticipants();
-    if (fundraiser && activeTab === 'products') {
-      loadProducts();
-      loadAvailableProducts();
-    }
+    if (fundraiser && activeTab === 'products') loadProducts();
+    if (fundraiser && activeTab === 'orders') loadOrders();
   }, [activeTab, fundraiser]);
 
   const loadFundraiser = async () => {
@@ -138,32 +150,33 @@ export default function AdminFundraiserDetailPage() {
     }
   };
 
-  const loadAvailableProducts = async () => {
+  const loadOrders = async () => {
+    setOrdersLoading(true);
     try {
       const token = await getToken();
-      const response = await api.get(`/admin/fundraisers/${id}/products/available`, {
+      const response = await api.get(`/admin/fundraisers/${id}/orders`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setAvailableProducts(response.data.products);
+      setOrders(response.data.orders || []);
     } catch (error) {
-      console.error('Failed to load available products:', error);
+      console.error('Failed to load orders:', error);
+    } finally {
+      setOrdersLoading(false);
     }
   };
 
-  const handleAddProduct = async (productId: number, priceCents: number) => {
+  const updateOrderStatus = async (orderId: number, newStatus: string) => {
     try {
       const token = await getToken();
-      await api.post(`/admin/fundraisers/${id}/products`, {
-        fundraiser_product: { product_id: productId, price_cents: priceCents }
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      toast.success('Product added to fundraiser');
-      loadProducts();
-      loadAvailableProducts();
-      setShowAddProduct(false);
-    } catch (error: any) {
-      toast.error(error.response?.data?.errors?.[0] || 'Failed to add product');
+      await api.patch(`/admin/fundraisers/${id}/orders/${orderId}`, 
+        { order: { status: newStatus } },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(`Order updated to ${newStatus}`);
+      loadOrders();
+      loadFundraiser(); // Refresh counts
+    } catch (error) {
+      toast.error('Failed to update order');
     }
   };
 
@@ -176,7 +189,6 @@ export default function AdminFundraiserDetailPage() {
       });
       toast.success('Product removed');
       loadProducts();
-      loadAvailableProducts();
     } catch (error) {
       toast.error('Failed to remove product');
     }
@@ -196,7 +208,13 @@ export default function AdminFundraiserDetailPage() {
     }
   };
 
-  const formatCurrency = (cents: number) => `$${(cents / 100).toFixed(2)}`;
+  // HAF-121: Handle null/undefined to prevent $NaN display
+  const formatCurrency = (cents: number | null | undefined) => {
+    if (cents === null || cents === undefined || isNaN(cents)) {
+      return '$0.00';
+    }
+    return `$${(cents / 100).toFixed(2)}`;
+  };
 
   if (loading) {
     return (
@@ -426,13 +444,13 @@ export default function AdminFundraiserDetailPage() {
           <div className="p-6">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-medium text-gray-900">Products ({products.length})</h3>
-              <button
-                onClick={() => setShowAddProduct(true)}
+              <Link
+                to={`/admin/fundraisers/${id}/products/new`}
                 className="flex items-center gap-2 px-3 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition text-sm"
               >
                 <Plus className="w-4 h-4" />
-                Add Product
-              </button>
+                Create Product
+              </Link>
             </div>
 
             {products.length === 0 ? (
@@ -479,16 +497,90 @@ export default function AdminFundraiserDetailPage() {
 
         {activeTab === 'orders' && (
           <div className="p-6">
-            <div className="text-center py-8 text-gray-500">
-              <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p>Orders will appear here once customers start ordering.</p>
-              <Link
-                to={`/admin/orders?order_type=wholesale&fundraiser=${id}`}
-                className="link-primary text-sm mt-2 inline-block"
-              >
-                View in Orders Page →
-              </Link>
-            </div>
+            {ordersLoading ? (
+              <div className="text-center py-8 text-gray-500">Loading orders...</div>
+            ) : orders.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p>No orders yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {orders.map((order) => (
+                  <div key={order.id} className="bg-white border rounded-lg p-4 shadow-sm">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <p className="font-semibold">{order.order_number}</p>
+                        <p className="text-sm text-gray-600">{order.customer_name}</p>
+                        <p className="text-xs text-gray-500">{order.customer_email}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold">${(order.total_cents / 100).toFixed(2)}</p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(order.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-sm text-gray-600 mb-3">
+                      {order.items?.map((item, idx) => (
+                        <span key={item.id}>
+                          {item.quantity}x {item.product_name}
+                          {item.variant_name && ` (${item.variant_name})`}
+                          {idx < order.items.length - 1 && ', '}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${
+                        order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        order.status === 'paid' ? 'bg-blue-100 text-blue-800' :
+                        order.status === 'processing' ? 'bg-purple-100 text-purple-800' :
+                        order.status === 'shipped' ? 'bg-indigo-100 text-indigo-800' :
+                        order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                        order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {order.status.toUpperCase()}
+                      </span>
+                      <div className="flex gap-2">
+                        {order.status === 'pending' && (
+                          <button
+                            onClick={() => updateOrderStatus(order.id, 'processing')}
+                            className="btn btn-sm btn-primary"
+                          >
+                            Process
+                          </button>
+                        )}
+                        {order.status === 'paid' && (
+                          <button
+                            onClick={() => updateOrderStatus(order.id, 'processing')}
+                            className="btn btn-sm btn-primary"
+                          >
+                            Process
+                          </button>
+                        )}
+                        {order.status === 'processing' && (
+                          <button
+                            onClick={() => updateOrderStatus(order.id, 'shipped')}
+                            className="btn btn-sm btn-primary"
+                          >
+                            Ship
+                          </button>
+                        )}
+                        {order.status === 'shipped' && (
+                          <button
+                            onClick={() => updateOrderStatus(order.id, 'delivered')}
+                            className="btn btn-sm btn-success"
+                          >
+                            Delivered
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -502,15 +594,6 @@ export default function AdminFundraiserDetailPage() {
             loadParticipants();
             loadFundraiser();
           }}
-        />
-      )}
-
-      {/* Add Product Modal */}
-      {showAddProduct && (
-        <AddProductModal
-          availableProducts={availableProducts}
-          onClose={() => setShowAddProduct(false)}
-          onAdd={handleAddProduct}
         />
       )}
 
@@ -651,161 +734,6 @@ function AddParticipantModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>
-  );
-}
-
-// Add Product Modal Component
-function AddProductModal({ 
-  availableProducts, 
-  onClose, 
-  onAdd 
-}: { 
-  availableProducts: AvailableProduct[]; 
-  onClose: () => void; 
-  onAdd: (productId: number, priceCents: number) => void;
-}) {
-  useLockBodyScroll(true);
-  const modalContentRef = useRef<HTMLDivElement | null>(null);
-
-  const [selectedProduct, setSelectedProduct] = useState<AvailableProduct | null>(null);
-  const [price, setPrice] = useState('');
-
-  const handleSelect = (product: AvailableProduct) => {
-    setSelectedProduct(product);
-    setPrice((product.base_price_cents / 100).toFixed(2));
-  };
-
-  const handleAdd = () => {
-    if (!selectedProduct) return;
-    const priceCents = Math.round(parseFloat(price) * 100);
-    onAdd(selectedProduct.id, priceCents);
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-lg w-full max-h-[85vh] flex flex-col min-h-0">
-        <div className="p-4 border-b">
-          <h3 className="text-lg font-semibold">Add Product to Fundraiser</h3>
-        </div>
-        
-        {selectedProduct ? (
-          <div
-            ref={modalContentRef}
-            className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 overscroll-contain"
-            onWheel={(event) => {
-              if (modalContentRef.current) {
-                modalContentRef.current.scrollTop += event.deltaY;
-              }
-              event.stopPropagation();
-              event.preventDefault();
-            }}
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-gray-100 rounded overflow-hidden">
-                {selectedProduct.image_url ? (
-                  <img src={selectedProduct.image_url} alt={selectedProduct.name} className="w-full h-full object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400">
-                    <Package className="w-6 h-6" />
-                  </div>
-                )}
-              </div>
-              <div>
-                <h4 className="font-medium">{selectedProduct.name}</h4>
-                <p className="text-sm text-gray-600">
-                  Original: ${(selectedProduct.base_price_cents / 100).toFixed(2)}
-                </p>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Fundraiser Price
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  className="w-full pl-8 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-hafalohaRed"
-                />
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setSelectedProduct(null)}
-                className="flex-1 px-4 py-2 border rounded-lg hover:bg-gray-50"
-              >
-                Back
-              </button>
-              <button
-                onClick={handleAdd}
-                className="flex-1 px-4 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700"
-              >
-                Add Product
-              </button>
-            </div>
-          </div>
-        ) : (
-          <>
-            <div
-              ref={modalContentRef}
-              className="flex-1 min-h-0 overflow-y-auto p-4 overscroll-contain"
-              onWheel={(event) => {
-                if (modalContentRef.current) {
-                  modalContentRef.current.scrollTop += event.deltaY;
-                }
-                event.stopPropagation();
-                event.preventDefault();
-              }}
-            >
-              {availableProducts.length === 0 ? (
-                <div className="text-center py-8 text-gray-500">
-                  <p>All products have been added to this fundraiser.</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {availableProducts.map((product) => (
-                    <button
-                      key={product.id}
-                      onClick={() => handleSelect(product)}
-                      className="w-full flex items-center gap-4 p-3 border rounded-lg hover:bg-gray-50 text-left transition"
-                    >
-                      <div className="w-12 h-12 bg-gray-100 rounded overflow-hidden shrink-0">
-                        {product.image_url ? (
-                          <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center text-gray-400">
-                            <Package className="w-4 h-4" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium truncate">{product.name}</h4>
-                        <p className="text-sm text-gray-600">
-                          ${(product.base_price_cents / 100).toFixed(2)}
-                        </p>
-                      </div>
-                      <Plus className="w-5 h-5 text-gray-400" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="p-4 border-t">
-              <button
-                onClick={onClose}
-                className="w-full px-4 py-2 border rounded-lg hover:bg-gray-50"
-              >
-                Cancel
-              </button>
-            </div>
-          </>
-        )}
       </div>
     </div>
   );

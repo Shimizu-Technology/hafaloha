@@ -23,12 +23,13 @@ import AdminVariantPresetsPage from './pages/admin/AdminVariantPresetsPage';
 import AdminFundraisersPage from './pages/admin/AdminFundraisersPage';
 import AdminFundraiserDetailPage from './pages/admin/AdminFundraiserDetailPage';
 import AdminFundraiserFormPage from './pages/admin/AdminFundraiserFormPage';
+import AdminFundraiserProductFormPage from './pages/admin/AdminFundraiserProductFormPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
 import AccountPage from './pages/AccountPage';
 import AcaiCakesPage from './pages/AcaiCakesPage';
-import FundraiserPage from './pages/FundraiserPage';
+// OLD: import FundraiserPage from './pages/FundraiserPage'; // Replaced by FundraiserPublicPage
 import FundraisersListPage from './pages/FundraisersListPage';
 import NotFoundPage from './pages/NotFoundPage';
 // Fundraiser Public Storefront Pages
@@ -444,9 +445,13 @@ function AppContent() {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/acai-cakes" element={<AcaiCakesPage />} />
           <Route path="/fundraisers" element={<FundraisersListPage />} />
-          <Route path="/fundraisers/:slug" element={<FundraiserPage />} />
-          
-          {/* Fundraiser Public Storefront Routes */}
+          {/* Fundraiser routes - both /fundraisers/:slug and /f/:slug patterns */}
+          <Route path="/fundraisers/:slug" element={<FundraiserPublicPage />} />
+          <Route path="/fundraisers/:slug/products/:productSlug" element={<FundraiserProductPage />} />
+          <Route path="/fundraisers/:slug/cart" element={<FundraiserCartPage />} />
+          <Route path="/fundraisers/:slug/checkout" element={<FundraiserCheckoutPage />} />
+          <Route path="/fundraisers/:slug/order/:orderId" element={<FundraiserOrderConfirmationPage />} />
+          {/* Short URL pattern for fundraisers */}
           <Route path="/f/:slug" element={<FundraiserPublicPage />} />
           <Route path="/f/:slug/products/:productSlug" element={<FundraiserProductPage />} />
           <Route path="/f/:slug/cart" element={<FundraiserCartPage />} />
@@ -476,6 +481,7 @@ function AppContent() {
             <Route path="fundraisers/new" element={<AdminFundraiserFormPage />} />
             <Route path="fundraisers/:id" element={<AdminFundraiserDetailPage />} />
             <Route path="fundraisers/:id/edit" element={<AdminFundraiserFormPage />} />
+            <Route path="fundraisers/:fundraiserId/products/new" element={<AdminFundraiserProductFormPage />} />
             <Route path="acai" element={<AdminAcaiPage />} />
             <Route path="inventory" element={<AdminInventoryPage />} />
             <Route path="users" element={<AdminUsersPage />} />

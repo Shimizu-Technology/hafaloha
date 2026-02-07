@@ -128,6 +128,7 @@ Rails.application.routes.draw do
             end
             collection do
               post :generate
+              post :auto_detect_options
             end
           end
 
@@ -173,6 +174,7 @@ Rails.application.routes.draw do
           resources :products, only: [ :index, :show ]
           resource :cart, only: [ :show, :update, :destroy ]
           resources :orders, only: [ :create, :show ]
+          resources :payment_intents, only: [ :create ]
         end
         member do
           post :create_order  # Legacy route for backward compatibility

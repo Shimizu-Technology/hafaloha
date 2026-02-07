@@ -115,11 +115,11 @@ class ProductVariant < ApplicationRecord
     if options.present?
       # Use options JSONB field
       parts = options.values.compact.map { |v| v.to_s.parameterize }
-      self.variant_key = parts.join("-")
+      self.variant_key = parts.any? ? parts.join("-") : "default"
     else
       # Fallback to legacy columns
       parts = [ size, color ].compact.map(&:parameterize)
-      self.variant_key = parts.join("-")
+      self.variant_key = parts.any? ? parts.join("-") : "default"
     end
   end
 
@@ -150,20 +150,48 @@ class ProductVariant < ApplicationRecord
     token = value.to_s.strip
     return nil if token.blank?
 
-    return "One Size" if token.casecmp("default title").zero? || token.casecmp("default").zero?
-
-    size_patterns = [
-      /\A(?:xs|s|m|l|xl|xxl|xxxl)\z/i,
-      /\A\d+xl\z/i,
-      /\Ay(?:xs|s|m|l|xl)\z/i,
-      /\A\d+t\z/i
-    ]
+    return "One Size" if size_like_default?(token)
 
     if size_patterns.any? { |pattern| token.match?(pattern) }
       token.upcase
     else
       token
     end
+  end
+
+  def self.size_like?(value)
+    token = value.to_s.strip
+    return false if token.blank?
+    return true if size_like_default?(token)
+
+    size_patterns.any? { |pattern| token.match?(pattern) }
+  end
+
+  def self.extract_size_from_text(text)
+    return nil if text.blank?
+
+    tokens = text.to_s.split(/[\s\/\-_,]+/)
+    tokens.reverse_each do |token|
+      next if token.blank?
+      return normalize_size_token(token) if size_like?(token)
+    end
+
+    nil
+  end
+
+  def self.size_like_default?(token)
+    token.casecmp("default title").zero? ||
+      token.casecmp("default").zero? ||
+      token.casecmp("one size").zero?
+  end
+
+  def self.size_patterns
+    [
+      /\A(?:xs|s|m|l|xl|xxl|xxxl)\z/i,
+      /\A\d+xl\z/i,
+      /\Ay(?:xs|s|m|l|xl)\z/i,
+      /\A\d+t\z/i
+    ]
   end
 
   # Generate SKU from variant key

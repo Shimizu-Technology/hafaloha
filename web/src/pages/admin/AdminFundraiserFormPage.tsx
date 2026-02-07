@@ -8,11 +8,13 @@ import toast from 'react-hot-toast';
 interface FundraiserForm {
   name: string;
   slug: string;
+  organization_name: string; // HAF-119: Required field for the organization running the fundraiser
   description: string;
   status: string;
   start_date: string;
   end_date: string;
   goal_amount_cents: string;
+  payout_percentage: string; // HAF-119: Percentage of sales that go to the organization
   image_url: string;
   contact_name: string;
   contact_email: string;
@@ -28,11 +30,13 @@ interface FundraiserForm {
 const defaultForm: FundraiserForm = {
   name: '',
   slug: '',
+  organization_name: '', // HAF-119
   description: '',
   status: 'draft',
   start_date: '',
   end_date: '',
   goal_amount_cents: '',
+  payout_percentage: '0', // HAF-119
   image_url: '',
   contact_name: '',
   contact_email: '',
@@ -73,11 +77,13 @@ export default function AdminFundraiserFormPage() {
       setForm({
         name: f.name || '',
         slug: f.slug || '',
+        organization_name: f.organization_name || '', // HAF-119
         description: f.description || '',
         status: f.status || 'draft',
         start_date: f.start_date || '',
         end_date: f.end_date || '',
         goal_amount_cents: f.goal_amount_cents ? (f.goal_amount_cents / 100).toString() : '',
+        payout_percentage: f.payout_percentage?.toString() || '0', // HAF-119
         image_url: f.image_url || '',
         contact_name: f.contact_name || '',
         contact_email: f.contact_email || '',
@@ -125,11 +131,13 @@ export default function AdminFundraiserFormPage() {
         fundraiser: {
           name: form.name,
           slug: form.slug,
+          organization_name: form.organization_name, // HAF-119: Required
           description: form.description || null,
           status: form.status,
           start_date: form.start_date || null,
           end_date: form.end_date || null,
           goal_amount_cents: form.goal_amount_cents ? Math.round(parseFloat(form.goal_amount_cents) * 100) : null,
+          payout_percentage: form.payout_percentage ? parseFloat(form.payout_percentage) : 0, // HAF-119
           image_url: form.image_url || null,
           contact_name: form.contact_name || null,
           contact_email: form.contact_email || null,
@@ -231,6 +239,22 @@ export default function AdminFundraiserFormPage() {
               </p>
             </div>
             
+            {/* HAF-119: Organization name - required field */}
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Organization Name *</label>
+              <input
+                type="text"
+                required
+                value={form.organization_name}
+                onChange={(e) => setForm({ ...form, organization_name: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-hafalohaRed"
+                placeholder="e.g., Hagåtña Tigers Soccer Club"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                The organization or group running this fundraiser
+              </p>
+            </div>
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
               <select
@@ -276,6 +300,24 @@ export default function AdminFundraiserFormPage() {
                 className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-hafalohaRed"
                 placeholder="1000.00"
               />
+            </div>
+            
+            {/* HAF-119: Payout percentage */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Payout Percentage (%)</label>
+              <input
+                type="number"
+                step="0.1"
+                min="0"
+                max="100"
+                value={form.payout_percentage}
+                onChange={(e) => setForm({ ...form, payout_percentage: e.target.value })}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-hafalohaRed"
+                placeholder="10"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Percentage of sales that go to the organization
+              </p>
             </div>
             
             <div>

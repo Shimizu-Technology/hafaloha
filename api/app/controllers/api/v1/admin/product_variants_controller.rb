@@ -114,6 +114,46 @@ module Api
           render_error("Failed to generate variants", errors: [ e.message ])
         end
 
+        # POST /api/v1/admin/products/:product_id/variants/auto_detect_options
+        # Attempts to infer missing option labels (ex: Size) from SKU/variant name
+        def auto_detect_options
+          updated = 0
+          skipped = 0
+
+          @product.product_variants.find_each do |variant|
+            options = variant.options.presence || {}
+            next if options["Size"].present? || options["size"].present?
+
+            candidate = variant.size.presence || variant.variant_name.presence || variant.sku.to_s
+            size = ProductVariant.extract_size_from_text(candidate)
+
+            if size.blank?
+              skipped += 1
+              next
+            end
+
+            options["Size"] = size
+            variant.update!(
+              options: options,
+              size: size,
+              variant_key: nil,
+              variant_name: nil
+            )
+            updated += 1
+          end
+
+          render_success(
+            {
+              updated: updated,
+              skipped: skipped,
+              variants: @product.product_variants.reload.map { |v| serialize_variant(v) }
+            },
+            message: "Updated #{updated} variant#{'s' unless updated == 1}"
+          )
+        rescue => e
+          render_error("Failed to auto-detect options", errors: [ e.message ])
+        end
+
         private
 
         def set_product

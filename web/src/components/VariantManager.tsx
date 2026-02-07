@@ -57,6 +57,7 @@ export default function VariantManager({ productId, basePriceCents, inventoryLev
   const [variants, setVariants] = useState<Variant[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [autoDetecting, setAutoDetecting] = useState(false);
   
   // Edit modal state
   const [editPrice, setEditPrice] = useState('');
@@ -246,13 +247,19 @@ export default function VariantManager({ productId, basePriceCents, inventoryLev
       return;
     }
 
+    if (basePriceCents <= 0) {
+      toast.error('Set a base price before generating variants');
+      return;
+    }
+
     const totalNew = calculateTotalVariants();
+    const basePriceLabel = formatPrice(basePriceCents);
     
-    if (variants.length > 0) {
-      const confirmMsg = `You have ${variants.length} existing variants. This will add up to ${totalNew} new combinations (duplicates will be skipped). Continue?`;
-      if (!window.confirm(confirmMsg)) {
-        return;
-      }
+    const confirmMsg = variants.length > 0
+      ? `You have ${variants.length} existing variants. This will add up to ${totalNew} new combinations (duplicates will be skipped).\n\nAll new variants will start at ${basePriceLabel} (plus any adjustments).\n\nContinue?`
+      : `All new variants will start at ${basePriceLabel} (plus any adjustments).\n\nContinue?`;
+    if (!window.confirm(confirmMsg)) {
+      return;
     }
 
     try {
@@ -381,6 +388,26 @@ export default function VariantManager({ productId, basePriceCents, inventoryLev
     }
   };
 
+  const autoDetectOptions = async () => {
+    try {
+      setAutoDetecting(true);
+      const token = await getToken();
+      const response = await axios.post(
+        `${API_BASE_URL}/api/v1/admin/products/${productId}/variants/auto_detect_options`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const updated = response.data?.data?.updated ?? 0;
+      toast.success(`Updated ${updated} variant${updated === 1 ? '' : 's'}`);
+      await fetchVariants();
+    } catch (err: unknown) {
+      console.error('Failed to auto-detect options:', err);
+      toast.error('Failed to auto-detect options');
+    } finally {
+      setAutoDetecting(false);
+    }
+  };
+
   const deleteVariant = async (variantId: number, variantName: string) => {
     if (!window.confirm(`Delete variant "${variantName}"? This cannot be undone.`)) {
       return;
@@ -416,9 +443,30 @@ export default function VariantManager({ productId, basePriceCents, inventoryLev
   }
 
   const totalVariants = calculateTotalVariants();
+  const hasMissingOptions = variants.length > 0 && optionTypes.length === 0;
 
   return (
     <div className="space-y-6">
+      {hasMissingOptions && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-amber-900">Variant options are missing</p>
+            <p className="text-sm text-amber-800">
+              These variants were imported without option labels (size/color). You can auto-detect sizes from SKU or variant title.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={autoDetectOptions}
+            disabled={autoDetecting}
+            className={`px-4 py-2 rounded-lg text-sm font-medium bg-amber-600 text-white hover:bg-amber-700 transition ${
+              autoDetecting ? 'opacity-60 cursor-not-allowed' : ''
+            }`}
+          >
+            {autoDetecting ? 'Detecting...' : 'Auto-detect sizes'}
+          </button>
+        </div>
+      )}
       {/* Option Types Builder */}
       <div className="border-2 border-gray-200 rounded-lg p-6 bg-gray-50">
         <div className="flex items-center justify-between mb-4">

@@ -18,6 +18,7 @@ class Product < ApplicationRecord
   validates :inventory_level, inclusion: { in: %w[none product variant] }
   validates :product_stock_quantity, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true, if: -> { inventory_level == "product" }
   validates :product_low_stock_threshold, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
+  validate :check_variants_not_in_carts_before_level_change, on: :update
 
   # Scopes
   scope :published, -> { where(published: true) }
@@ -190,6 +191,21 @@ class Product < ApplicationRecord
     when [ nil, "product" ], [ "none", "product" ], [ "product", "none" ]
       # Switching between product and none, or new product
       ensure_default_variant
+    end
+  end
+
+  # HAF-123: Prevent inventory level change if variants are in active carts
+  def check_variants_not_in_carts_before_level_change
+    return unless inventory_level_changed?
+    return unless inventory_level_was == "variant"
+    return if inventory_level == "variant"
+
+    # Check if any variants are currently in customer carts
+    variant_ids = product_variants.pluck(:id)
+    cart_item_count = CartItem.where(product_variant_id: variant_ids).count
+
+    if cart_item_count > 0
+      errors.add(:inventory_level, "cannot be changed from 'variant' because #{cart_item_count} cart item(s) reference these variants. Please wait for customers to complete checkout or clear stale carts first.")
     end
   end
 end
