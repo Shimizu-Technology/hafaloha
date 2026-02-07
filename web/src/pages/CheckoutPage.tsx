@@ -14,7 +14,7 @@ import OptimizedImage from '../components/ui/OptimizedImage';
 function CheckoutForm() {
   const navigate = useNavigate();
   const { getToken, isSignedIn, isLoaded: authLoaded } = useAuth();
-  const { cart, clearCart, sessionId, fetchCart, isLoading: cartLoading } = useCartStore();
+  const { cart, clearCart, sessionId, fetchCart, validateCart, removeItem, isLoading: cartLoading } = useCartStore();
   const stripe = useStripe();
   const elements = useElements();
   
@@ -53,6 +53,13 @@ function CheckoutForm() {
   // Loading/error states
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [validationIssues, setValidationIssues] = useState<Array<{
+    cart_item_id: number;
+    type: string;
+    message: string;
+    item_name: string;
+    action?: string;
+  }> | null>(null);
   
   const isTestMode = appConfig?.app_mode === 'test';
 
@@ -149,9 +156,21 @@ function CheckoutForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setValidationIssues(null);
     setLoading(true);
     
     try {
+      // HAF-118: Pre-checkout cart validation to catch sync issues
+      // This ensures we catch any stale/phantom items before attempting payment
+      const validation = await validateCart();
+      if (validation.issues && validation.issues.length > 0) {
+        // Show validation issues and refresh cart to sync
+        setValidationIssues(validation.issues);
+        await fetchCart(); // Refresh cart to show all items including problematic ones
+        setLoading(false);
+        return; // Don't proceed until issues are resolved
+      }
+      
       // Get auth token if signed in
       let token: string | null = null;
       if (isSignedIn && authLoaded) {
@@ -622,6 +641,46 @@ function CheckoutForm() {
                 isTestMode={isTestMode}
                 onPaymentReady={handlePaymentReady}
               />
+
+              {/* HAF-118: Validation Issues - Show cart sync problems before checkout */}
+              {validationIssues && validationIssues.length > 0 && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <div className="flex items-start mb-3">
+                    <svg className="w-5 h-5 text-amber-600 mr-2 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                    <div className="flex-1">
+                      <h4 className="text-sm font-semibold text-amber-800 mb-2">Cart Issues Found</h4>
+                      <p className="text-sm text-amber-700 mb-3">
+                        Please resolve these issues before proceeding with checkout:
+                      </p>
+                      <ul className="space-y-2">
+                        {validationIssues.map((issue) => (
+                          <li key={issue.cart_item_id} className="flex items-center justify-between text-sm">
+                            <span className="text-amber-700">{issue.message}</span>
+                            {issue.action === 'remove' && (
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  await removeItem(issue.cart_item_id);
+                                  await fetchCart();
+                                  // Remove this issue from the list
+                                  setValidationIssues((prev) => 
+                                    prev?.filter((i) => i.cart_item_id !== issue.cart_item_id) || null
+                                  );
+                                }}
+                                className="ml-2 text-xs bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded transition-colors"
+                              >
+                                Remove
+                              </button>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Error Message */}
               {error && (
