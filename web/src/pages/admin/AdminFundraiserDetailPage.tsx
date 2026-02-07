@@ -43,6 +43,24 @@ interface Participant {
   order_count: number;
 }
 
+interface FundraiserOrder {
+  id: number;
+  order_number: string;
+  customer_name: string;
+  customer_email: string;
+  status: string;
+  payment_status: string;
+  total_cents: number;
+  created_at: string;
+  items: Array<{
+    id: number;
+    product_name: string;
+    variant_name: string | null;
+    quantity: number;
+    price_cents: number;
+  }>;
+}
+
 interface FundraiserProduct {
   id: number;
   product_id: number;
@@ -68,7 +86,9 @@ export default function AdminFundraiserDetailPage() {
   const [fundraiser, setFundraiser] = useState<Fundraiser | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [products, setProducts] = useState<FundraiserProduct[]>([]);
+  const [orders, setOrders] = useState<FundraiserOrder[]>([]);
   const [loading, setLoading] = useState(true);
+  const [ordersLoading, setOrdersLoading] = useState(false);
   
   // Initialize tab from URL query param or default to 'overview'
   const initialTab = (searchParams.get('tab') as TabType) || 'overview';
@@ -87,6 +107,7 @@ export default function AdminFundraiserDetailPage() {
   useEffect(() => {
     if (fundraiser && activeTab === 'participants') loadParticipants();
     if (fundraiser && activeTab === 'products') loadProducts();
+    if (fundraiser && activeTab === 'orders') loadOrders();
   }, [activeTab, fundraiser]);
 
   const loadFundraiser = async () => {
@@ -126,6 +147,36 @@ export default function AdminFundraiserDetailPage() {
       setProducts(response.data.products);
     } catch (error) {
       console.error('Failed to load products:', error);
+    }
+  };
+
+  const loadOrders = async () => {
+    setOrdersLoading(true);
+    try {
+      const token = await getToken();
+      const response = await api.get(`/admin/fundraisers/${id}/orders`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setOrders(response.data.orders || []);
+    } catch (error) {
+      console.error('Failed to load orders:', error);
+    } finally {
+      setOrdersLoading(false);
+    }
+  };
+
+  const updateOrderStatus = async (orderId: number, newStatus: string) => {
+    try {
+      const token = await getToken();
+      await api.patch(`/admin/fundraisers/${id}/orders/${orderId}`, 
+        { order: { status: newStatus } },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      toast.success(`Order updated to ${newStatus}`);
+      loadOrders();
+      loadFundraiser(); // Refresh counts
+    } catch (error) {
+      toast.error('Failed to update order');
     }
   };
 
@@ -446,16 +497,90 @@ export default function AdminFundraiserDetailPage() {
 
         {activeTab === 'orders' && (
           <div className="p-6">
-            <div className="text-center py-8 text-gray-500">
-              <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p>Orders will appear here once customers start ordering.</p>
-              <Link
-                to={`/admin/orders?order_type=wholesale&fundraiser=${id}`}
-                className="link-primary text-sm mt-2 inline-block"
-              >
-                View in Orders Page →
-              </Link>
-            </div>
+            {ordersLoading ? (
+              <div className="text-center py-8 text-gray-500">Loading orders...</div>
+            ) : orders.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                <ShoppingCart className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                <p>No orders yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {orders.map((order) => (
+                  <div key={order.id} className="bg-white border rounded-lg p-4 shadow-sm">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <p className="font-semibold">{order.order_number}</p>
+                        <p className="text-sm text-gray-600">{order.customer_name}</p>
+                        <p className="text-xs text-gray-500">{order.customer_email}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold">${(order.total_cents / 100).toFixed(2)}</p>
+                        <p className="text-xs text-gray-500">
+                          {new Date(order.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-sm text-gray-600 mb-3">
+                      {order.items?.map((item, idx) => (
+                        <span key={item.id}>
+                          {item.quantity}x {item.product_name}
+                          {item.variant_name && ` (${item.variant_name})`}
+                          {idx < order.items.length - 1 && ', '}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${
+                        order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                        order.status === 'paid' ? 'bg-blue-100 text-blue-800' :
+                        order.status === 'processing' ? 'bg-purple-100 text-purple-800' :
+                        order.status === 'shipped' ? 'bg-indigo-100 text-indigo-800' :
+                        order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                        order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {order.status.toUpperCase()}
+                      </span>
+                      <div className="flex gap-2">
+                        {order.status === 'pending' && (
+                          <button
+                            onClick={() => updateOrderStatus(order.id, 'processing')}
+                            className="btn btn-sm btn-primary"
+                          >
+                            Process
+                          </button>
+                        )}
+                        {order.status === 'paid' && (
+                          <button
+                            onClick={() => updateOrderStatus(order.id, 'processing')}
+                            className="btn btn-sm btn-primary"
+                          >
+                            Process
+                          </button>
+                        )}
+                        {order.status === 'processing' && (
+                          <button
+                            onClick={() => updateOrderStatus(order.id, 'shipped')}
+                            className="btn btn-sm btn-primary"
+                          >
+                            Ship
+                          </button>
+                        )}
+                        {order.status === 'shipped' && (
+                          <button
+                            onClick={() => updateOrderStatus(order.id, 'delivered')}
+                            className="btn btn-sm btn-success"
+                          >
+                            Delivered
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
