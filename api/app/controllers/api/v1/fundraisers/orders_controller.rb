@@ -145,8 +145,8 @@ module Api
             # Clear cart
             clear_cart
 
-            # TODO: Send confirmation emails
-            # SendFundraiserOrderConfirmationJob.perform_later(@order.id)
+            # Send confirmation emails
+            send_order_emails(@order)
 
             render json: {
               success: true,
@@ -247,6 +247,24 @@ module Api
         def clear_cart
           cart_key = "fundraiser_cart_#{@fundraiser.id}"
           session.delete(cart_key)
+        end
+
+        def send_order_emails(order)
+          # Send confirmation to customer
+          begin
+            FundraiserOrderMailer.order_confirmation(order).deliver_later
+            Rails.logger.info "Queued order confirmation email for order ##{order.order_number}"
+          rescue StandardError => e
+            Rails.logger.error "Failed to queue order confirmation email: #{e.message}"
+          end
+
+          # Send notification to fundraiser contact
+          begin
+            FundraiserOrderMailer.order_notification(order).deliver_later
+            Rails.logger.info "Queued order notification email for order ##{order.order_number}"
+          rescue StandardError => e
+            Rails.logger.error "Failed to queue order notification email: #{e.message}"
+          end
         end
 
         def serialize_order(order)
