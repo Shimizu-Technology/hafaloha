@@ -23,6 +23,7 @@ import AdminVariantPresetsPage from './pages/admin/AdminVariantPresetsPage';
 import AdminFundraisersPage from './pages/admin/AdminFundraisersPage';
 import AdminFundraiserDetailPage from './pages/admin/AdminFundraiserDetailPage';
 import AdminFundraiserFormPage from './pages/admin/AdminFundraiserFormPage';
+import AdminFundraiserProductFormPage from './pages/admin/AdminFundraiserProductFormPage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
@@ -480,6 +481,7 @@ function AppContent() {
             <Route path="fundraisers/new" element={<AdminFundraiserFormPage />} />
             <Route path="fundraisers/:id" element={<AdminFundraiserDetailPage />} />
             <Route path="fundraisers/:id/edit" element={<AdminFundraiserFormPage />} />
+            <Route path="fundraisers/:fundraiserId/products/new" element={<AdminFundraiserProductFormPage />} />
             <Route path="acai" element={<AdminAcaiPage />} />
             <Route path="inventory" element={<AdminInventoryPage />} />
             <Route path="users" element={<AdminUsersPage />} />
