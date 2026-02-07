@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_06_150529) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_07_032717) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -263,7 +263,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_06_150529) do
     t.text "pickup_instructions"
     t.string "pickup_location"
     t.text "public_message"
-    t.boolean "published", default: false, null: false
+    t.boolean "published", default: true, null: false
     t.integer "raised_amount_cents"
     t.text "shipping_note"
     t.string "slug"
@@ -500,7 +500,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_06_150529) do
     t.integer "product_low_stock_threshold", default: 5
     t.integer "product_stock_quantity"
     t.string "product_type"
-    t.boolean "published"
+    t.boolean "published", default: true
     t.integer "sale_price_cents"
     t.string "shopify_product_id"
     t.string "sku_prefix"
