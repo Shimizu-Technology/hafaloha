@@ -251,19 +251,19 @@ module Api
 
         def send_order_emails(order)
           # Send confirmation to customer
-          begin
-            FundraiserOrderMailer.order_confirmation(order).deliver_later
-            Rails.logger.info "Queued order confirmation email for order ##{order.order_number}"
-          rescue StandardError => e
-            Rails.logger.error "Failed to queue order confirmation email: #{e.message}"
+          result = EmailService.send_fundraiser_order_confirmation(order)
+          if result[:success]
+            Rails.logger.info "Sent order confirmation email for order ##{order.order_number}"
+          else
+            Rails.logger.warn "Failed to send order confirmation email: #{result[:error]}"
           end
 
           # Send notification to fundraiser contact
-          begin
-            FundraiserOrderMailer.order_notification(order).deliver_later
-            Rails.logger.info "Queued order notification email for order ##{order.order_number}"
-          rescue StandardError => e
-            Rails.logger.error "Failed to queue order notification email: #{e.message}"
+          result = EmailService.send_fundraiser_order_notification(order)
+          if result[:success]
+            Rails.logger.info "Sent order notification email for order ##{order.order_number}"
+          else
+            Rails.logger.warn "Failed to send order notification email: #{result[:error]}"
           end
         end
 
