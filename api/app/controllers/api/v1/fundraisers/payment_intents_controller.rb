@@ -42,6 +42,12 @@ module Api
             calculated_total += variant.price_cents * item[:quantity].to_i
           end
 
+          # Security: Verify client-submitted amount matches server calculation
+          if calculated_total != amount_cents
+            Rails.logger.warn "Payment amount mismatch: client sent #{amount_cents}, server calculated #{calculated_total}"
+            return render json: { error: "Amount mismatch - please refresh and try again" }, status: :unprocessable_entity
+          end
+
           # Create payment intent
           settings = SiteSetting.instance
           result = PaymentService.create_payment_intent(
