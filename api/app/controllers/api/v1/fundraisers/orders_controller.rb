@@ -199,10 +199,7 @@ module Api
 
         def authorized_to_view_order?(order)
           # Admin users can view any order
-          return true if current_user&.admin? || current_user&.super_admin?
-
-          # Staff of the restaurant/fundraiser organization can view
-          return true if current_user && @fundraiser.restaurant&.staff_members&.exists?(user_id: current_user.id)
+          return true if current_user&.admin?
 
           # Guest access: email must match
           guest_email_matches_order?(order)

@@ -48,7 +48,9 @@ Rails.application.configure do
 
   # Use a durable queue adapter in production.
   # Default to Solid Queue, with optional override (e.g. sidekiq) via env var.
-  config.active_job.queue_adapter = ENV.fetch("ACTIVE_JOB_QUEUE_ADAPTER", "solid_queue").to_sym
+  # Default to :async until Solid Queue is fully set up in production
+  # Switch via ACTIVE_JOB_QUEUE_ADAPTER=solid_queue once migrations are in place
+  config.active_job.queue_adapter = ENV.fetch("ACTIVE_JOB_QUEUE_ADAPTER", "async").to_sym
 
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
