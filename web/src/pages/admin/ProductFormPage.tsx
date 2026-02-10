@@ -1,14 +1,12 @@
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
-import axios from 'axios';
 import toast from 'react-hot-toast';
 import { ArrowLeft, Save, X, Archive, AlertTriangle, History } from 'lucide-react';
 import ImageUpload from '../../components/ImageUpload';
 import VariantManager from '../../components/VariantManager';
 import useLockBodyScroll from '../../hooks/useLockBodyScroll';
-
-import { API_BASE_URL } from '../../config';
+import { authDelete, authGet, authPost, authPut } from '../../services/authApi';
 
 interface InventoryAudit {
   id: number;
@@ -62,6 +60,38 @@ interface ProductFormData {
   import_notes?: string;
 }
 
+interface ProductDetailsResponse {
+  data: {
+    id: number;
+    name?: string;
+    description?: string;
+    product_type?: string;
+    vendor?: string;
+    base_price_cents?: number;
+    weight_oz?: number;
+    published?: boolean;
+    featured?: boolean;
+    meta_title?: string;
+    meta_description?: string;
+    inventory_level?: 'none' | 'product' | 'variant';
+    product_stock_quantity?: number;
+    product_low_stock_threshold?: number;
+    collection_ids?: number[];
+    needs_attention?: boolean;
+    import_notes?: string;
+    archived?: boolean;
+    images?: ProductImage[];
+  };
+}
+
+interface CollectionsResponse {
+  data: Collection[];
+}
+
+interface InventoryAuditsResponse {
+  audits: InventoryAudit[];
+}
+
 export default function ProductFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -110,10 +140,7 @@ export default function ProductFormPage() {
   const fetchCollections = async () => {
     try {
       // Fetch ALL collections (including unpublished) for admin use
-      const token = await getToken();
-      const response = await axios.get(`${API_BASE_URL}/api/v1/admin/collections`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await authGet<CollectionsResponse>('/admin/collections', getToken);
       setAllCollections(response.data.data || []);
     } catch (err) {
       console.error('Failed to fetch collections:', err);
@@ -123,10 +150,7 @@ export default function ProductFormPage() {
   const fetchProduct = async () => {
     try {
       setLoading(true);
-      const token = await getToken();
-      const response = await axios.get(`${API_BASE_URL}/api/v1/admin/products/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await authGet<ProductDetailsResponse>(`/admin/products/${id}`, getToken);
       
       // Backend wraps response in { success: true, data: {...} }
       const product = response.data.data || response.data;
@@ -200,11 +224,7 @@ export default function ProductFormPage() {
     
     setLoadingAudits(true);
     try {
-      const token = await getToken();
-      const response = await axios.get(
-        `${API_BASE_URL}/api/v1/admin/products/${id}/inventory_audits`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await authGet<InventoryAuditsResponse>(`/admin/products/${id}/inventory_audits`, getToken);
       setInventoryAudits(response.data.audits || []);
     } catch (err) {
       console.error('Failed to fetch inventory audits:', err);
@@ -244,18 +264,13 @@ export default function ProductFormPage() {
 
     try {
       setSaving(true);
-      const token = await getToken();
       
       const payload = {
         product: formData,
       };
 
       if (isEditMode) {
-        const response = await axios.put(
-          `${API_BASE_URL}/api/v1/admin/products/${id}`,
-          payload,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const response = await authPut<ProductDetailsResponse>(`/admin/products/${id}`, payload, getToken);
         
         // Update form data with latest from server (in case anything changed)
         const updatedProduct = response.data.data || response.data;
@@ -283,11 +298,7 @@ export default function ProductFormPage() {
           position: 'top-right',
         });
       } else {
-        const response = await axios.post(
-          `${API_BASE_URL}/api/v1/admin/products`,
-          payload,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        const response = await authPost<ProductDetailsResponse>('/admin/products', payload, getToken);
         
         toast.success('Product created successfully!', {
           duration: 3000,
@@ -315,12 +326,7 @@ export default function ProductFormPage() {
     
     try {
       setDeleting(true);
-      const token = await getToken();
-      
-      await axios.delete(
-        `${API_BASE_URL}/api/v1/admin/products/${id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await authDelete(`/admin/products/${id}`, getToken);
       
       toast.success('Product archived successfully!', {
         duration: 3000,
@@ -349,13 +355,7 @@ export default function ProductFormPage() {
     
     try {
       setDeleting(true);
-      const token = await getToken();
-      
-      await axios.post(
-        `${API_BASE_URL}/api/v1/admin/products/${id}/unarchive`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await authPost(`/admin/products/${id}/unarchive`, {}, getToken);
       
       toast.success('Product unarchived successfully!', {
         duration: 3000,

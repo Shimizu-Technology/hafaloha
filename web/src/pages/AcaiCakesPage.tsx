@@ -378,7 +378,7 @@ export default function AcaiCakesPage() {
       
       if (response.success) {
         toast.success('Order placed successfully!');
-        navigate(`/orders/${response.order.id}`);
+        navigate(`/orders/${response.order.id}?email=${encodeURIComponent(email)}`);
       }
     } catch (err: any) {
       console.error('Order failed:', err);

@@ -1,12 +1,10 @@
 import { useRef, useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Plus, Edit, Trash2, Eye, Package } from 'lucide-react';
 import useLockBodyScroll from '../../hooks/useLockBodyScroll';
-
-import { API_BASE_URL } from '../../config';
+import { authDelete, authGet, authPatch, authPost } from '../../services/authApi';
 
 interface Collection {
   id: number;
@@ -20,6 +18,10 @@ interface Collection {
   product_count: number;
   created_at: string;
   updated_at: string;
+}
+
+interface CollectionsResponse {
+  data: Collection[];
 }
 
 export default function AdminCollectionsPage() {
@@ -49,10 +51,7 @@ export default function AdminCollectionsPage() {
   const fetchCollections = async () => {
     try {
       setLoading(true);
-      const token = await getToken();
-      const response = await axios.get(`${API_BASE_URL}/api/v1/admin/collections`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await authGet<CollectionsResponse>('/admin/collections', getToken);
       setCollections(response.data.data || []);
     } catch (err: any) {
       console.error('Failed to fetch collections:', err);
@@ -94,7 +93,6 @@ export default function AdminCollectionsPage() {
 
     try {
       setSaving(true);
-      const token = await getToken();
       
       const payload = {
         collection: {
@@ -105,19 +103,11 @@ export default function AdminCollectionsPage() {
 
       if (selectedCollection) {
         // Update existing
-        await axios.put(
-          `${API_BASE_URL}/api/v1/admin/collections/${selectedCollection.id}`,
-          payload,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await authPatch(`/admin/collections/${selectedCollection.id}`, payload, getToken);
         toast.success('Collection updated successfully');
       } else {
         // Create new
-        await axios.post(
-          `${API_BASE_URL}/api/v1/admin/collections`,
-          payload,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        await authPost('/admin/collections', payload, getToken);
         toast.success('Collection created successfully');
       }
 
@@ -136,11 +126,7 @@ export default function AdminCollectionsPage() {
 
     try {
       setDeleting(true);
-      const token = await getToken();
-      await axios.delete(
-        `${API_BASE_URL}/api/v1/admin/collections/${selectedCollection.id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await authDelete(`/admin/collections/${selectedCollection.id}`, getToken);
       toast.success('Collection deleted successfully');
       setShowDeleteModal(false);
       setSelectedCollection(null);

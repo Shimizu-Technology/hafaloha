@@ -1,3 +1,5 @@
+require "digest"
+
 module Api
   module V1
     module Fundraisers
@@ -76,15 +78,22 @@ module Api
         end
 
         def load_cart
-          cart_key = "fundraiser_cart_#{@fundraiser.id}"
-          @cart = session[cart_key] || { items: {}, participant_code: nil }
+          @cart = Rails.cache.read(fundraiser_cart_key) || { items: {}, participant_code: nil }
           @cart = @cart.with_indifferent_access
           @cart[:items] ||= {}
         end
 
         def save_cart
-          cart_key = "fundraiser_cart_#{@fundraiser.id}"
-          session[cart_key] = @cart
+          Rails.cache.write(fundraiser_cart_key, @cart, expires_in: 30.days)
+        end
+
+        def fundraiser_cart_key
+          session_id = request.headers["X-Session-ID"] || request.cookies["session_id"]
+          if session_id.blank?
+            fingerprint = "#{request.remote_ip}|#{request.user_agent}"
+            session_id = Digest::SHA256.hexdigest(fingerprint)
+          end
+          "fundraiser_cart:#{@fundraiser.id}:#{session_id}"
         end
 
         def serialize_cart

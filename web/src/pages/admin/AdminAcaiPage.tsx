@@ -1,11 +1,9 @@
 import { useRef, useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
-import axios from 'axios';
 import toast from 'react-hot-toast';
 import { Save, Plus, Trash2, Edit2, X } from 'lucide-react';
 import useLockBodyScroll from '../../hooks/useLockBodyScroll';
-
-import { API_BASE_URL } from '../../config';
+import { authDelete, authGet, authPost, authPut } from '../../services/authApi';
 
 interface AcaiSettings {
   id: number;
@@ -63,6 +61,26 @@ interface BlockedSlot {
   display_name: string;
 }
 
+interface AcaiSettingsResponse {
+  data: AcaiSettings;
+}
+
+interface CrustOptionsResponse {
+  data: CrustOption[];
+}
+
+interface PlacardOptionsResponse {
+  data: PlacardOption[];
+}
+
+interface PickupWindowsResponse {
+  data: PickupWindow[];
+}
+
+interface BlockedSlotsResponse {
+  data: BlockedSlot[];
+}
+
 type TabType = 'settings' | 'crust' | 'placards' | 'windows' | 'blocked';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -118,15 +136,12 @@ export default function AdminAcaiPage() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const token = await getToken();
-      const headers = { Authorization: `Bearer ${token}` };
-
       const [settingsRes, crustRes, placardRes, windowsRes, blockedRes] = await Promise.all([
-        axios.get(`${API_BASE_URL}/api/v1/admin/acai/settings`, { headers }),
-        axios.get(`${API_BASE_URL}/api/v1/admin/acai/crust_options`, { headers }),
-        axios.get(`${API_BASE_URL}/api/v1/admin/acai/placard_options`, { headers }),
-        axios.get(`${API_BASE_URL}/api/v1/admin/acai/pickup_windows`, { headers }),
-        axios.get(`${API_BASE_URL}/api/v1/admin/acai/blocked_slots`, { headers }),
+        authGet<AcaiSettingsResponse>('/admin/acai/settings', getToken),
+        authGet<CrustOptionsResponse>('/admin/acai/crust_options', getToken),
+        authGet<PlacardOptionsResponse>('/admin/acai/placard_options', getToken),
+        authGet<PickupWindowsResponse>('/admin/acai/pickup_windows', getToken),
+        authGet<BlockedSlotsResponse>('/admin/acai/blocked_slots', getToken),
       ]);
 
       setSettings(settingsRes.data.data);
@@ -153,12 +168,7 @@ export default function AdminAcaiPage() {
     
     setSavingSettings(true);
     try {
-      const token = await getToken();
-      await axios.put(
-        `${API_BASE_URL}/api/v1/admin/acai/settings`,
-        { settings },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await authPut('/admin/acai/settings', { settings }, getToken);
       toast.success('Settings saved!');
     } catch (err) {
       console.error('Failed to save settings:', err);
@@ -173,21 +183,10 @@ export default function AdminAcaiPage() {
     if (!editingCrust) return;
     
     try {
-      const token = await getToken();
-      const headers = { Authorization: `Bearer ${token}` };
-      
       if (editingCrust.id) {
-        await axios.put(
-          `${API_BASE_URL}/api/v1/admin/acai/crust_options/${editingCrust.id}`,
-          { crust_option: editingCrust },
-          { headers }
-        );
+        await authPut(`/admin/acai/crust_options/${editingCrust.id}`, { crust_option: editingCrust }, getToken);
       } else {
-        await axios.post(
-          `${API_BASE_URL}/api/v1/admin/acai/crust_options`,
-          { crust_option: editingCrust },
-          { headers }
-        );
+        await authPost('/admin/acai/crust_options', { crust_option: editingCrust }, getToken);
       }
       
       toast.success('Crust option saved!');
@@ -204,11 +203,7 @@ export default function AdminAcaiPage() {
     if (!confirm('Delete this crust option?')) return;
     
     try {
-      const token = await getToken();
-      await axios.delete(
-        `${API_BASE_URL}/api/v1/admin/acai/crust_options/${id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await authDelete(`/admin/acai/crust_options/${id}`, getToken);
       toast.success('Crust option deleted');
       fetchData();
     } catch (err) {
@@ -222,21 +217,10 @@ export default function AdminAcaiPage() {
     if (!editingPlacard) return;
     
     try {
-      const token = await getToken();
-      const headers = { Authorization: `Bearer ${token}` };
-      
       if (editingPlacard.id) {
-        await axios.put(
-          `${API_BASE_URL}/api/v1/admin/acai/placard_options/${editingPlacard.id}`,
-          { placard_option: editingPlacard },
-          { headers }
-        );
+        await authPut(`/admin/acai/placard_options/${editingPlacard.id}`, { placard_option: editingPlacard }, getToken);
       } else {
-        await axios.post(
-          `${API_BASE_URL}/api/v1/admin/acai/placard_options`,
-          { placard_option: editingPlacard },
-          { headers }
-        );
+        await authPost('/admin/acai/placard_options', { placard_option: editingPlacard }, getToken);
       }
       
       toast.success('Placard option saved!');
@@ -253,11 +237,7 @@ export default function AdminAcaiPage() {
     if (!confirm('Delete this placard option?')) return;
     
     try {
-      const token = await getToken();
-      await axios.delete(
-        `${API_BASE_URL}/api/v1/admin/acai/placard_options/${id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await authDelete(`/admin/acai/placard_options/${id}`, getToken);
       toast.success('Placard option deleted');
       fetchData();
     } catch (err) {
@@ -271,21 +251,10 @@ export default function AdminAcaiPage() {
     if (!editingWindow) return;
     
     try {
-      const token = await getToken();
-      const headers = { Authorization: `Bearer ${token}` };
-      
       if (editingWindow.id) {
-        await axios.put(
-          `${API_BASE_URL}/api/v1/admin/acai/pickup_windows/${editingWindow.id}`,
-          { pickup_window: editingWindow },
-          { headers }
-        );
+        await authPut(`/admin/acai/pickup_windows/${editingWindow.id}`, { pickup_window: editingWindow }, getToken);
       } else {
-        await axios.post(
-          `${API_BASE_URL}/api/v1/admin/acai/pickup_windows`,
-          { pickup_window: editingWindow },
-          { headers }
-        );
+        await authPost('/admin/acai/pickup_windows', { pickup_window: editingWindow }, getToken);
       }
       
       toast.success('Pickup window saved!');
@@ -302,11 +271,7 @@ export default function AdminAcaiPage() {
     if (!confirm('Delete this pickup window?')) return;
     
     try {
-      const token = await getToken();
-      await axios.delete(
-        `${API_BASE_URL}/api/v1/admin/acai/pickup_windows/${id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await authDelete(`/admin/acai/pickup_windows/${id}`, getToken);
       toast.success('Pickup window deleted');
       fetchData();
     } catch (err) {
@@ -320,21 +285,10 @@ export default function AdminAcaiPage() {
     if (!editingBlocked) return;
     
     try {
-      const token = await getToken();
-      const headers = { Authorization: `Bearer ${token}` };
-      
       if (editingBlocked.id) {
-        await axios.put(
-          `${API_BASE_URL}/api/v1/admin/acai/blocked_slots/${editingBlocked.id}`,
-          { blocked_slot: editingBlocked },
-          { headers }
-        );
+        await authPut(`/admin/acai/blocked_slots/${editingBlocked.id}`, { blocked_slot: editingBlocked }, getToken);
       } else {
-        await axios.post(
-          `${API_BASE_URL}/api/v1/admin/acai/blocked_slots`,
-          { blocked_slot: editingBlocked },
-          { headers }
-        );
+        await authPost('/admin/acai/blocked_slots', { blocked_slot: editingBlocked }, getToken);
       }
       
       toast.success('Blocked date saved!');
@@ -351,11 +305,7 @@ export default function AdminAcaiPage() {
     if (!confirm('Delete this blocked date?')) return;
     
     try {
-      const token = await getToken();
-      await axios.delete(
-        `${API_BASE_URL}/api/v1/admin/acai/blocked_slots/${id}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await authDelete(`/admin/acai/blocked_slots/${id}`, getToken);
       toast.success('Blocked date deleted');
       fetchData();
     } catch (err) {

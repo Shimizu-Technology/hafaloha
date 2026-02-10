@@ -1,10 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Upload, FileText, AlertCircle, CheckCircle, Clock, XCircle, ChevronDown, ChevronUp } from 'lucide-react';
-import axios from 'axios';
 import { useAuth } from '@clerk/clerk-react';
 import useLockBodyScroll from '../../hooks/useLockBodyScroll';
-
-import { API_BASE_URL } from '../../config';
+import { authGet, authPost } from '../../services/authApi';
 
 // Collapsible section for import log
 function ImportLogSection({ warnings }: { warnings: string[] }) {
@@ -214,6 +212,14 @@ interface ImportDetails extends Import {
   error_messages: string | null;
 }
 
+interface AdminImportsListResponse {
+  data: Import[];
+}
+
+interface AdminImportResponse {
+  data: ImportDetails;
+}
+
 export default function AdminImportPage() {
   const { getToken } = useAuth();
   const [productsFile, setProductsFile] = useState<File | null>(null);
@@ -254,10 +260,7 @@ export default function AdminImportPage() {
 
   const fetchImports = async () => {
     try {
-      const token = await getToken();
-      const response = await axios.get(`${API_BASE_URL}/api/v1/admin/imports`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await authGet<AdminImportsListResponse>('/admin/imports', getToken);
       const importsData = response.data.data;
       setImports(importsData);
 
@@ -272,10 +275,7 @@ export default function AdminImportPage() {
 
   const fetchImportStatus = async (importId: number) => {
     try {
-      const token = await getToken();
-      const response = await axios.get(`${API_BASE_URL}/api/v1/admin/imports/${importId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await authGet<AdminImportResponse>(`/admin/imports/${importId}`, getToken);
       const importData = response.data.data;
       setCurrentImport(importData);
       
@@ -339,21 +339,20 @@ export default function AdminImportPage() {
     setIsUploading(true);
 
     try {
-      const token = await getToken();
       const formData = new FormData();
       formData.append('products_file', productsFile);
       if (inventoryFile) {
         formData.append('inventory_file', inventoryFile);
       }
 
-      const response = await axios.post(
-        `${API_BASE_URL}/api/v1/admin/imports`,
+      const response = await authPost<AdminImportResponse>(
+        '/admin/imports',
         formData,
+        getToken,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'multipart/form-data'
-          }
+            'Content-Type': 'multipart/form-data',
+          },
         }
       );
 
@@ -371,10 +370,7 @@ export default function AdminImportPage() {
 
   const viewImportDetails = async (importId: number) => {
     try {
-      const token = await getToken();
-      const response = await axios.get(`${API_BASE_URL}/api/v1/admin/imports/${importId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await authGet<AdminImportResponse>(`/admin/imports/${importId}`, getToken);
       setSelectedImport(response.data.data);
     } catch (error) {
       console.error('Failed to fetch import details:', error);

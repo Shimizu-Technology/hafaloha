@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { ArrowLeft, Save } from 'lucide-react';
-import api from '../../services/api';
+import { authPost } from '../../services/authApi';
 import toast from 'react-hot-toast';
 
 interface ProductFormData {
@@ -14,6 +14,12 @@ interface ProductFormData {
   product_stock_quantity: number | undefined;
   featured: boolean;
   published: boolean;
+}
+
+interface CreatedFundraiserProductResponse {
+  product: {
+    id: number;
+  };
 }
 
 export default function AdminFundraiserProductFormPage() {
@@ -64,8 +70,6 @@ export default function AdminFundraiserProductFormPage() {
 
     setSaving(true);
     try {
-      const token = await getToken();
-      
       // Build the product payload
       const payload: Record<string, unknown> = {
         name: formData.name,
@@ -82,11 +86,11 @@ export default function AdminFundraiserProductFormPage() {
         payload.product_stock_quantity = formData.product_stock_quantity || 0;
       }
 
-      await api.post(`/admin/fundraisers/${fundraiserId}/products`, {
-        product: payload
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await authPost<CreatedFundraiserProductResponse>(
+        `/admin/fundraisers/${fundraiserId}/products`,
+        { product: payload },
+        getToken
+      );
 
       toast.success('Product created successfully');
       navigate(`/admin/fundraisers/${fundraiserId}?tab=products`);

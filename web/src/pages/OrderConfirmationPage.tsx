@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@clerk/clerk-react';
 import { motion } from 'framer-motion';
 import api, { configApi } from '../services/api';
 import type { AppConfig } from '../types/order';
@@ -56,6 +57,8 @@ interface Order {
 export default function OrderConfirmationPage() {
   const { id: orderId } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { getToken, isSignedIn } = useAuth();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,7 +73,13 @@ export default function OrderConfirmationPage() {
       }
 
       try {
-        const response = await api.get(`/orders/${orderId}`);
+        const params = new URLSearchParams(location.search);
+        const guestEmail = params.get('email');
+        const token = isSignedIn ? await getToken() : null;
+        const response = await api.get(`/orders/${orderId}`, {
+          params: guestEmail ? { email: guestEmail } : undefined,
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        });
         setOrder(response.data.order);
       } catch (err: unknown) {
         console.error('Failed to fetch order:', err);
@@ -82,7 +91,7 @@ export default function OrderConfirmationPage() {
 
     fetchOrder();
     configApi.getConfig().then(setAppConfig).catch(console.error);
-  }, [orderId]);
+  }, [orderId, location.search, getToken, isSignedIn]);
 
   const formatPrice = (cents: number) => {
     return `$${(cents / 100).toFixed(2)}`;

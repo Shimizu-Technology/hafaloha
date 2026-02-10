@@ -215,8 +215,8 @@ function FundraiserCheckoutForm() {
       // Create the order
       const orderData = {
         customer_name: name,
-        email,
-        phone,
+        customer_email: email,
+        customer_phone: phone,
         participant_code: state.participantCode || undefined,
         delivery_method: deliveryMethod,
         items,
@@ -241,7 +241,7 @@ function FundraiserCheckoutForm() {
 
       if (response.success) {
         clearCart();
-        navigate(`/f/${slug}/order/${response.order.id}`);
+        navigate(`/f/${slug}/order/${response.order.id}?email=${encodeURIComponent(email)}`);
       } else {
         throw new Error('Order creation failed');
       }

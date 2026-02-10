@@ -1,7 +1,7 @@
 // src/services/variantPresets.ts
 // API service for managing variant presets
 
-import api from './api';
+import { authDelete, authGet, authPatch, authPost, type GetTokenFn } from './authApi';
 
 // Types
 export interface PresetValue {
@@ -53,76 +53,65 @@ export interface UpdatePresetData {
   values?: PresetValue[];
 }
 
-// Helper to create auth headers
-const authHeaders = (token: string | null) => {
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
-
 // API Functions
 
 /**
  * Get all variant presets
  */
-export const getAll = async (token?: string | null): Promise<PresetsResponse> => {
-  const response = await api.get('/admin/variant_presets', {
-    headers: authHeaders(token ?? null)
-  });
+export const getAll = async (getToken: GetTokenFn): Promise<PresetsResponse> => {
+  const response = await authGet<PresetsResponse>('/admin/variant_presets', getToken);
   return response.data;
 };
 
 /**
  * Get a single preset by ID
  */
-export const getById = async (id: number, token?: string | null): Promise<PresetResponse> => {
-  const response = await api.get(`/admin/variant_presets/${id}`, {
-    headers: authHeaders(token ?? null)
-  });
+export const getById = async (id: number, getToken: GetTokenFn): Promise<PresetResponse> => {
+  const response = await authGet<PresetResponse>(`/admin/variant_presets/${id}`, getToken);
   return response.data;
 };
 
 /**
  * Create a new preset
  */
-export const create = async (data: CreatePresetData, token?: string | null): Promise<PresetResponse> => {
-  const response = await api.post('/admin/variant_presets', {
-    variant_preset: data
-  }, {
-    headers: authHeaders(token ?? null)
-  });
+export const create = async (data: CreatePresetData, getToken: GetTokenFn): Promise<PresetResponse> => {
+  const response = await authPost<PresetResponse>(
+    '/admin/variant_presets',
+    { variant_preset: data },
+    getToken
+  );
   return response.data;
 };
 
 /**
  * Update an existing preset
  */
-export const update = async (id: number, data: UpdatePresetData, token?: string | null): Promise<PresetResponse> => {
-  const response = await api.patch(`/admin/variant_presets/${id}`, {
-    variant_preset: data
-  }, {
-    headers: authHeaders(token ?? null)
-  });
+export const update = async (id: number, data: UpdatePresetData, getToken: GetTokenFn): Promise<PresetResponse> => {
+  const response = await authPatch<PresetResponse>(
+    `/admin/variant_presets/${id}`,
+    { variant_preset: data },
+    getToken
+  );
   return response.data;
 };
 
 /**
  * Delete a preset
  */
-export const remove = async (id: number, token?: string | null): Promise<{ success: boolean; message: string }> => {
-  const response = await api.delete(`/admin/variant_presets/${id}`, {
-    headers: authHeaders(token ?? null)
-  });
+export const remove = async (id: number, getToken: GetTokenFn): Promise<{ success: boolean; message: string }> => {
+  const response = await authDelete<{ success: boolean; message: string }>(`/admin/variant_presets/${id}`, getToken);
   return response.data;
 };
 
 /**
  * Duplicate a preset
  */
-export const duplicate = async (id: number, newName?: string, token?: string | null): Promise<PresetResponse> => {
-  const response = await api.post(`/admin/variant_presets/${id}/duplicate`, {
-    name: newName
-  }, {
-    headers: authHeaders(token ?? null)
-  });
+export const duplicate = async (id: number, getToken: GetTokenFn, newName?: string): Promise<PresetResponse> => {
+  const response = await authPost<PresetResponse>(
+    `/admin/variant_presets/${id}/duplicate`,
+    { name: newName },
+    getToken
+  );
   return response.data;
 };
 

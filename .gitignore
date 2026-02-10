@@ -1,0 +1,6 @@
+# Monorepo-wide ignores
+Backups/
+*.env
+*.env.*
+!.env.example
+

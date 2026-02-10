@@ -9,6 +9,31 @@ const api = axios.create({
   },
 });
 
+const AUTH_INTERCEPTOR_ATTACHED = '__hafalohaAuthInterceptorAttached';
+
+const onAuthError = (error: unknown) => {
+  const status = (error as { response?: { status?: number } })?.response?.status;
+  if (typeof window !== 'undefined' && (status === 401 || status === 403)) {
+    window.dispatchEvent(
+      new CustomEvent('hafaloha:auth-error', {
+        detail: { status },
+      })
+    );
+  }
+  return Promise.reject(error);
+};
+
+const attachAuthErrorInterceptor = (instance: typeof axios | typeof api) => {
+  const interceptorState = instance as typeof instance & { [AUTH_INTERCEPTOR_ATTACHED]?: boolean };
+  if (interceptorState[AUTH_INTERCEPTOR_ATTACHED]) return;
+
+  instance.interceptors.response.use((response) => response, onAuthError);
+  interceptorState[AUTH_INTERCEPTOR_ATTACHED] = true;
+};
+
+attachAuthErrorInterceptor(api);
+attachAuthErrorInterceptor(axios);
+
 // Types
 export interface Product {
   id: number;

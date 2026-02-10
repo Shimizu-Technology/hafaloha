@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import toast from 'react-hot-toast';
 import type { Product, DetailedProduct } from '../../components/admin/products';
 import {
@@ -11,7 +10,15 @@ import {
 } from '../../components/admin/products';
 import { SkeletonListPage } from '../../components/admin';
 
-import { API_BASE_URL } from '../../config';
+import { authGet, authPatch, authPost } from '../../services/authApi';
+
+interface ProductListResponse {
+  data: Product[];
+}
+
+interface ProductDetailResponse {
+  data: DetailedProduct;
+}
 
 export default function AdminProductsPage() {
   const { getToken } = useAuth();
@@ -46,9 +53,8 @@ export default function AdminProductsPage() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const token = await getToken();
-      const response = await axios.get(`${API_BASE_URL}/api/v1/admin/products?show_archived=true`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const response = await authGet<ProductListResponse>('/admin/products', getToken, {
+        params: { show_archived: true },
       });
       const all = response.data.data;
       setProducts(all);
@@ -63,10 +69,7 @@ export default function AdminProductsPage() {
   const fetchProductDetails = async (slug: string) => {
     try {
       setLoadingDetails(true);
-      const token = await getToken();
-      const response = await axios.get(`${API_BASE_URL}/api/v1/admin/products/${slug}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await authGet<ProductDetailResponse>(`/admin/products/${slug}`, getToken);
       setSelectedProduct(response.data.data);
     } catch (err) {
       console.error('Failed to fetch product details:', err);
@@ -78,12 +81,7 @@ export default function AdminProductsPage() {
   // ── Actions ────────────────────────────────────────────
   const handleTogglePublished = async (product: Product) => {
     try {
-      const token = await getToken();
-      await axios.put(
-        `${API_BASE_URL}/api/v1/admin/products/${product.id}`,
-        { product: { published: !product.published } },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      await authPatch(`/admin/products/${product.id}`, { product: { published: !product.published } }, getToken);
       toast.success(product.published ? 'Product unpublished' : 'Product published');
       fetchProducts();
     } catch { toast.error('Failed to update product'); }
@@ -91,10 +89,7 @@ export default function AdminProductsPage() {
 
   const handleArchive = async (product: Product) => {
     try {
-      const token = await getToken();
-      await axios.post(`${API_BASE_URL}/api/v1/admin/products/${product.id}/archive`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await authPost(`/admin/products/${product.id}/archive`, {}, getToken);
       toast.success('Product archived');
       fetchProducts();
     } catch { toast.error('Failed to archive product'); }
@@ -102,10 +97,7 @@ export default function AdminProductsPage() {
 
   const handleUnarchive = async (product: Product) => {
     try {
-      const token = await getToken();
-      await axios.post(`${API_BASE_URL}/api/v1/admin/products/${product.id}/unarchive`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await authPost(`/admin/products/${product.id}/unarchive`, {}, getToken);
       toast.success('Product restored');
       fetchProducts();
     } catch { toast.error('Failed to restore product'); }
@@ -113,10 +105,7 @@ export default function AdminProductsPage() {
 
   const handleDuplicate = async (product: Product) => {
     try {
-      const token = await getToken();
-      await axios.post(`${API_BASE_URL}/api/v1/admin/products/${product.id}/duplicate`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await authPost(`/admin/products/${product.id}/duplicate`, {}, getToken);
       toast.success('Product duplicated');
       fetchProducts();
     } catch { toast.error('Failed to duplicate product'); }

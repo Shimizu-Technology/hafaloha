@@ -1,16 +1,19 @@
 FactoryBot.define do
   factory :fundraiser do
-    name { "MyString" }
-    slug { "MyString" }
-    description { "MyText" }
-    contact_name { "MyString" }
-    contact_email { "MyString" }
-    contact_phone { "MyString" }
-    start_date { "2025-12-10" }
-    end_date { "2025-12-10" }
-    status { "MyString" }
-    goal_amount_cents { 1 }
-    raised_amount_cents { 1 }
-    image_url { "MyString" }
+    sequence(:name) { |n| "Fundraiser #{n}" }
+    sequence(:slug) { |n| "fundraiser-#{n}" }
+    organization_name { "Hafaloha Foundation" }
+    description { "Fundraiser description" }
+    contact_name { "Fundraiser Contact" }
+    sequence(:contact_email) { |n| "fundraiser#{n}@example.com" }
+    contact_phone { "671-555-0000" }
+    start_date { Date.current - 1.day }
+    end_date { Date.current + 30.days }
+    status { "active" }
+    goal_amount_cents { 100_000 }
+    raised_amount_cents { 0 }
+    image_url { "https://example.com/fundraiser.jpg" }
+    payout_percentage { 20.0 }
+    published { true }
   end
 end

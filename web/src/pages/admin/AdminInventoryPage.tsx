@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import { Package, Filter, ChevronLeft, ChevronRight, ArrowUp, ArrowDown, Minus } from 'lucide-react';
-import api from '../../services/api';
+import { authGet } from '../../services/authApi';
 import { format } from 'date-fns';
 
 interface InventoryAudit {
@@ -43,6 +43,15 @@ interface Summary {
   total_stock_added: number;
   total_stock_removed: number;
   orders_affecting_stock: number;
+}
+
+interface InventoryAuditsResponse {
+  audits: InventoryAudit[];
+  pagination: Pagination;
+}
+
+interface InventorySummaryResponse {
+  summary: Summary;
 }
 
 const AUDIT_TYPE_LABELS: Record<string, string> = {
@@ -93,7 +102,6 @@ export default function AdminInventoryPage() {
   const loadAudits = async () => {
     setLoading(true);
     try {
-      const token = await getToken();
       const params = new URLSearchParams();
       params.append('page', page.toString());
       params.append('per_page', '25');
@@ -102,9 +110,7 @@ export default function AdminInventoryPage() {
       if (dateRange.start) params.append('start_date', dateRange.start);
       if (dateRange.end) params.append('end_date', dateRange.end);
 
-      const response = await api.get(`/admin/inventory_audits?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await authGet<InventoryAuditsResponse>(`/admin/inventory_audits?${params.toString()}`, getToken);
       
       setAudits(response.data.audits);
       setPagination(response.data.pagination);
@@ -117,14 +123,11 @@ export default function AdminInventoryPage() {
 
   const loadSummary = async () => {
     try {
-      const token = await getToken();
       const params = new URLSearchParams();
       if (dateRange.start) params.append('start_date', dateRange.start);
       if (dateRange.end) params.append('end_date', dateRange.end);
 
-      const response = await api.get(`/admin/inventory_audits/summary?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await authGet<InventorySummaryResponse>(`/admin/inventory_audits/summary?${params.toString()}`, getToken);
       
       setSummary(response.data.summary);
     } catch (err) {

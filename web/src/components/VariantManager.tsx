@@ -107,8 +107,7 @@ export default function VariantManager({ productId, basePriceCents, inventoryLev
   const fetchPresets = async () => {
     try {
       setPresetsLoading(true);
-      const token = await getToken();
-      const response = await variantPresetsService.getAll(token);
+      const response = await variantPresetsService.getAll(getToken);
       if (response.success) {
         setPresets(response.data.presets);
       }

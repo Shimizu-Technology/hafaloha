@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '@clerk/clerk-react';
 import { ArrowLeft, Users, Package, ShoppingCart, Settings, Plus, Trash2, Edit, ExternalLink, Upload, Copy, Check } from 'lucide-react';
 import useLockBodyScroll from '../../hooks/useLockBodyScroll';
-import api from '../../services/api';
+import { authDelete, authGet, authPatch, authPost } from '../../services/authApi';
 import toast from 'react-hot-toast';
 import { BulkImportModal } from '../../components/admin/fundraisers';
 
@@ -77,6 +77,29 @@ interface FundraiserProduct {
 
 type TabType = 'overview' | 'participants' | 'products' | 'orders';
 
+interface FundraiserResponse {
+  fundraiser: Fundraiser;
+}
+
+interface ParticipantsResponse {
+  participants: Participant[];
+}
+
+interface FundraiserProductsResponse {
+  products: FundraiserProduct[];
+}
+
+interface FundraiserOrdersResponse {
+  orders: FundraiserOrder[];
+}
+
+interface BulkImportResponse {
+  success: boolean;
+  imported: number;
+  failed: number;
+  errors: string[];
+}
+
 export default function AdminFundraiserDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -112,10 +135,7 @@ export default function AdminFundraiserDetailPage() {
 
   const loadFundraiser = async () => {
     try {
-      const token = await getToken();
-      const response = await api.get(`/admin/fundraisers/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await authGet<FundraiserResponse>(`/admin/fundraisers/${id}`, getToken);
       setFundraiser(response.data.fundraiser);
     } catch (error) {
       console.error('Failed to load fundraiser:', error);
@@ -128,10 +148,7 @@ export default function AdminFundraiserDetailPage() {
 
   const loadParticipants = async () => {
     try {
-      const token = await getToken();
-      const response = await api.get(`/admin/fundraisers/${id}/participants`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await authGet<ParticipantsResponse>(`/admin/fundraisers/${id}/participants`, getToken);
       setParticipants(response.data.participants);
     } catch (error) {
       console.error('Failed to load participants:', error);
@@ -140,10 +157,7 @@ export default function AdminFundraiserDetailPage() {
 
   const loadProducts = async () => {
     try {
-      const token = await getToken();
-      const response = await api.get(`/admin/fundraisers/${id}/products`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await authGet<FundraiserProductsResponse>(`/admin/fundraisers/${id}/products`, getToken);
       setProducts(response.data.products);
     } catch (error) {
       console.error('Failed to load products:', error);
@@ -153,10 +167,7 @@ export default function AdminFundraiserDetailPage() {
   const loadOrders = async () => {
     setOrdersLoading(true);
     try {
-      const token = await getToken();
-      const response = await api.get(`/admin/fundraisers/${id}/orders`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await authGet<FundraiserOrdersResponse>(`/admin/fundraisers/${id}/orders`, getToken);
       setOrders(response.data.orders || []);
     } catch (error) {
       console.error('Failed to load orders:', error);
@@ -167,11 +178,7 @@ export default function AdminFundraiserDetailPage() {
 
   const updateOrderStatus = async (orderId: number, newStatus: string) => {
     try {
-      const token = await getToken();
-      await api.patch(`/admin/fundraisers/${id}/orders/${orderId}`, 
-        { order: { status: newStatus } },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await authPatch(`/admin/fundraisers/${id}/orders/${orderId}`, { order: { status: newStatus } }, getToken);
       toast.success(`Order updated to ${newStatus}`);
       loadOrders();
       loadFundraiser(); // Refresh counts
@@ -183,10 +190,7 @@ export default function AdminFundraiserDetailPage() {
   const handleRemoveProduct = async (fpId: number) => {
     if (!confirm('Remove this product from the fundraiser?')) return;
     try {
-      const token = await getToken();
-      await api.delete(`/admin/fundraisers/${id}/products/${fpId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await authDelete(`/admin/fundraisers/${id}/products/${fpId}`, getToken);
       toast.success('Product removed');
       loadProducts();
     } catch (error) {
@@ -197,10 +201,7 @@ export default function AdminFundraiserDetailPage() {
   const handleDeleteParticipant = async (participant: Participant) => {
     if (!confirm(`Delete participant "${participant.name}"?`)) return;
     try {
-      const token = await getToken();
-      await api.delete(`/admin/fundraisers/${id}/participants/${participant.id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await authDelete(`/admin/fundraisers/${id}/participants/${participant.id}`, getToken);
       toast.success('Participant deleted');
       loadParticipants();
     } catch (error: any) {
@@ -602,11 +603,10 @@ export default function AdminFundraiserDetailPage() {
         <BulkImportModal
           onClose={() => setShowBulkImport(false)}
           onImport={async (csvContent: string) => {
-            const token = await getToken();
-            const response = await api.post(
+            const response = await authPost<BulkImportResponse>(
               `/admin/fundraisers/${id}/participants/bulk_import`,
               { csv: csvContent },
-              { headers: { Authorization: `Bearer ${token}` } }
+              getToken
             );
             loadParticipants();
             loadFundraiser();
@@ -644,12 +644,7 @@ function AddParticipantModal({
     e.preventDefault();
     setSaving(true);
     try {
-      const token = await getToken();
-      await api.post(`/admin/fundraisers/${fundraiserId}/participants`, {
-        participant: form
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await authPost(`/admin/fundraisers/${fundraiserId}/participants`, { participant: form }, getToken);
       toast.success('Participant added');
       onSuccess();
       onClose();

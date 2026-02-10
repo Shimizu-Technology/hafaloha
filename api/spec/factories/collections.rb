@@ -1,13 +1,13 @@
 FactoryBot.define do
   factory :collection do
-    name { "MyString" }
-    slug { "MyString" }
-    description { "MyText" }
-    image_url { "MyString" }
-    published { false }
+    sequence(:name) { |n| "Collection #{n}" }
+    sequence(:slug) { |n| "collection-#{n}" }
+    description { "Collection description" }
+    image_url { "https://example.com/collection.jpg" }
+    published { true }
     featured { false }
     sort_order { 1 }
-    meta_title { "MyString" }
-    meta_description { "MyText" }
+    meta_title { "Collection Meta Title" }
+    meta_description { "Collection meta description" }
   end
 end

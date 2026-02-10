@@ -4,6 +4,12 @@
 require "clerk"
 
 Clerk.configure do |config|
-  config.api_key = ENV.fetch("CLERK_SECRET_KEY")
+  clerk_secret_key = ENV["CLERK_SECRET_KEY"]
+  if clerk_secret_key.blank? && Rails.env.production?
+    raise "CLERK_SECRET_KEY is required in production"
+  end
+
+  # Allow test/development boot without a real Clerk key.
+  config.api_key = clerk_secret_key.presence || "test_clerk_secret_key"
   config.logger = Rails.logger
 end
