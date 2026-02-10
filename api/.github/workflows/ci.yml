@@ -8,6 +8,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
     services:
       postgres:
         image: postgres:16
@@ -33,6 +36,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
+          working-directory: api
 
       - name: Prepare test database
         run: bin/rails db:prepare
@@ -42,7 +46,9 @@ jobs:
 
   scan_ruby:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: api
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
@@ -51,6 +57,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
+          working-directory: api
 
       - name: Scan for common Rails security vulnerabilities using static analysis
         run: bin/brakeman --no-pager
@@ -60,6 +67,9 @@ jobs:
       
   lint:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
     env:
       RUBOCOP_CACHE_ROOT: tmp/rubocop
     steps:
@@ -70,6 +80,7 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           bundler-cache: true
+          working-directory: api
 
       - name: Prepare RuboCop cache
         uses: actions/cache@v4
@@ -83,4 +94,3 @@ jobs:
 
       - name: Lint code for consistent style
         run: bin/rubocop -f github
-

@@ -88,12 +88,30 @@ module Api
         end
 
         def fundraiser_cart_key
-          session_id = request.headers["X-Session-ID"] || request.cookies["session_id"]
-          if session_id.blank?
-            fingerprint = "#{request.remote_ip}|#{request.user_agent}"
-            session_id = Digest::SHA256.hexdigest(fingerprint)
+          "fundraiser_cart:#{@fundraiser.id}:#{cart_session_id}"
+        end
+
+        # Get or generate a unique session ID for cart tracking
+        # Priority: X-Session-ID header > session_id cookie > generate new
+        def cart_session_id
+          @cart_session_id ||= begin
+            sid = request.headers["X-Session-ID"].presence || cookies[:fundraiser_session_id].presence
+
+            if sid.blank?
+              # Generate a secure random session ID
+              sid = SecureRandom.uuid
+              # Set as HTTP-only cookie for subsequent requests (30 days)
+              cookies[:fundraiser_session_id] = {
+                value: sid,
+                expires: 30.days.from_now,
+                httponly: true,
+                secure: Rails.env.production?,
+                same_site: :lax
+              }
+            end
+
+            sid
           end
-          "fundraiser_cart:#{@fundraiser.id}:#{session_id}"
         end
 
         def serialize_cart

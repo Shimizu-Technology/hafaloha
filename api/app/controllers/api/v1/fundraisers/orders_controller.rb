@@ -176,7 +176,8 @@ module Api
 
         # GET /api/v1/fundraisers/:fundraiser_slug/orders/:id
         def show
-          unless guest_email_matches_order?(@order)
+          # Allow access if: admin user, authenticated owner, or guest email matches
+          unless authorized_to_view_order?(@order)
             return render json: { error: "Order not found" }, status: :not_found
           end
 
@@ -194,6 +195,17 @@ module Api
           @order = @fundraiser.fundraiser_orders.find_by(id: params[:id]) ||
                    @fundraiser.fundraiser_orders.find_by(order_number: params[:id])
           render json: { error: "Order not found" }, status: :not_found unless @order
+        end
+
+        def authorized_to_view_order?(order)
+          # Admin users can view any order
+          return true if current_user&.admin? || current_user&.super_admin?
+
+          # Staff of the restaurant/fundraiser organization can view
+          return true if current_user && @fundraiser.restaurant&.staff_members&.exists?(user_id: current_user.id)
+
+          # Guest access: email must match
+          guest_email_matches_order?(order)
         end
 
         def guest_email_matches_order?(order)
@@ -281,12 +293,12 @@ module Api
         end
 
         def fundraiser_cart_key
-          session_id = request.headers["X-Session-ID"] || request.cookies["session_id"]
-          if session_id.blank?
-            fingerprint = "#{request.remote_ip}|#{request.user_agent}"
-            session_id = Digest::SHA256.hexdigest(fingerprint)
-          end
-          "fundraiser_cart:#{@fundraiser.id}:#{session_id}"
+          "fundraiser_cart:#{@fundraiser.id}:#{cart_session_id}"
+        end
+
+        def cart_session_id
+          # Use X-Session-ID header or fundraiser_session_id cookie
+          request.headers["X-Session-ID"].presence || cookies[:fundraiser_session_id].presence || SecureRandom.uuid
         end
 
         def verify_payment_intent(payment_intent_id, expected_amount_cents)
@@ -296,7 +308,23 @@ module Api
             return { success: false, error: "Payment has not been completed (status: #{intent.status})" }
           end
 
-          # Allow a tiny rounding tolerance.
+          # Verify this PaymentIntent was created for this fundraiser (prevents replay attacks)
+          metadata_fundraiser_id = intent.metadata&.dig("fundraiser_id")&.to_s
+          if metadata_fundraiser_id.present? && metadata_fundraiser_id != @fundraiser.id.to_s
+            Rails.logger.warn "Fundraiser PaymentIntent mismatch: expected fundraiser #{@fundraiser.id}, got #{metadata_fundraiser_id}"
+            return { success: false, error: "Payment was not created for this fundraiser" }
+          end
+
+          # Check if this PaymentIntent has already been used for another order
+          existing_order = FundraiserOrder.where(stripe_payment_intent_id: payment_intent_id)
+                                          .where.not(payment_status: [ "pending", "failed" ])
+                                          .first
+          if existing_order
+            Rails.logger.warn "PaymentIntent #{payment_intent_id} already used for order #{existing_order.order_number}"
+            return { success: false, error: "This payment has already been applied to an order" }
+          end
+
+          # Allow a tiny rounding tolerance for amount
           if (intent.amount - expected_amount_cents).abs > 1
             Rails.logger.warn "Fundraiser payment amount mismatch: expected #{expected_amount_cents}, got #{intent.amount}"
             return { success: false, error: "Payment amount does not match order total" }
