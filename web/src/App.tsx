@@ -122,6 +122,20 @@ function AppContent() {
     configApi.getConfig().then(setAppConfig).catch(console.error);
   }, []);
 
+  useEffect(() => {
+    const handleAuthError = () => {
+      setIsAdmin(false);
+      if (location.pathname.startsWith('/admin')) {
+        navigate('/');
+      }
+    };
+
+    window.addEventListener('hafaloha:auth-error', handleAuthError as EventListener);
+    return () => {
+      window.removeEventListener('hafaloha:auth-error', handleAuthError as EventListener);
+    };
+  }, [location.pathname, navigate]);
+
   // Helper to close both mobile menu and cart (for explicit link clicks)
   const handleNavClick = () => {
     setMobileMenuOpen(false);
@@ -150,6 +164,10 @@ function AppContent() {
 
       try {
         const token = await getToken();
+        if (!token) {
+          setIsAdmin(false);
+          return;
+        }
         
         const response = await axios.get(`${API_BASE_URL}/api/v1/me`, {
           headers: {

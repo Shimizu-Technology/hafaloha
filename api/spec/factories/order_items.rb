@@ -1,13 +1,13 @@
 FactoryBot.define do
   factory :order_item do
-    order { nil }
-    product { nil }
-    product_variant { nil }
-    quantity { 1 }
-    unit_price_cents { 1 }
-    total_price_cents { 1 }
-    product_name { "MyString" }
-    variant_name { "MyString" }
-    product_sku { "MyString" }
+    order
+    product
+    product_variant
+    quantity { 2 }
+    unit_price_cents { 1500 }
+    total_price_cents { 3000 }
+    product_name { product.name }
+    variant_name { product_variant.display_name }
+    product_sku { product_variant.sku }
   end
 end

@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
-import axios from 'axios';
 import { Link } from 'react-router-dom';
 import {
   ShoppingCart, DollarSign, Clock, Package, Plus, ClipboardList, FolderOpen, Settings,
   BarChart3, ArrowRight,
 } from 'lucide-react';
 import { StatCard, SkeletonDashboard } from '../../components/admin';
-
-import { API_BASE_URL } from '../../config';
+import { authGet } from '../../services/authApi';
 
 interface DashboardStats {
   total_orders: number;
@@ -24,6 +22,10 @@ interface RecentOrder {
   total_cents: number;
   status: string;
   created_at: string;
+}
+
+interface AdminOrdersListResponse {
+  orders: RecentOrder[];
 }
 
 const formatCurrency = (cents: number) => `$${(cents / 100).toFixed(2)}`;
@@ -57,12 +59,9 @@ export default function AdminDashboardPage() {
 
   const fetchDashboardData = async () => {
     try {
-      const token = await getToken();
-      const headers = { Authorization: `Bearer ${token}` };
-
       const [statsRes, ordersRes] = await Promise.all([
-        axios.get(`${API_BASE_URL}/api/v1/admin/dashboard/stats`, { headers }),
-        axios.get(`${API_BASE_URL}/api/v1/admin/orders?per_page=8`, { headers }),
+        authGet<DashboardStats>('/admin/dashboard/stats', getToken),
+        authGet<AdminOrdersListResponse>('/admin/orders', getToken, { params: { per_page: 8 } }),
       ]);
 
       setStats(statsRes.data);

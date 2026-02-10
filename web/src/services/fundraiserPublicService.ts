@@ -82,8 +82,11 @@ export interface FundraiserOrderItem {
 
 export interface FundraiserOrderRequest {
   customer_name: string;
-  email: string;
-  phone: string;
+  customer_email?: string;
+  customer_phone?: string;
+  // Legacy aliases (kept for backward compatibility with older payloads)
+  email?: string;
+  phone?: string;
   participant_code?: string;
   delivery_method: 'pickup' | 'shipping';
   shipping_address?: {
@@ -122,8 +125,11 @@ export interface FundraiserOrder {
     price_cents: number;
   }>;
   customer_name: string;
-  email: string;
-  phone: string;
+  customer_email?: string;
+  customer_phone?: string;
+  // Legacy aliases from previous API versions
+  email?: string;
+  phone?: string;
   delivery_method: 'pickup' | 'shipping';
   shipping_address?: {
     street1: string;

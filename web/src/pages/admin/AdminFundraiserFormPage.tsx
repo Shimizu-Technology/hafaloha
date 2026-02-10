@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { ArrowLeft, Save } from 'lucide-react';
-import api from '../../services/api';
+import { authGet, authPatch, authPost } from '../../services/authApi';
 import toast from 'react-hot-toast';
 
 interface FundraiserForm {
@@ -49,6 +49,33 @@ const defaultForm: FundraiserForm = {
   thank_you_message: '',
 };
 
+interface FundraiserEntity {
+  id: number;
+  name?: string;
+  slug?: string;
+  organization_name?: string;
+  description?: string;
+  status?: string;
+  start_date?: string;
+  end_date?: string;
+  goal_amount_cents?: number;
+  payout_percentage?: number;
+  image_url?: string;
+  contact_name?: string;
+  contact_email?: string;
+  contact_phone?: string;
+  pickup_location?: string;
+  pickup_instructions?: string;
+  allow_shipping?: boolean;
+  shipping_note?: string;
+  public_message?: string;
+  thank_you_message?: string;
+}
+
+interface FundraiserResponse {
+  fundraiser: FundraiserEntity;
+}
+
 export default function AdminFundraiserFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -69,10 +96,7 @@ export default function AdminFundraiserFormPage() {
 
   const loadFundraiser = async () => {
     try {
-      const token = await getToken();
-      const response = await api.get(`/admin/fundraisers/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await authGet<FundraiserResponse>(`/admin/fundraisers/${id}`, getToken);
       const f = response.data.fundraiser;
       setForm({
         name: f.name || '',
@@ -126,7 +150,6 @@ export default function AdminFundraiserFormPage() {
     setErrors([]);
 
     try {
-      const token = await getToken();
       const payload = {
         fundraiser: {
           name: form.name,
@@ -152,14 +175,10 @@ export default function AdminFundraiserFormPage() {
       };
 
       if (isEditing) {
-        await api.put(`/admin/fundraisers/${id}`, payload, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await authPatch(`/admin/fundraisers/${id}`, payload, getToken);
         toast.success('Fundraiser updated');
       } else {
-        const response = await api.post('/admin/fundraisers', payload, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await authPost<FundraiserResponse>('/admin/fundraisers', payload, getToken);
         toast.success('Fundraiser created');
         navigate(`/admin/fundraisers/${response.data.fundraiser.id}`);
         return;

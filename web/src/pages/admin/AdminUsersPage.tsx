@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
-import axios from 'axios';
 import toast from 'react-hot-toast';
-
-import { API_BASE_URL } from '../../config';
+import { authGet, authPatch } from '../../services/authApi';
 
 interface User {
   id: number;
@@ -23,6 +21,16 @@ interface Stats {
   customers: number;
 }
 
+interface UsersIndexResponse {
+  users: User[];
+  stats: Stats;
+}
+
+interface AdminUserResponse {
+  user: User;
+  message: string;
+}
+
 export default function AdminUsersPage() {
   const { getToken } = useAuth();
   const [users, setUsers] = useState<User[]>([]);
@@ -36,16 +44,12 @@ export default function AdminUsersPage() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const token = await getToken();
       
       const params: Record<string, string> = {};
       if (searchQuery) params.search = searchQuery;
       if (roleFilter !== 'all') params.role = roleFilter;
       
-      const response = await axios.get(`${API_BASE_URL}/api/v1/admin/users`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params
-      });
+      const response = await authGet<UsersIndexResponse>('/admin/users', getToken, { params });
       
       setUsers(response.data.users);
       setStats(response.data.stats);
@@ -76,13 +80,7 @@ export default function AdminUsersPage() {
 
     try {
       setUpdatingUserId(user.id);
-      const token = await getToken();
-      
-      const response = await axios.patch(
-        `${API_BASE_URL}/api/v1/admin/users/${user.id}`,
-        { user: { role: newRole } },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await authPatch<AdminUserResponse>(`/admin/users/${user.id}`, { user: { role: newRole } }, getToken);
       
       // Update user in list
       setUsers(users.map(u => u.id === user.id ? response.data.user : u));

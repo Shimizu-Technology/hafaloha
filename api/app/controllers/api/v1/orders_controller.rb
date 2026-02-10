@@ -203,6 +203,7 @@ module Api
       # Get order details
       def show
         order = find_order_by_id_or_number(params[:id])
+        return unless authorize_order_access(order)
 
         render json: {
           order: detailed_order_json(order)
@@ -648,6 +649,30 @@ module Api
         else
           Order.includes(order_items: { product_variant: :product }).find_by!(order_number: id_or_number)
         end
+      end
+
+      def authorize_order_access(order)
+        # Admins can view any order
+        return true if current_user&.admin?
+
+        # Signed-in users can view their own orders. If an order was created as a guest
+        # and later associated by email, allow that as well.
+        if current_user
+          owns_order = order.user_id == current_user.id
+          email_matches = order.user_id.nil? &&
+                          current_user.email.present? &&
+                          order.customer_email.to_s.casecmp(current_user.email.to_s).zero?
+          return true if owns_order || email_matches
+        end
+
+        # Guest access requires matching email to reduce order-number/ID enumeration risk.
+        guest_email = params[:email].to_s.strip
+        if guest_email.present? && order.customer_email.to_s.casecmp(guest_email).zero?
+          return true
+        end
+
+        render json: { error: "Order not found" }, status: :not_found
+        false
       end
 
       # Simplified order JSON for customer-facing order history

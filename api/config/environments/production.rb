@@ -46,9 +46,11 @@ Rails.application.configure do
   # Use memory cache store (Solid Cache requires separate database setup)
   config.cache_store = :memory_store
 
-  # Use async queue adapter (Solid Queue requires separate database setup)
-  # TODO: Switch to Sidekiq when Redis is configured
-  config.active_job.queue_adapter = :async
+  # Use a durable queue adapter in production.
+  # Default to Solid Queue, with optional override (e.g. sidekiq) via env var.
+  # Default to :async until Solid Queue is fully set up in production
+  # Switch via ACTIVE_JOB_QUEUE_ADAPTER=solid_queue once migrations are in place
+  config.active_job.queue_adapter = ENV.fetch("ACTIVE_JOB_QUEUE_ADAPTER", "async").to_sym
 
   # Ignore bad email addresses and do not raise email delivery errors.
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.

@@ -51,8 +51,7 @@ export default function AdminVariantPresetsPage() {
   const loadPresets = async () => {
     try {
       setLoading(true);
-      const token = await getToken();
-      const response = await variantPresetsService.getAll(token);
+      const response = await variantPresetsService.getAll(getToken);
       if (response.success) {
         setGroupedPresets(response.data.grouped_by_type);
         setOptionTypes(response.data.option_types);
@@ -88,8 +87,7 @@ export default function AdminVariantPresetsPage() {
 
   const handleDuplicate = async (preset: VariantPreset) => {
     try {
-      const token = await getToken();
-      const response = await variantPresetsService.duplicate(preset.id, undefined, token);
+      const response = await variantPresetsService.duplicate(preset.id, getToken);
       if (response.success) {
         toast.success(`Duplicated as "${response.data.name}"`);
         loadPresets();
@@ -106,8 +104,7 @@ export default function AdminVariantPresetsPage() {
     }
 
     try {
-      const token = await getToken();
-      await variantPresetsService.remove(preset.id, token);
+      await variantPresetsService.remove(preset.id, getToken);
       toast.success('Preset deleted');
       loadPresets();
     } catch (error) {
@@ -133,13 +130,12 @@ export default function AdminVariantPresetsPage() {
 
     try {
       setSaving(true);
-      const token = await getToken();
       
       if (editingPreset) {
-        await variantPresetsService.update(editingPreset.id, formData, token);
+        await variantPresetsService.update(editingPreset.id, formData, getToken);
         toast.success('Preset updated');
       } else {
-        await variantPresetsService.create(formData, token);
+        await variantPresetsService.create(formData, getToken);
         toast.success('Preset created');
       }
       

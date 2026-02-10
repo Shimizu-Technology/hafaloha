@@ -584,7 +584,7 @@ module Api
                 product: product,
                 previous_qty: previous_stock,
                 new_qty: new_stock,
-                reason: "Order #" + '#{order.order_number}' + " refunded - stock restored",
+                reason: "Order ##{order.order_number} refunded - stock restored",
                 audit_type: "order_refunded",
                 order: order,
                 user: user
@@ -593,7 +593,7 @@ module Api
           end
         end
 
-        Rails.logger.info "Inventory restored for refunded order #" + '#{order.order_number}'
+        Rails.logger.info "Inventory restored for refunded order ##{order.order_number}"
       end
 
       # Restore inventory for specific order items (for partial refunds)

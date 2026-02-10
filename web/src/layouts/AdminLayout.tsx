@@ -100,6 +100,10 @@ export default function AdminLayout() {
       }
       try {
         const token = await getToken();
+        if (!token) {
+          setIsAdmin(false);
+          return;
+        }
         const response = await axios.get(`${API_BASE_URL}/api/v1/me`, {
           headers: { Authorization: `Bearer ${token}` }
         });

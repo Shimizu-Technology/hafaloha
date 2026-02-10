@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
-import axios from 'axios';
 import toast from 'react-hot-toast';
 import type { Order } from '../../components/admin/orders';
 import {
@@ -13,9 +12,26 @@ import {
 } from '../../components/admin/orders';
 import { SkeletonListPage } from '../../components/admin';
 
-import { API_BASE_URL } from '../../config';
 import { configApi } from '../../services/api';
+import { authGet, authPatch, authPost } from '../../services/authApi';
 import type { AppConfig } from '../../types/order';
+
+interface OrdersIndexResponse {
+  orders: Order[];
+  pagination: {
+    total_pages: number;
+    total_count: number;
+  };
+}
+
+interface AdminOrderResponse {
+  order: Order;
+}
+
+interface RefundResponse {
+  order: Order;
+  message?: string;
+}
 
 export default function AdminOrdersPage() {
   const { getToken } = useAuth();
@@ -62,7 +78,6 @@ export default function AdminOrdersPage() {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const token = await getToken();
       const params: Record<string, unknown> = { page, per_page: 25 };
       if (statusFilter !== 'all') params.status = statusFilter;
       if (orderTypeFilter !== 'all') params.order_type = orderTypeFilter;
@@ -70,10 +85,7 @@ export default function AdminOrdersPage() {
       if (startDate) params.start_date = startDate;
       if (endDate) params.end_date = endDate;
 
-      const response = await axios.get(`${API_BASE_URL}/api/v1/orders`, {
-        headers: { Authorization: `Bearer ${token}` },
-        params,
-      });
+      const response = await authGet<OrdersIndexResponse>('/orders', getToken, { params });
 
       setOrders(response.data.orders);
       setTotalPages(response.data.pagination.total_pages);
@@ -96,10 +108,7 @@ export default function AdminOrdersPage() {
   // ── Fetch single order details ────────────────────────────────
   const fetchOrderDetails = async (orderId: number) => {
     try {
-      const token = await getToken();
-      const response = await axios.get(`${API_BASE_URL}/api/v1/admin/orders/${orderId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await authGet<AdminOrderResponse>(`/admin/orders/${orderId}`, getToken);
       setSelectedOrder(response.data.order);
     } catch (err) {
       console.error('Failed to fetch order details:', err);
@@ -116,12 +125,7 @@ export default function AdminOrdersPage() {
     if (!selectedOrder) return;
     try {
       setSaving(true);
-      const token = await getToken();
-      const response = await axios.patch(
-        `${API_BASE_URL}/api/v1/admin/orders/${selectedOrder.id}`,
-        { order: updates },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      const response = await authPatch<AdminOrderResponse>(`/admin/orders/${selectedOrder.id}`, { order: updates }, getToken);
       setOrders(orders.map((o) => (o.id === selectedOrder.id ? response.data.order : o)));
       setSelectedOrder(response.data.order);
       toast.success('Order updated successfully!');
@@ -143,12 +147,7 @@ export default function AdminOrdersPage() {
     }
 
     try {
-      const token = await getToken();
-      const response = await axios.patch(
-        `${API_BASE_URL}/api/v1/admin/orders/${orderId}`,
-        { order: { status: newStatus } },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      const response = await authPatch<AdminOrderResponse>(`/admin/orders/${orderId}`, { order: { status: newStatus } }, getToken);
       setOrders(orders.map((o) => (o.id === orderId ? response.data.order : o)));
       if (selectedOrder?.id === orderId) setSelectedOrder(response.data.order);
       toast.success(`Order marked as ${formatStatus(newStatus)}!`);
@@ -162,16 +161,15 @@ export default function AdminOrdersPage() {
     if (!shipOrderId) return;
     try {
       setSaving(true);
-      const token = await getToken();
       const trackingInfo =
         shipCarrier && shipTrackingNumber
           ? `${shipCarrier}: ${shipTrackingNumber}`
           : shipTrackingNumber;
 
-      const response = await axios.patch(
-        `${API_BASE_URL}/api/v1/admin/orders/${shipOrderId}`,
+      const response = await authPatch<AdminOrderResponse>(
+        `/admin/orders/${shipOrderId}`,
         { order: { status: 'shipped', tracking_number: trackingInfo || null } },
-        { headers: { Authorization: `Bearer ${token}` } },
+        getToken
       );
 
       setOrders(orders.map((o) => (o.id === shipOrderId ? response.data.order : o)));
@@ -194,11 +192,10 @@ export default function AdminOrdersPage() {
     }
     try {
       setProcessingRefund(true);
-      const token = await getToken();
-      const response = await axios.post(
-        `${API_BASE_URL}/api/v1/admin/orders/${selectedOrder.id}/refund`,
+      const response = await authPost<RefundResponse>(
+        `/admin/orders/${selectedOrder.id}/refund`,
         { amount_cents: amountCents, reason: reason || undefined },
-        { headers: { Authorization: `Bearer ${token}` } },
+        getToken
       );
       toast.success(response.data.message || 'Refund processed successfully');
       const updatedOrder = response.data.order;
@@ -215,12 +212,7 @@ export default function AdminOrdersPage() {
   // ── Resend notification ───────────────────────────────────────
   const resendNotification = async (orderId: number) => {
     try {
-      const token = await getToken();
-      await axios.post(
-        `${API_BASE_URL}/api/v1/admin/orders/${orderId}/notify`,
-        {},
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      await authPost(`/admin/orders/${orderId}/notify`, {}, getToken);
       toast.success('Notification email sent to customer!');
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Failed to send notification');
@@ -309,7 +301,7 @@ export default function AdminOrdersPage() {
       {/* Fundraiser Orders Note */}
       {orderTypeFilter === 'wholesale' && (
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
-          <svg className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-blue-500 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <div>

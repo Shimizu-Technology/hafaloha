@@ -1,18 +1,20 @@
 FactoryBot.define do
   factory :product do
-    name { "MyString" }
-    slug { "MyString" }
-    description { "MyText" }
-    base_price_cents { 1 }
-    sku_prefix { "MyString" }
+    sequence(:name) { |n| "Product #{n}" }
+    sequence(:slug) { |n| "product-#{n}" }
+    description { "Product description" }
+    base_price_cents { 2500 }
+    sku_prefix { "PRD" }
     track_inventory { false }
-    weight_oz { "9.99" }
-    published { false }
+    weight_oz { 9.99 }
+    published { true }
     featured { false }
-    product_type { "MyString" }
-    shopify_product_id { "MyString" }
-    vendor { "MyString" }
-    meta_title { "MyString" }
-    meta_description { "MyText" }
+    product_type { "apparel" }
+    shopify_product_id { nil }
+    vendor { "Hafaloha" }
+    meta_title { "Product Meta Title" }
+    meta_description { "Product meta description" }
+    inventory_level { "none" }
+    archived { false }
   end
 end

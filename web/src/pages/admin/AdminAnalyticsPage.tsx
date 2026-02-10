@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@clerk/clerk-react';
-import axios from 'axios';
 import {
   TrendingUp, TrendingDown, Minus,
 } from 'lucide-react';
 import { SkeletonBar, SkeletonStatCard } from '../../components/admin';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-
-import { API_BASE_URL } from '../../config';
+import { authGet } from '../../services/authApi';
 
 interface ChartPoint {
   date: string;
@@ -40,9 +38,9 @@ export default function AdminAnalyticsPage() {
   const fetchChartData = async () => {
     try {
       setLoading(true);
-      const token = await getToken();
-      const headers = { Authorization: `Bearer ${token}` };
-      const res = await axios.get(`${API_BASE_URL}/api/v1/admin/dashboard/chart_data?days=${days}`, { headers });
+      const res = await authGet<ChartData>('/admin/dashboard/chart_data', getToken, {
+        params: { days },
+      });
       setChartData(res.data);
     } catch (err) {
       console.error('Failed to fetch chart data:', err);

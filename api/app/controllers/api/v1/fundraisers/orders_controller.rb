@@ -1,3 +1,5 @@
+require "digest"
+
 module Api
   module V1
     module Fundraisers
@@ -38,8 +40,8 @@ module Api
             status: "pending",
             payment_status: "pending",
             customer_name: order_params[:customer_name],
-            customer_email: order_params[:customer_email],
-            customer_phone: order_params[:customer_phone],
+            customer_email: order_params[:customer_email] || order_params[:email],
+            customer_phone: order_params[:customer_phone] || order_params[:phone],
             notes: order_params[:notes]
           )
 
@@ -54,7 +56,7 @@ module Api
               shipping_zip: shipping[:zip],
               shipping_country: shipping[:country] || "US"
             )
-            @order.shipping_cents = order_params[:shipping_cents].to_i
+            @order.shipping_cents = shipping_cents_from_params
           end
 
           # Process items and calculate totals
@@ -122,8 +124,18 @@ module Api
           @order.tax_cents = order_params[:tax_cents].to_i
           @order.total_cents = subtotal_cents + (@order.shipping_cents || 0) + (@order.tax_cents || 0)
 
-          # Process payment if payment method provided
-          if order_params[:payment_method].present?
+          # Process payment intent from Stripe.js checkout flow
+          if order_params[:payment_intent_id].present?
+            verification = verify_payment_intent(order_params[:payment_intent_id], @order.total_cents)
+            unless verification[:success]
+              return render json: { error: verification[:error] }, status: :unprocessable_entity
+            end
+
+            @order.payment_status = "paid"
+            @order.stripe_payment_intent_id = order_params[:payment_intent_id]
+            @order.status = "paid"
+          # Legacy payment method flow (server-side charge)
+          elsif order_params[:payment_method].present?
             payment_result = process_payment(@order, order_params[:payment_method])
 
             unless payment_result[:success]
@@ -131,7 +143,7 @@ module Api
             end
 
             @order.payment_status = "paid"
-            @order.stripe_payment_intent_id = payment_result[:payment_intent_id]
+            @order.stripe_payment_intent_id = payment_result[:payment_intent_id] || payment_result[:charge_id]
             @order.status = "paid"
           end
 
@@ -164,6 +176,11 @@ module Api
 
         # GET /api/v1/fundraisers/:fundraiser_slug/orders/:id
         def show
+          # Allow access if: admin user, authenticated owner, or guest email matches
+          unless authorized_to_view_order?(@order)
+            return render json: { error: "Order not found" }, status: :not_found
+          end
+
           render json: { order: serialize_order(@order) }
         end
 
@@ -180,15 +197,38 @@ module Api
           render json: { error: "Order not found" }, status: :not_found unless @order
         end
 
+        def authorized_to_view_order?(order)
+          # Admin users can view any order
+          return true if current_user&.admin?
+
+          # Guest access: email must match
+          guest_email_matches_order?(order)
+        end
+
+        def guest_email_matches_order?(order)
+          provided_email = params[:email].to_s.strip
+          provided_email.present? && order.customer_email.to_s.casecmp(provided_email).zero?
+        end
+
         def order_params
           params.require(:order).permit(
             :participant_id, :participant_code,
             :customer_name, :customer_email, :customer_phone,
+            :email, :phone, :delivery_method, :payment_intent_id,
             :notes, :shipping_cents, :tax_cents,
             shipping_address: [ :line1, :line2, :street1, :street2, :city, :state, :zip, :country ],
+            shipping_method: [ :carrier, :service, :rate_cents, :rate_id ],
             payment_method: [ :token, :type, :payment_method_id ],
             items: [ :variant_id, :quantity ]
           )
+        end
+
+        def shipping_cents_from_params
+          explicit_shipping_cents = order_params[:shipping_cents]
+          return explicit_shipping_cents.to_i if explicit_shipping_cents.present?
+
+          shipping_method = order_params[:shipping_method] || {}
+          shipping_method[:rate_cents].to_i
         end
 
         def process_payment(order, payment_method)
@@ -245,8 +285,55 @@ module Api
         end
 
         def clear_cart
-          cart_key = "fundraiser_cart_#{@fundraiser.id}"
-          session.delete(cart_key)
+          cart_key = fundraiser_cart_key
+          Rails.cache.delete(cart_key)
+        end
+
+        def fundraiser_cart_key
+          "fundraiser_cart:#{@fundraiser.id}:#{cart_session_id}"
+        end
+
+        def cart_session_id
+          # Use X-Session-ID header or fundraiser_session_id cookie
+          request.headers["X-Session-ID"].presence || cookies[:fundraiser_session_id].presence || SecureRandom.uuid
+        end
+
+        def verify_payment_intent(payment_intent_id, expected_amount_cents)
+          intent = Stripe::PaymentIntent.retrieve(payment_intent_id)
+
+          unless intent.status == "succeeded"
+            return { success: false, error: "Payment has not been completed (status: #{intent.status})" }
+          end
+
+          # Verify this PaymentIntent was created for this fundraiser (prevents replay attacks)
+          metadata_fundraiser_id = intent.metadata&.dig("fundraiser_id")&.to_s
+          if metadata_fundraiser_id.present? && metadata_fundraiser_id != @fundraiser.id.to_s
+            Rails.logger.warn "Fundraiser PaymentIntent mismatch: expected fundraiser #{@fundraiser.id}, got #{metadata_fundraiser_id}"
+            return { success: false, error: "Payment was not created for this fundraiser" }
+          end
+
+          # Check if this PaymentIntent has already been used for another order
+          existing_order = FundraiserOrder.where(stripe_payment_intent_id: payment_intent_id)
+                                          .where.not(payment_status: [ "pending", "failed" ])
+                                          .first
+          if existing_order
+            Rails.logger.warn "PaymentIntent #{payment_intent_id} already used for order #{existing_order.order_number}"
+            return { success: false, error: "This payment has already been applied to an order" }
+          end
+
+          # Allow a tiny rounding tolerance for amount
+          if (intent.amount - expected_amount_cents).abs > 1
+            Rails.logger.warn "Fundraiser payment amount mismatch: expected #{expected_amount_cents}, got #{intent.amount}"
+            return { success: false, error: "Payment amount does not match order total" }
+          end
+
+          { success: true }
+        rescue Stripe::InvalidRequestError => e
+          Rails.logger.error "Invalid fundraiser PaymentIntent ID: #{e.message}"
+          { success: false, error: "Invalid payment reference" }
+        rescue Stripe::StripeError => e
+          Rails.logger.error "Fundraiser Stripe verification error: #{e.message}"
+          { success: false, error: "Payment verification failed. Please try again." }
         end
 
         def send_order_emails(order)
@@ -276,6 +363,9 @@ module Api
             customer_name: order.customer_name,
             customer_email: order.customer_email,
             customer_phone: order.customer_phone,
+            email: order.customer_email,
+            phone: order.customer_phone,
+            delivery_method: order.shipping_cents.to_i.positive? ? "shipping" : "pickup",
             participant_name: order.participant&.name,
             participant_code: order.participant&.unique_code,
             subtotal_cents: order.subtotal_cents,

@@ -1,3 +1,5 @@
+require "digest"
+
 module Api
   module V1
     module Fundraisers
@@ -76,15 +78,40 @@ module Api
         end
 
         def load_cart
-          cart_key = "fundraiser_cart_#{@fundraiser.id}"
-          @cart = session[cart_key] || { items: {}, participant_code: nil }
+          @cart = Rails.cache.read(fundraiser_cart_key) || { items: {}, participant_code: nil }
           @cart = @cart.with_indifferent_access
           @cart[:items] ||= {}
         end
 
         def save_cart
-          cart_key = "fundraiser_cart_#{@fundraiser.id}"
-          session[cart_key] = @cart
+          Rails.cache.write(fundraiser_cart_key, @cart, expires_in: 30.days)
+        end
+
+        def fundraiser_cart_key
+          "fundraiser_cart:#{@fundraiser.id}:#{cart_session_id}"
+        end
+
+        # Get or generate a unique session ID for cart tracking
+        # Priority: X-Session-ID header > session_id cookie > generate new
+        def cart_session_id
+          @cart_session_id ||= begin
+            sid = request.headers["X-Session-ID"].presence || cookies[:fundraiser_session_id].presence
+
+            if sid.blank?
+              # Generate a secure random session ID
+              sid = SecureRandom.uuid
+              # Set as HTTP-only cookie for subsequent requests (30 days)
+              cookies[:fundraiser_session_id] = {
+                value: sid,
+                expires: 30.days.from_now,
+                httponly: true,
+                secure: Rails.env.production?,
+                same_site: :lax
+              }
+            end
+
+            sid
+          end
         end
 
         def serialize_cart

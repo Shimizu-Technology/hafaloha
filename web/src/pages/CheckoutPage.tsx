@@ -218,7 +218,7 @@ function CheckoutForm() {
         const response = await ordersApi.createOrder(orderData, token, sessionId);
         if (response.success) {
           await clearCart();
-          navigate(`/orders/${response.order.id}`);
+          navigate(`/orders/${response.order.id}?email=${encodeURIComponent(email)}`);
         } else {
           setError('Failed to create order. Please try again.');
         }
@@ -266,7 +266,7 @@ function CheckoutForm() {
         const response = await ordersApi.createOrder(orderData, token, sessionId);
         if (response.success) {
           await clearCart();
-          navigate(`/orders/${response.order.id}`);
+          navigate(`/orders/${response.order.id}?email=${encodeURIComponent(email)}`);
         } else {
           setError('Your payment was processed but there was an issue creating your order. Please contact support with reference: ' + paymentIntent.id);
         }

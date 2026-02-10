@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { CheckCircle, Package, MapPin, Truck, Mail, Phone, Heart } from 'lucide-react';
 import api from '../../services/api';
 
@@ -21,8 +21,11 @@ interface FundraiserOrder {
   shipping_cents: number;
   items: OrderItem[];
   customer_name: string;
-  email: string;
-  phone: string;
+  customer_email?: string;
+  customer_phone?: string;
+  // Legacy aliases
+  email?: string;
+  phone?: string;
   delivery_method: 'pickup' | 'shipping';
   shipping_address?: {
     name?: string;
@@ -42,6 +45,7 @@ interface FundraiserOrder {
 
 export default function FundraiserOrderConfirmationPage() {
   const { slug, orderId } = useParams<{ slug: string; orderId: string }>();
+  const location = useLocation();
 
   const [order, setOrder] = useState<FundraiserOrder | null>(null);
   const [loading, setLoading] = useState(true);
@@ -51,11 +55,15 @@ export default function FundraiserOrderConfirmationPage() {
     if (slug && orderId) {
       loadOrder();
     }
-  }, [slug, orderId]);
+  }, [slug, orderId, location.search]);
 
   const loadOrder = async () => {
     try {
-      const response = await api.get(`/fundraisers/${slug}/orders/${orderId}`);
+      const params = new URLSearchParams(location.search);
+      const guestEmail = params.get('email');
+      const response = await api.get(`/fundraisers/${slug}/orders/${orderId}`, {
+        params: guestEmail ? { email: guestEmail } : undefined,
+      });
       setOrder(response.data.order);
     } catch (err: unknown) {
       const error = err as { response?: { data?: { error?: string } } };
@@ -159,11 +167,11 @@ export default function FundraiserOrderConfirmationPage() {
             <p className="font-medium">{order.customer_name}</p>
             <p className="flex items-center gap-2 text-warm-600">
               <Mail className="w-4 h-4" />
-              {order.email}
+              {order.customer_email || order.email}
             </p>
             <p className="flex items-center gap-2 text-warm-600">
               <Phone className="w-4 h-4" />
-              {order.phone}
+              {order.customer_phone || order.phone}
             </p>
           </div>
         </div>

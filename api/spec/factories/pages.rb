@@ -1,10 +1,10 @@
 FactoryBot.define do
   factory :page do
-    title { "MyString" }
-    slug { "MyString" }
-    content { "MyText" }
-    published { false }
-    meta_title { "MyString" }
-    meta_description { "MyText" }
+    sequence(:title) { |n| "Page #{n}" }
+    sequence(:slug) { |n| "page-#{n}" }
+    content { "Page content" }
+    published { true }
+    meta_title { "Page Meta Title" }
+    meta_description { "Page meta description" }
   end
 end

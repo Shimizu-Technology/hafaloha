@@ -28,9 +28,7 @@ RSpec.describe Order, type: :model do
 
     context 'authenticated orders (has user_id)' do
       it 'does not require customer_email' do
-        user = create(:user) rescue nil
-        # If User factory doesn't exist, skip this test
-        skip 'User factory not available' unless user
+        user = create(:user)
         order = build(:order, user: user, customer_email: nil)
         expect(order).to be_valid
       end

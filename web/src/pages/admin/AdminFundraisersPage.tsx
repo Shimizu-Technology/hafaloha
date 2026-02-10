@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import { Plus, Search, Edit, Trash2, Users, Package, ShoppingCart } from 'lucide-react';
-import api from '../../services/api';
+import { authDelete, authGet } from '../../services/authApi';
 
 interface Fundraiser {
   id: number;
@@ -24,6 +24,10 @@ interface Fundraiser {
   created_at: string;
 }
 
+interface FundraisersListResponse {
+  fundraisers: Fundraiser[];
+}
+
 export default function AdminFundraisersPage() {
   const { getToken } = useAuth();
   const [fundraisers, setFundraisers] = useState<Fundraiser[]>([]);
@@ -41,14 +45,11 @@ export default function AdminFundraisersPage() {
 
   const loadFundraisers = async () => {
     try {
-      const token = await getToken();
       const params = new URLSearchParams();
       if (search) params.append('search', search);
       if (statusFilter) params.append('status', statusFilter);
 
-      const response = await api.get(`/admin/fundraisers?${params}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await authGet<FundraisersListResponse>(`/admin/fundraisers?${params.toString()}`, getToken);
       setFundraisers(response.data.fundraisers);
     } catch (error) {
       console.error('Failed to load fundraisers:', error);
@@ -61,10 +62,7 @@ export default function AdminFundraisersPage() {
     if (!confirm(`Are you sure you want to delete "${fundraiser.name}"? This cannot be undone.`)) return;
     
     try {
-      const token = await getToken();
-      await api.delete(`/admin/fundraisers/${fundraiser.id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await authDelete(`/admin/fundraisers/${fundraiser.id}`, getToken);
       loadFundraisers();
     } catch (error: any) {
       alert(error.response?.data?.error || 'Failed to delete fundraiser');

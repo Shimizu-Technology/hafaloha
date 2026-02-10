@@ -15,9 +15,7 @@ module Authenticatable
     return render_unauthorized unless token
 
     begin
-      # Decode the JWT token to get the user ID
-      decoded_token = JWT.decode(token, nil, false)
-      payload = decoded_token.first
+      payload, clerk_client = verify_token_with_clerk(token)
 
       clerk_id = payload["sub"]
 
@@ -29,7 +27,6 @@ module Authenticatable
       Rails.logger.info("Fetching user info from Clerk for ID: #{clerk_id}")
 
       # Fetch user info from Clerk API
-      clerk_client = Clerk::SDK.new
       clerk_user = clerk_client.users.find(clerk_id)
 
       # Extract primary email
@@ -45,9 +42,6 @@ module Authenticatable
 
       @current_user = find_or_create_user(clerk_id, email)
       Rails.logger.info("User authenticated: #{@current_user.email} (Admin: #{@current_user.admin?})")
-    rescue JWT::DecodeError => e
-      Rails.logger.error("JWT decode error: #{e.message}")
-      render_unauthorized("Invalid token format")
     rescue StandardError => e
       Rails.logger.error("Authentication error: #{e.class} - #{e.message}")
       Rails.logger.error(e.backtrace.first(5).join("\n"))
@@ -55,17 +49,34 @@ module Authenticatable
     end
   end
 
+  def verify_token_with_clerk(token)
+    clerk_client = Clerk::SDK.new
+    payload = clerk_client.verify_token(token)
+
+    unless payload.is_a?(Hash)
+      raise StandardError, "Invalid token payload from Clerk verification"
+    end
+
+    [ payload.with_indifferent_access, clerk_client ]
+  end
+
+  DEFAULT_ADMIN_EMAILS = %w[
+    shimizutechnology@gmail.com
+    jerry.shimizutechnology@gmail.com
+  ].freeze
+
+  ADMIN_EMAILS = ENV.fetch("ADMIN_EMAILS", DEFAULT_ADMIN_EMAILS.join(","))
+                    .split(",")
+                    .map(&:strip)
+                    .reject(&:blank?)
+                    .freeze
+
   def extract_token
     auth_header = request.headers["Authorization"]
     return unless auth_header&.start_with?("Bearer ")
 
     auth_header.split(" ").last
   end
-
-  ADMIN_EMAILS = %w[
-    shimizutechnology@gmail.com
-    jerry.shimizutechnology@gmail.com
-  ].freeze
 
   def find_or_create_user(clerk_id, email)
     user = User.find_or_create_by!(clerk_id: clerk_id) do |u|
@@ -95,21 +106,19 @@ module Authenticatable
     return unless token
 
     begin
-      decoded_token = JWT.decode(token, nil, false)
-      payload = decoded_token.first
+      payload, clerk_client = verify_token_with_clerk(token)
       clerk_id = payload["sub"]
 
       return unless clerk_id
 
-      clerk_client = Clerk::SDK.new
       clerk_user = clerk_client.users.find(clerk_id)
 
       primary_email_obj = clerk_user["email_addresses"].find { |e| e["id"] == clerk_user["primary_email_address_id"] }
       email = primary_email_obj ? primary_email_obj["email_address"] : nil
 
       @current_user = find_or_create_user(clerk_id, email) if email
-    rescue
-      # Silent fail for optional auth
+    rescue StandardError => e
+      Rails.logger.warn("Optional auth failed: #{e.class} - #{e.message}")
       nil
     end
   end
