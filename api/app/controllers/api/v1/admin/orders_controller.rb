@@ -79,12 +79,16 @@ module Api
                       .order(created_at: :asc)
         orders = orders.where(status: params[:status]) if params[:status].present?
 
+        status_counts = Order.where(order_type: %w[acai wholesale])
+                             .where(status: %w[pending confirmed ready])
+                             .group(:status).count
+
         render json: {
           orders: orders.map { |o| order_json(o) },
           counts: {
-            pending: Order.where(order_type: %w[acai wholesale], status: "pending").count,
-            confirmed: Order.where(order_type: %w[acai wholesale], status: "confirmed").count,
-            ready: Order.where(order_type: %w[acai wholesale], status: "ready").count
+            pending: status_counts["pending"] || 0,
+            confirmed: status_counts["confirmed"] || 0,
+            ready: status_counts["ready"] || 0
           }
         }
       end
@@ -97,12 +101,16 @@ module Api
                       .order(created_at: :asc)
         orders = orders.where(status: params[:status]) if params[:status].present?
 
+        status_counts = Order.where(order_type: "retail")
+                             .where(status: %w[pending processing shipped])
+                             .group(:status).count
+
         render json: {
           orders: orders.map { |o| order_json(o) },
           counts: {
-            pending: Order.retail.where(status: "pending").count,
-            processing: Order.retail.where(status: "processing").count,
-            shipped: Order.retail.where(status: "shipped").count
+            pending: status_counts["pending"] || 0,
+            processing: status_counts["processing"] || 0,
+            shipped: status_counts["shipped"] || 0
           }
         }
       end

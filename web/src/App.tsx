@@ -27,7 +27,6 @@ import AdminFundraiserProductFormPage from './pages/admin/AdminFundraiserProduct
 import AdminPOSPage from './pages/admin/AdminPOSPage';
 import AdminPickupQueuePage from './pages/admin/AdminPickupQueuePage';
 import AdminShippingQueuePage from './pages/admin/AdminShippingQueuePage';
->>>>>>> main
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
