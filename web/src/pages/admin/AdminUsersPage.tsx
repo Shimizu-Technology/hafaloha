@@ -19,55 +19,6 @@ const ROLE_COLORS: Record<Role, string> = {
   manager: 'bg-purple-100 text-purple-800',
   admin: 'bg-indigo-100 text-indigo-800',
 };
-
-interface User {
-  id: number;
-  email: string;
-  name: string | null;
-  phone: string | null;
-  role: Role;
-  role_level: number;
-  is_admin: boolean;
-  assigned_location_id: number | null;
-  clerk_id: string;
-  created_at: string;
-  updated_at: string;
-}
-
-interface Stats {
-  total: number;
-  admins: number;
-  managers: number;
-  staff: number;
-  customers: number;
-}
-
-interface UsersIndexResponse {
-  users: User[];
-  stats: Stats;
-}
-
-interface AdminUserResponse {
-  user: User;
-  message: string;
-}
-
-export default function AdminUsersPage() {
-  const { getToken } = useAuth();
-  const [users, setUsers] = useState<User[]>([]);
-  const [stats, setStats] = useState<Stats>({ total: 0, admins: 0, managers: 0, staff: 0, customers: 0 });
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [roleFilter, setRoleFilter] = useState('all');
-  const [updatingUserId, setUpdatingUserId] = useState<number | null>(null);
-
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const params: Record<string, string> = {};
-      if (searchQuery) params.search = searchQuery;
-      if (roleFilter !== 'all') params.role = roleFilter;
-      const response = await authGet<UsersIndexResponse>('/admin/users', getToken, { params });
       setUsers(response.data.users);
       setStats(response.data.stats);
     } catch (err) {
