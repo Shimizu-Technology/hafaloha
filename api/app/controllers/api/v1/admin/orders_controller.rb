@@ -87,10 +87,9 @@ module Api
               # Send order processing notification
               SendOrderProcessingEmailJob.perform_later(@order.id)
             when "shipped"
-              # Send shipping notification with tracking
               SendOrderShippedEmailJob.perform_later(@order.id) if @order.tracking_number.present?
+              SendOrderSmsJob.perform_later(@order.id, "shipped")
             when "ready"
-              # Send ready for pickup notification
               SendOrderReadyEmailJob.perform_later(@order.id)
             when "picked_up"
               # Send picked up confirmation

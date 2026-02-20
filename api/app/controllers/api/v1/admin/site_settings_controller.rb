@@ -77,6 +77,7 @@ module Api
             :acai_gallery_show_image_a,
             :acai_gallery_show_image_b,
             order_notification_emails: [],
+            admin_sms_phones: [],
             shipping_origin_address: [
               :company, :street1, :street2, :city, :state, :zip, :country, :phone, :email
             ]

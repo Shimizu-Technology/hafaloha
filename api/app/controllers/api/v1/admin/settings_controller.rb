@@ -51,7 +51,14 @@ module Api
             store_phone: settings.store_phone,
             placeholder_image_url: settings.placeholder_image_url,
             order_notification_emails: settings.order_notification_emails,
-            shipping_origin_address: settings.shipping_origin_address
+            shipping_origin_address: settings.shipping_origin_address,
+            # SMS notification settings
+            send_sms_notifications: settings.send_sms_notifications,
+            sms_order_updates: settings.sms_order_updates,
+            sms_new_order_alert: settings.sms_new_order_alert,
+            admin_sms_phones: settings.admin_sms_phones,
+            sms_configured: ENV["CLICKSEND_USERNAME"].present? && ENV["CLICKSEND_API_KEY"].present?,
+            email_configured: ENV["RESEND_API_KEY"].present?
           }
         end
 
@@ -63,11 +70,15 @@ module Api
             :send_retail_emails,
             :send_acai_emails,
             :send_wholesale_emails,
+            :send_sms_notifications,
+            :sms_order_updates,
+            :sms_new_order_alert,
             :store_name,
             :store_email,
             :store_phone,
             :placeholder_image_url,
             order_notification_emails: [],
+            admin_sms_phones: [],
             shipping_origin_address: [
               :company, :street1, :street2, :city, :state, :zip, :country, :phone
             ]

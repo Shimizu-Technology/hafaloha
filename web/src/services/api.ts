@@ -496,6 +496,9 @@ export const locationsApi = {
     const response = await api.get('/locations');
     return response.data;
   },
+=======
+>>>>>>> main
+>>>>>>> main
 };
 
 export default api;
