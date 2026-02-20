@@ -3,6 +3,7 @@ import { useAuth } from '@clerk/clerk-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { Bell, Mail, MessageSquare, Phone, Plus, Trash2, AlertTriangle } from 'lucide-react';
 import api, { collectionsApi, type Collection } from '../services/api';
 
 import { API_BASE_URL } from '../config';
@@ -20,6 +21,13 @@ interface SiteSettings {
   send_wholesale_emails: boolean;
   // Legacy field (kept for backwards compatibility)
   send_customer_emails: boolean;
+  // SMS notification settings
+  send_sms_notifications: boolean;
+  sms_order_updates: boolean;
+  sms_new_order_alert: boolean;
+  admin_sms_phones: string[];
+  sms_configured: boolean;
+  email_configured: boolean;
   store_name: string;
   store_email: string;
   store_phone: string;
@@ -91,10 +99,11 @@ interface HomepageSection {
   active: boolean;
 }
 
-type TabType = 'general' | 'homepage';
+type TabType = 'general' | 'notifications' | 'homepage';
 
 const TABS: { id: TabType; label: string }[] = [
   { id: 'general', label: 'General' },
+  { id: 'notifications', label: 'Notifications' },
   { id: 'homepage', label: 'Homepage' },
 ];
 
@@ -306,6 +315,58 @@ export default function AdminSettingsPage() {
     }
   };
 
+  const handleToggleSmsSetting = async (field: 'send_sms_notifications' | 'sms_order_updates' | 'sms_new_order_alert') => {
+    if (!settings) return;
+
+    try {
+      setSaving(true);
+      const newValue = !settings[field];
+      const token = await getToken();
+      const response = await axios.put(
+        `${API_BASE_URL}/api/v1/admin/settings`,
+        { settings: { [field]: newValue } },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setSettings({ ...settings, ...response.data.settings });
+
+      const labels: Record<string, string> = {
+        send_sms_notifications: 'SMS notifications',
+        sms_order_updates: 'SMS order updates',
+        sms_new_order_alert: 'SMS new order alerts',
+      };
+      const label = labels[field];
+      toast.success(`${label} ${newValue ? 'enabled' : 'disabled'}`, { duration: 3000 });
+    } catch (err: any) {
+      console.error('Failed to toggle SMS setting:', err);
+      toast.error('Failed to update SMS setting');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleUpdateAdminPhones = async (phones: string[]) => {
+    if (!settings) return;
+
+    try {
+      setSaving(true);
+      const token = await getToken();
+      const response = await axios.put(
+        `${API_BASE_URL}/api/v1/admin/settings`,
+        { settings: { admin_sms_phones: phones } },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setSettings({ ...settings, ...response.data.settings });
+      toast.success('Admin phone numbers updated', { duration: 3000 });
+    } catch (err: any) {
+      console.error('Failed to update admin phones:', err);
+      toast.error('Failed to update admin phone numbers');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const saveSiteSettings = async (updates: Partial<SiteSettings>) => {
     if (!settings) return;
 
@@ -344,7 +405,8 @@ export default function AdminSettingsPage() {
       acai_gallery_subtext: settings.acai_gallery_subtext,
       acai_gallery_show_image_a: settings.acai_gallery_show_image_a,
       acai_gallery_show_image_b: settings.acai_gallery_show_image_b,
-      shipping_origin_address: settings.shipping_origin_address
+      shipping_origin_address: settings.shipping_origin_address,
+      admin_sms_phones: (settings.admin_sms_phones || []).filter((p: string) => p.trim() !== '')
     };
 
     const responseData = await saveSiteSettings(updates);
@@ -635,6 +697,16 @@ export default function AdminSettingsPage() {
           />
         )}
 
+        {activeTab === 'notifications' && (
+          <NotificationSettingsTab
+            settings={settings}
+            saving={saving}
+            onToggleEmailSetting={handleToggleEmailSetting}
+            onToggleSmsSetting={handleToggleSmsSetting}
+            onUpdateAdminPhones={handleUpdateAdminPhones}
+          />
+        )}
+
         {activeTab === 'homepage' && (
           <HomepageSettingsTab
             sections={sections}
@@ -676,6 +748,7 @@ interface GeneralSettingsTabProps {
   isSiteSettingsDirty: boolean;
   onToggleTestMode: () => void;
   onToggleEmailSetting: (field: 'send_retail_emails' | 'send_acai_emails' | 'send_wholesale_emails') => void;
+  onToggleSmsSetting: (field: 'send_sms_notifications' | 'sms_order_updates' | 'sms_new_order_alert') => void;
   onUpdateSettings: (updates: Partial<SiteSettings>) => void;
   onUpdateShippingAddress: (updates: Partial<SiteSettings['shipping_origin_address']>) => void;
   onPlaceholderFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -706,6 +779,7 @@ function GeneralSettingsTab({
   isSiteSettingsDirty,
   onToggleTestMode,
   onToggleEmailSetting,
+  onToggleSmsSetting,
   onUpdateSettings,
   onUpdateShippingAddress,
   onPlaceholderFileChange,
@@ -866,6 +940,119 @@ function GeneralSettingsTab({
                   settings.send_wholesale_emails && 'Wholesale'
                 ].filter(Boolean).join(', ') || 'All emails disabled'}
               </p>
+            </div>
+          </div>
+        </div>
+
+        {/* SMS Notifications */}
+        <div className="border-b border-gray-200 pb-4 mb-4">
+          <h3 className="font-medium text-gray-900 mb-1">SMS Notifications</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Send SMS notifications via ClickSend.
+            {!settings.sms_configured && (
+              <span className="text-amber-600 font-medium"> ⚠ ClickSend not configured — set CLICKSEND_USERNAME and CLICKSEND_API_KEY env vars.</span>
+            )}
+          </p>
+
+          {/* Master SMS Toggle */}
+          <div className="flex items-center justify-between py-3 border-b border-gray-100">
+            <div>
+              <p className="font-medium text-gray-900">Enable SMS Notifications</p>
+              <p className="text-sm text-gray-500">Master toggle for all SMS sending</p>
+            </div>
+            <button
+              onClick={() => onToggleSmsSetting('send_sms_notifications')}
+              disabled={saving}
+              className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-hafalohaRed focus:ring-offset-2 ${
+                settings.send_sms_notifications ? 'bg-green-500' : 'bg-gray-200'
+              } ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                settings.send_sms_notifications ? 'translate-x-5' : 'translate-x-0'
+              }`} />
+            </button>
+          </div>
+
+          {/* SMS Order Updates Toggle */}
+          <div className="flex items-center justify-between py-3 border-b border-gray-100">
+            <div>
+              <p className="font-medium text-gray-900">Customer Order Updates</p>
+              <p className="text-sm text-gray-500">SMS customers when order status changes</p>
+            </div>
+            <button
+              onClick={() => onToggleSmsSetting('sms_order_updates')}
+              disabled={saving || !settings.send_sms_notifications}
+              className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-hafalohaRed focus:ring-offset-2 ${
+                settings.sms_order_updates && settings.send_sms_notifications ? 'bg-green-500' : 'bg-gray-200'
+              } ${saving || !settings.send_sms_notifications ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                settings.sms_order_updates && settings.send_sms_notifications ? 'translate-x-5' : 'translate-x-0'
+              }`} />
+            </button>
+          </div>
+
+          {/* New Order Admin Alert Toggle */}
+          <div className="flex items-center justify-between py-3 border-b border-gray-100">
+            <div>
+              <p className="font-medium text-gray-900">New Order Admin Alerts</p>
+              <p className="text-sm text-gray-500">SMS admin phones when a new order is placed</p>
+            </div>
+            <button
+              onClick={() => onToggleSmsSetting('sms_new_order_alert')}
+              disabled={saving || !settings.send_sms_notifications}
+              className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-hafalohaRed focus:ring-offset-2 ${
+                settings.sms_new_order_alert && settings.send_sms_notifications ? 'bg-green-500' : 'bg-gray-200'
+              } ${saving || !settings.send_sms_notifications ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <span className={`inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                settings.sms_new_order_alert && settings.send_sms_notifications ? 'translate-x-5' : 'translate-x-0'
+              }`} />
+            </button>
+          </div>
+
+          {/* Admin SMS Phones */}
+          <div className="py-3">
+            <p className="font-medium text-gray-900 mb-1">Admin SMS Phone Numbers</p>
+            <p className="text-sm text-gray-500 mb-3">
+              Receive new order alerts. Location-specific phones take priority if configured.
+            </p>
+            <div className="space-y-2">
+              {(settings.admin_sms_phones || []).map((phone, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => {
+                      const updated = [...(settings.admin_sms_phones || [])];
+                      updated[index] = e.target.value;
+                      onUpdateSettings({ admin_sms_phones: updated } as Partial<SiteSettings>);
+                    }}
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+                    placeholder="+16711234567"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = (settings.admin_sms_phones || []).filter((_: string, i: number) => i !== index);
+                      onUpdateSettings({ admin_sms_phones: updated } as Partial<SiteSettings>);
+                    }}
+                    className="text-red-500 hover:text-red-700 text-sm px-2 py-2"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  const updated = [...(settings.admin_sms_phones || []), ''];
+                  onUpdateSettings({ admin_sms_phones: updated } as Partial<SiteSettings>);
+                }}
+                className="text-sm text-hafalohaRed hover:text-red-700 font-medium"
+              >
+                + Add phone number
+              </button>
             </div>
           </div>
         </div>
@@ -2059,6 +2246,304 @@ function SectionForm({ section, collections, onSave, onCancel, saving }: Section
           </button>
         </div>
       </form>
+    </div>
+  );
+}
+
+// ============================================================================
+// NOTIFICATION SETTINGS TAB
+// ============================================================================
+
+interface NotificationSettingsTabProps {
+  settings: SiteSettings;
+  saving: boolean;
+  onToggleEmailSetting: (field: 'send_retail_emails' | 'send_acai_emails' | 'send_wholesale_emails') => void;
+  onToggleSmsSetting: (field: 'send_sms_notifications' | 'sms_order_updates' | 'sms_new_order_alert') => void;
+  onUpdateAdminPhones: (phones: string[]) => void;
+}
+
+function NotificationSettingsTab({
+  settings,
+  saving,
+  onToggleEmailSetting,
+  onToggleSmsSetting,
+  onUpdateAdminPhones,
+}: NotificationSettingsTabProps) {
+  const [newPhone, setNewPhone] = useState('');
+
+  const handleAddPhone = () => {
+    const trimmed = newPhone.trim();
+    if (!trimmed) return;
+    if (settings.admin_sms_phones.includes(trimmed)) {
+      toast.error('Phone number already added');
+      return;
+    }
+    onUpdateAdminPhones([...settings.admin_sms_phones, trimmed]);
+    setNewPhone('');
+  };
+
+  const handleRemovePhone = (phone: string) => {
+    onUpdateAdminPhones(settings.admin_sms_phones.filter((p) => p !== phone));
+  };
+
+  const handlePhoneKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddPhone();
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Email Notifications */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center gap-2">
+            <Mail className="w-5 h-5 text-gray-500" />
+            <h2 className="text-lg font-semibold text-gray-900">Email Notifications</h2>
+          </div>
+          <p className="text-sm text-gray-500 mt-1">
+            Configure which order types send confirmation emails to customers. Changes auto-save.
+          </p>
+          {!settings.email_configured && (
+            <div className="mt-3 flex items-center gap-2 text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              <AlertTriangle className="w-4 h-4 shrink-0" />
+              <p className="text-sm">Email service is not configured. Set the RESEND_API_KEY environment variable to enable email delivery.</p>
+            </div>
+          )}
+        </div>
+        <div className="p-6 space-y-1">
+          {/* Retail Orders */}
+          <div className="flex items-center justify-between py-3 border-b border-gray-100">
+            <div>
+              <p className="font-medium text-gray-900">Retail Orders</p>
+              <p className="text-sm text-gray-500">Online store purchases</p>
+            </div>
+            <button
+              onClick={() => onToggleEmailSetting('send_retail_emails')}
+              disabled={saving}
+              className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-hafalohaRed focus:ring-offset-2 ${
+                settings.send_retail_emails ? 'bg-green-500' : 'bg-gray-200'
+              } ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <span
+                className={`inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  settings.send_retail_emails ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Acai Orders */}
+          <div className="flex items-center justify-between py-3 border-b border-gray-100">
+            <div>
+              <p className="font-medium text-gray-900">Acai Cake Orders</p>
+              <p className="text-sm text-gray-500">Acai cake pickup orders</p>
+            </div>
+            <button
+              onClick={() => onToggleEmailSetting('send_acai_emails')}
+              disabled={saving}
+              className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-hafalohaRed focus:ring-offset-2 ${
+                settings.send_acai_emails ? 'bg-green-500' : 'bg-gray-200'
+              } ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <span
+                className={`inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  settings.send_acai_emails ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Wholesale Orders */}
+          <div className="flex items-center justify-between py-3">
+            <div>
+              <p className="font-medium text-gray-900">Wholesale Orders</p>
+              <p className="text-sm text-gray-500">Fundraiser and wholesale orders</p>
+            </div>
+            <button
+              onClick={() => onToggleEmailSetting('send_wholesale_emails')}
+              disabled={saving}
+              className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-hafalohaRed focus:ring-offset-2 ${
+                settings.send_wholesale_emails ? 'bg-green-500' : 'bg-gray-200'
+              } ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <span
+                className={`inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  settings.send_wholesale_emails ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Email Status Summary */}
+          <div className="mt-4 pt-4 border-t border-gray-100">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Bell className="w-4 h-4 text-gray-400" />
+              <span>
+                <strong>Active:</strong>{' '}
+                {[
+                  settings.send_retail_emails && 'Retail',
+                  settings.send_acai_emails && 'Acai',
+                  settings.send_wholesale_emails && 'Wholesale',
+                ].filter(Boolean).join(', ') || 'No customer emails enabled'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* SMS Notifications */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-gray-500" />
+            <h2 className="text-lg font-semibold text-gray-900">SMS Notifications</h2>
+          </div>
+          <p className="text-sm text-gray-500 mt-1">
+            Configure SMS alerts for order activity. Changes auto-save.
+          </p>
+          {!settings.sms_configured && (
+            <div className="mt-3 flex items-center gap-2 text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              <AlertTriangle className="w-4 h-4 shrink-0" />
+              <p className="text-sm">SMS service is not configured. Set CLICKSEND_USERNAME and CLICKSEND_API_KEY environment variables to enable SMS delivery.</p>
+            </div>
+          )}
+        </div>
+        <div className="p-6 space-y-1">
+          {/* Master SMS Toggle */}
+          <div className="flex items-center justify-between py-3 border-b border-gray-100">
+            <div>
+              <p className="font-medium text-gray-900">Enable SMS Notifications</p>
+              <p className="text-sm text-gray-500">Master toggle for all SMS features</p>
+            </div>
+            <button
+              onClick={() => onToggleSmsSetting('send_sms_notifications')}
+              disabled={saving}
+              className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-hafalohaRed focus:ring-offset-2 ${
+                settings.send_sms_notifications ? 'bg-green-500' : 'bg-gray-200'
+              } ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <span
+                className={`inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  settings.send_sms_notifications ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* Order Updates Toggle */}
+          <div className={`flex items-center justify-between py-3 border-b border-gray-100 ${!settings.send_sms_notifications ? 'opacity-50' : ''}`}>
+            <div>
+              <p className="font-medium text-gray-900">Order Status Updates</p>
+              <p className="text-sm text-gray-500">Send SMS to customers on each order status change</p>
+            </div>
+            <button
+              onClick={() => onToggleSmsSetting('sms_order_updates')}
+              disabled={saving || !settings.send_sms_notifications}
+              className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-hafalohaRed focus:ring-offset-2 ${
+                settings.sms_order_updates ? 'bg-green-500' : 'bg-gray-200'
+              } ${saving || !settings.send_sms_notifications ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <span
+                className={`inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  settings.sms_order_updates ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+
+          {/* New Order Alert Toggle */}
+          <div className={`flex items-center justify-between py-3 ${!settings.send_sms_notifications ? 'opacity-50' : ''}`}>
+            <div>
+              <p className="font-medium text-gray-900">New Order Alerts</p>
+              <p className="text-sm text-gray-500">Alert admin phone numbers when a new order is placed</p>
+            </div>
+            <button
+              onClick={() => onToggleSmsSetting('sms_new_order_alert')}
+              disabled={saving || !settings.send_sms_notifications}
+              className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-hafalohaRed focus:ring-offset-2 ${
+                settings.sms_new_order_alert ? 'bg-green-500' : 'bg-gray-200'
+              } ${saving || !settings.send_sms_notifications ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <span
+                className={`inline-block h-6 w-6 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                  settings.sms_new_order_alert ? 'translate-x-5' : 'translate-x-0'
+                }`}
+              />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Admin Phone Numbers */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center gap-2">
+            <Phone className="w-5 h-5 text-gray-500" />
+            <h2 className="text-lg font-semibold text-gray-900">Admin SMS Recipients</h2>
+          </div>
+          <p className="text-sm text-gray-500 mt-1">
+            Phone numbers that receive new order alerts and admin notifications.
+          </p>
+        </div>
+        <div className="p-6">
+          {/* Existing phones */}
+          {settings.admin_sms_phones.length > 0 ? (
+            <ul className="space-y-2 mb-4">
+              {settings.admin_sms_phones.map((phone) => (
+                <li
+                  key={phone}
+                  className="flex items-center justify-between bg-gray-50 rounded-lg px-4 py-3 border border-gray-200"
+                >
+                  <div className="flex items-center gap-3">
+                    <Phone className="w-4 h-4 text-gray-400" />
+                    <span className="text-gray-900 font-medium">{phone}</span>
+                  </div>
+                  <button
+                    onClick={() => handleRemovePhone(phone)}
+                    disabled={saving}
+                    className="text-gray-400 hover:text-red-500 transition disabled:opacity-50"
+                    title="Remove phone number"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="text-center py-6 text-gray-500 mb-4">
+              <Phone className="w-8 h-8 mx-auto mb-2 text-gray-300" />
+              <p className="text-sm">No admin phone numbers configured</p>
+              <p className="text-xs text-gray-400 mt-1">Add a phone number below to receive SMS alerts</p>
+            </div>
+          )}
+
+          {/* Add phone form */}
+          <div className="flex gap-2">
+            <input
+              type="tel"
+              value={newPhone}
+              onChange={(e) => setNewPhone(e.target.value)}
+              onKeyDown={handlePhoneKeyDown}
+              placeholder="+1 (671) 555-1234"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent"
+              disabled={saving}
+            />
+            <button
+              onClick={handleAddPhone}
+              disabled={saving || !newPhone.trim()}
+              className="flex items-center gap-1 px-4 py-2 bg-hafalohaRed text-white rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add</span>
+            </button>
+          </div>
+          <p className="mt-2 text-xs text-gray-500">
+            Use international format (e.g., +16715551234) for best results.
+          </p>
+        </div>
+      </div>
     </div>
   );
 }

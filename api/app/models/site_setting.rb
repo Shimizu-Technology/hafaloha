@@ -3,6 +3,7 @@ class SiteSetting < ApplicationRecord
   validates :payment_processor, presence: true, inclusion: { in: %w[stripe paypal] }
   validates :payment_test_mode, inclusion: { in: [ true, false ] }
   validate :validate_shipping_origin_address
+  validate :validate_admin_sms_phones
 
   # Singleton accessor
   def self.instance
@@ -23,6 +24,9 @@ class SiteSetting < ApplicationRecord
       acai_gallery_subtext: "Seasonal & special requests",
       acai_gallery_show_image_a: true,
       acai_gallery_show_image_b: true,
+      send_sms_notifications: false,
+      sms_order_updates: false,
+      admin_sms_phones: [],
       order_notification_emails: [ "shimizutechnology@gmail.com" ],
       shipping_origin_address: {
         company: "Hafaloha",
@@ -35,6 +39,11 @@ class SiteSetting < ApplicationRecord
         phone: "671-989-3444"
       }
     )
+  end
+
+  # Check if SMS notifications are fully enabled
+  def sms_enabled?
+    send_sms_notifications
   end
 
   # Check if customer emails are enabled for a specific order type
@@ -82,6 +91,14 @@ class SiteSetting < ApplicationRecord
     return if missing.empty?
 
     errors.add(:shipping_origin_address, "is missing required fields: #{missing.join(', ')}")
+  end
+
+  def validate_admin_sms_phones
+    return if admin_sms_phones.blank?
+
+    unless admin_sms_phones.is_a?(Array) && admin_sms_phones.all? { |p| p.is_a?(String) }
+      errors.add(:admin_sms_phones, "must be an array of phone number strings")
+    end
   end
 
   def missing_shipping_origin_fields
