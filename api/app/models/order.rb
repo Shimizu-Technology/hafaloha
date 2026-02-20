@@ -3,6 +3,10 @@ class Order < ApplicationRecord
   belongs_to :fundraiser, optional: true
   belongs_to :participant, optional: true
   belongs_to :location, optional: true
+<<<<<<< HEAD
+  belongs_to :created_by_user, class_name: "User", optional: true
+=======
+>>>>>>> main
   has_many :order_items, dependent: :destroy
   has_many :refunds, dependent: :destroy
 
@@ -16,13 +20,20 @@ class Order < ApplicationRecord
 
   # Validations
   validates :order_number, presence: true, uniqueness: true
-  validates :order_type, inclusion: { in: %w[retail wholesale acai] }
+  VALID_ORDER_TYPES = %w[retail wholesale acai pickup dine_in].freeze
+  VALID_SOURCES = %w[web pos api].freeze
+  VALID_PAYMENT_METHODS = %w[stripe cash card_present card_manual].freeze
+
+  validates :order_type, inclusion: { in: VALID_ORDER_TYPES }
   validates :status, inclusion: { in: VALID_STATUSES }
   validates :payment_status, inclusion: { in: %w[pending paid failed refunded] }
   validates :total_cents, numericality: { greater_than_or_equal_to: 0 }
 
-  # Guest orders (no user_id) must have contact email so we can reach the customer
-  validates :customer_email, presence: { message: "is required for guest checkout" }, if: -> { user_id.nil? }
+  validates :source, inclusion: { in: VALID_SOURCES }, allow_nil: true
+  validates :payment_method, inclusion: { in: VALID_PAYMENT_METHODS }, allow_nil: true
+
+  # Guest orders (no user_id) must have contact email — unless POS walk-in
+  validates :customer_email, presence: { message: "is required for guest checkout" }, if: -> { user_id.nil? && !staff_created? }
   validates :customer_email, format: { with: URI::MailTo::EMAIL_REGEXP, message: "is not a valid email address" }, allow_blank: true
 
   # Scopes
@@ -40,6 +51,8 @@ class Order < ApplicationRecord
   scope :paid, -> { where(payment_status: "paid") }
   scope :recent, -> { order(created_at: :desc) }
   scope :active, -> { where.not(status: "cancelled") }
+  scope :pos, -> { where(source: "pos") }
+  scope :staff_created, -> { where(staff_created: true) }
 
   # Callbacks
   before_validation :generate_order_number, if: -> { order_number.blank? }
@@ -161,6 +174,14 @@ class Order < ApplicationRecord
     order_type == "acai"
   end
 
+  def pos?
+    source == "pos"
+  end
+
+  def cash_payment?
+    payment_method == "cash"
+  end
+
   def requires_shipping?
     retail? || wholesale?
   end
@@ -253,6 +274,7 @@ class Order < ApplicationRecord
     type_prefix = case order_type
     when "acai" then "A"
     when "wholesale" then "W"
+    when "pickup", "dine_in" then "P"
     else "R" # retail is default
     end
 
