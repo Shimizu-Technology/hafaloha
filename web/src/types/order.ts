@@ -90,5 +90,10 @@ export interface AppConfig {
     email: string;
     phone: string;
   };
+  announcement?: {
+    enabled: boolean;
+    text: string | null;
+    style: string;
+  };
 }
 

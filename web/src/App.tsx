@@ -42,6 +42,8 @@ import FundraiserCartPage from './pages/fundraiser/FundraiserCartPage';
 import FundraiserCheckoutPage from './pages/fundraiser/FundraiserCheckoutPage';
 import FundraiserOrderConfirmationPage from './pages/fundraiser/FundraiserOrderConfirmationPage';
 import ContactPage from './pages/ContactPage';
+import LocationsPage from './pages/LocationsPage';
+import AnnouncementBanner from './components/AnnouncementBanner';
 import ShippingInfoPage from './pages/ShippingInfoPage';
 import ReturnsPage from './pages/ReturnsPage';
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
@@ -240,6 +242,11 @@ function AppContent() {
       <div className="min-h-screen bg-white">
         {/* Cart Drawer */}
         <CartDrawer />
+
+        {/* Announcement Banner */}
+        {!isAdminPage && appConfig?.announcement?.enabled && appConfig.announcement.text && (
+          <AnnouncementBanner text={appConfig.announcement.text} style={appConfig.announcement.style || 'gold'} />
+        )}
 
         {/* Navigation - Hidden when printing and on admin pages */}
         {!isAdminPage && (
@@ -488,6 +495,7 @@ function AppContent() {
           <Route path="/orders" element={<OrderHistoryPage />} />
           <Route path="/orders/:id" element={<OrderConfirmationPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/locations" element={<LocationsPage />} />
           <Route path="/shipping" element={<ShippingInfoPage />} />
           <Route path="/returns" element={<ReturnsPage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />

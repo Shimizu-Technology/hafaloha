@@ -22,6 +22,8 @@ class Product < ApplicationRecord
   validates :product_low_stock_threshold, numericality: { greater_than_or_equal_to: 0 }, allow_nil: true
   validate :check_variants_not_in_carts_before_level_change, on: :update
 
+    validates :allow_pickup, inclusion: { in: [ true, false ] }
+
   # Scopes
   scope :published, -> { where(published: true) }
   scope :featured, -> { where(featured: true) }

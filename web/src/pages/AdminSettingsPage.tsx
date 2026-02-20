@@ -31,6 +31,9 @@ interface SiteSettings {
   store_name: string;
   store_email: string;
   store_phone: string;
+  announcement_enabled: boolean;
+  announcement_text: string;
+  announcement_style: string;
   placeholder_image_url?: string;
   acai_gallery_image_a_url?: string;
   acai_gallery_image_b_url?: string;
@@ -1072,6 +1075,46 @@ function GeneralSettingsTab({
             </span>
           </div>
         </div>
+        </div>
+      </div>
+
+      {/* Announcement Banner Card */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+          <h2 className="text-lg font-semibold text-gray-900">Announcement Banner</h2>
+          <p className="text-sm text-gray-500 mt-1">Display a banner at the top of your site</p>
+        </div>
+        <div className="p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-medium text-gray-900">Enable Announcement</h3>
+              <p className="text-sm text-gray-600">Show a banner at the top of every page</p>
+            </div>
+            <button onClick={() => onUpdateSettings({ announcement_enabled: !settings.announcement_enabled })} disabled={saving}
+              className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-hafalohaRed focus:ring-offset-2 ${settings.announcement_enabled ? 'bg-hafalohaRed' : 'bg-gray-200'} ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}>
+              <span className={`inline-block h-7 w-7 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${settings.announcement_enabled ? 'translate-x-6' : 'translate-x-0'}`} />
+            </button>
+          </div>
+          <div>
+            <label htmlFor="announcement_text" className="block text-sm font-medium text-gray-700 mb-2">Announcement Text</label>
+            <input type="text" id="announcement_text" value={settings.announcement_text || ''} onChange={(e) => onUpdateSettings({ announcement_text: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent" placeholder="e.g., Free shipping on orders over $50!" />
+          </div>
+          <div>
+            <label htmlFor="announcement_style" className="block text-sm font-medium text-gray-700 mb-2">Banner Style</label>
+            <select id="announcement_style" value={settings.announcement_style || 'gold'} onChange={(e) => onUpdateSettings({ announcement_style: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hafalohaRed focus:border-transparent">
+              <option value="gold">Gold (Promo)</option><option value="blue">Blue (Info)</option><option value="red">Red (Urgent)</option><option value="green">Green (Success)</option>
+            </select>
+          </div>
+          {settings.announcement_enabled && settings.announcement_text && (
+            <div className="mt-2">
+              <p className="text-sm font-medium text-gray-700 mb-2">Preview:</p>
+              <div className={`rounded-lg px-4 py-2.5 text-sm font-medium text-center ${settings.announcement_style === 'gold' ? 'bg-amber-50 text-amber-900 border border-amber-200' : settings.announcement_style === 'red' ? 'bg-red-50 text-red-900 border border-red-200' : settings.announcement_style === 'blue' ? 'bg-blue-50 text-blue-900 border border-blue-200' : 'bg-green-50 text-green-900 border border-green-200'}`}>
+                {settings.announcement_text}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

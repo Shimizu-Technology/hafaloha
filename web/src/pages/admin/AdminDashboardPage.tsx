@@ -13,6 +13,14 @@ interface DashboardStats {
   total_revenue_cents: number;
   pending_orders: number;
   total_products: number;
+  revenue_today: number;
+  revenue_this_week: number;
+  revenue_this_month: number;
+  status_breakdown: Record<string, number>;
+  recent_orders: RecentOrder[];
+  top_products_today: TopProduct[];
+  location_breakdown: LocationStat[];
+  fulfillment_breakdown: Record<string, number>;
 }
 
 interface RecentOrder {
@@ -24,8 +32,17 @@ interface RecentOrder {
   created_at: string;
 }
 
-interface AdminOrdersListResponse {
-  orders: RecentOrder[];
+interface TopProduct {
+  product_id: number;
+  name: string;
+  quantity_sold: number;
+  revenue_cents: number;
+}
+
+interface LocationStat {
+  name: string;
+  orders: number;
+  revenue_cents: number;
 }
 
 const formatCurrency = (cents: number) => `$${(cents / 100).toFixed(2)}`;
@@ -47,25 +64,15 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function AdminDashboardPage() {
   const { getToken } = useAuth();
-  const [stats, setStats] = useState<DashboardStats>({
-    total_orders: 0, total_revenue_cents: 0, pending_orders: 0, total_products: 0,
-  });
-  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+  useEffect(() => { fetchDashboardData(); }, []);
 
   const fetchDashboardData = async () => {
     try {
-      const [statsRes, ordersRes] = await Promise.all([
-        authGet<DashboardStats>('/admin/dashboard/stats', getToken),
-        authGet<AdminOrdersListResponse>('/admin/orders', getToken, { params: { per_page: 8 } }),
-      ]);
-
-      setStats(statsRes.data);
-      setRecentOrders(ordersRes.data.orders || []);
+      const res = await authGet<DashboardStats>('/admin/dashboard/stats', getToken);
+      setStats(res.data);
     } catch (err) {
       console.error('Failed to fetch dashboard data:', err);
     } finally {
@@ -73,9 +80,9 @@ export default function AdminDashboardPage() {
     }
   };
 
-  if (loading) {
-    return <SkeletonDashboard />;
-  }
+  if (loading || !stats) return <SkeletonDashboard />;
+
+  const recentOrders = stats.recent_orders || [];
 
   return (
     <div className="space-y-8">
@@ -85,83 +92,110 @@ export default function AdminDashboardPage() {
         <p style={{ color: '#ffffff', opacity: 0.9 }}>Here's what's happening with your store today.</p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-        <StatCard
-          label="Total Orders"
-          value={stats.total_orders}
-          icon={ShoppingCart}
-          iconColor="bg-blue-50 text-blue-600"
-        />
-        <StatCard
-          label="Revenue"
-          value={formatCurrency(stats.total_revenue_cents)}
-          icon={DollarSign}
-          iconColor="bg-green-50 text-green-600"
-          valueColor="text-green-600"
-        />
-        <StatCard
-          label="Pending"
-          value={stats.pending_orders}
-          icon={Clock}
-          iconColor="bg-orange-50 text-orange-600"
-          valueColor="text-hafalohaRed"
-          link={
-            stats.pending_orders > 0
-              ? { text: 'View pending', to: '/admin/orders?status=pending' }
-              : undefined
-          }
-        />
-        <StatCard
-          label="Products"
-          value={stats.total_products}
-          icon={Package}
-          iconColor="bg-purple-50 text-purple-600"
-        />
+      {/* Revenue Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+          <p className="text-sm font-medium text-gray-500 mb-1">Today</p>
+          <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.revenue_today)}</p>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+          <p className="text-sm font-medium text-gray-500 mb-1">This Week</p>
+          <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.revenue_this_week)}</p>
+        </div>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+          <p className="text-sm font-medium text-gray-500 mb-1">This Month</p>
+          <p className="text-2xl font-bold text-green-600">{formatCurrency(stats.revenue_this_month)}</p>
+        </div>
       </div>
 
+      {/* Stats Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+        <StatCard label="Total Orders" value={stats.total_orders} icon={ShoppingCart} iconColor="bg-blue-50 text-blue-600" />
+        <StatCard label="Revenue" value={formatCurrency(stats.total_revenue_cents)} icon={DollarSign} iconColor="bg-green-50 text-green-600" valueColor="text-green-600" />
+        <StatCard label="Pending" value={stats.pending_orders} icon={Clock} iconColor="bg-orange-50 text-orange-600" valueColor="text-hafalohaRed"
+          link={stats.pending_orders > 0 ? { text: 'View pending', to: '/admin/orders?status=pending' } : undefined} />
+        <StatCard label="Products" value={stats.total_products} icon={Package} iconColor="bg-purple-50 text-purple-600" />
+      </div>
+
+      {/* Order Status Breakdown */}
+      {stats.status_breakdown && Object.keys(stats.status_breakdown).length > 0 && (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-4">Order Status Breakdown</h2>
+          <div className="flex flex-wrap gap-3">
+            {Object.entries(stats.status_breakdown).map(([status, count]) => (
+              <div key={status} className="flex items-center gap-2">
+                <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${STATUS_COLORS[status] || 'bg-gray-100 text-gray-800'}`}>
+                  {status.charAt(0).toUpperCase() + status.slice(1).replace('_', ' ')}
+                </span>
+                <span className="text-sm font-medium text-gray-700">{count}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-        <Link to="/admin/products/new" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2">
-          <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
-            <Plus className="w-5 h-5 text-gray-600 group-hover:text-hafalohaRed transition" />
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-5 gap-4">
+        {[
+          { to: '/admin/products/new', icon: Plus, label: 'Add Product' },
+          { to: '/admin/orders', icon: ClipboardList, label: 'View Orders' },
+          { to: '/admin/collections', icon: FolderOpen, label: 'Collections' },
+          { to: '/admin/analytics', icon: BarChart3, label: 'Analytics' },
+          { to: '/admin/settings', icon: Settings, label: 'Settings' },
+        ].map(({ to, icon: Icon, label }) => (
+          <Link key={to} to={to} className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2">
+            <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
+              <Icon className="w-5 h-5 text-gray-600 group-hover:text-hafalohaRed transition" />
+            </div>
+            <p className="text-sm font-medium text-gray-700">{label}</p>
+          </Link>
+        ))}
+      </div>
+
+      {/* Two Column: Top Products + Location Breakdown */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {stats.top_products_today && stats.top_products_today.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100"><h2 className="text-lg font-bold text-gray-900">Top Products Today</h2></div>
+            <div className="divide-y divide-gray-50">
+              {stats.top_products_today.map((product, idx) => (
+                <div key={product.product_id} className="flex items-center justify-between px-6 py-3">
+                  <div className="flex items-center gap-3">
+                    <span className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-xs font-bold text-gray-500">{idx + 1}</span>
+                    <span className="text-sm font-medium text-gray-900">{product.name}</span>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-semibold text-gray-900">{product.quantity_sold} sold</p>
+                    <p className="text-xs text-gray-500">{formatCurrency(product.revenue_cents)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <p className="text-sm font-medium text-gray-700">Add Product</p>
-        </Link>
-        <Link to="/admin/orders" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2">
-          <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
-            <ClipboardList className="w-5 h-5 text-gray-600 group-hover:text-hafalohaRed transition" />
+        )}
+        {stats.location_breakdown && stats.location_breakdown.length > 0 && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100"><h2 className="text-lg font-bold text-gray-900">By Location</h2></div>
+            <div className="divide-y divide-gray-50">
+              {stats.location_breakdown.map((loc) => (
+                <div key={loc.name} className="flex items-center justify-between px-6 py-3">
+                  <span className="text-sm font-medium text-gray-900">{loc.name}</span>
+                  <div className="text-right">
+                    <p className="text-sm font-semibold text-gray-900">{loc.orders} orders</p>
+                    <p className="text-xs text-gray-500">{formatCurrency(loc.revenue_cents)}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <p className="text-sm font-medium text-gray-700">View Orders</p>
-        </Link>
-        <Link to="/admin/collections" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2">
-          <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
-            <FolderOpen className="w-5 h-5 text-gray-600 group-hover:text-hafalohaRed transition" />
-          </div>
-          <p className="text-sm font-medium text-gray-700">Collections</p>
-        </Link>
-        <Link to="/admin/analytics" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2">
-          <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
-            <BarChart3 className="w-5 h-5 text-gray-600 group-hover:text-hafalohaRed transition" />
-          </div>
-          <p className="text-sm font-medium text-gray-700">Analytics</p>
-        </Link>
-        <Link to="/admin/settings" className="bg-white rounded-xl border border-gray-100 p-4 text-center hover:shadow-md hover:border-hafalohaRed transition group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2">
-          <div className="w-10 h-10 bg-hafalohaCream rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-hafalohaRed/10 transition">
-            <Settings className="w-5 h-5 text-gray-600 group-hover:text-hafalohaRed transition" />
-          </div>
-          <p className="text-sm font-medium text-gray-700">Settings</p>
-        </Link>
+        )}
       </div>
 
       {/* Recent Orders */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
           <h2 className="text-lg font-bold text-gray-900">Recent Orders</h2>
-          <Link to="/admin/orders" className="text-sm link-primary flex items-center gap-1">
-            View All
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+          <Link to="/admin/orders" className="text-sm link-primary flex items-center gap-1">View All<ArrowRight className="w-4 h-4" /></Link>
         </div>
         <div className="divide-y divide-gray-50">
           {recentOrders.length === 0 ? (
@@ -170,34 +204,27 @@ export default function AdminDashboardPage() {
               <p className="text-gray-500">No orders yet</p>
               <p className="text-sm text-gray-400 mt-1">Orders will appear here once customers start purchasing</p>
             </div>
-          ) : (
-            recentOrders.map((order) => (
-              <Link
-                key={order.id}
-                to={`/admin/orders?id=${order.id}`}
-                className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2 rounded"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-sm font-semibold text-gray-600">
-                    {order.customer_name.charAt(0)}
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm">{order.order_number}</p>
-                    <p className="text-sm text-gray-500">{order.customer_name}</p>
-                  </div>
+          ) : recentOrders.map((order) => (
+            <Link key={order.id} to={`/admin/orders?id=${order.id}`}
+              className="flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hafalohaRed focus-visible:ring-offset-2 rounded">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-sm font-semibold text-gray-600">{order.customer_name.charAt(0)}</div>
+                <div>
+                  <p className="font-semibold text-gray-900 text-sm">{order.order_number}</p>
+                  <p className="text-sm text-gray-500">{order.customer_name}</p>
                 </div>
-                <div className="flex items-center gap-4">
-                  <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-800'}`}>
-                    {order.status.charAt(0).toUpperCase() + order.status.slice(1).replace('_', ' ')}
-                  </span>
-                  <div className="text-right">
-                    <p className="font-bold text-gray-900 text-sm">{formatCurrency(order.total_cents)}</p>
-                    <p className="text-xs text-gray-400">{formatDate(order.created_at)}</p>
-                  </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <span className={`px-2 py-0.5 text-xs font-semibold rounded-full ${STATUS_COLORS[order.status] || 'bg-gray-100 text-gray-800'}`}>
+                  {order.status.charAt(0).toUpperCase() + order.status.slice(1).replace('_', ' ')}
+                </span>
+                <div className="text-right">
+                  <p className="font-bold text-gray-900 text-sm">{formatCurrency(order.total_cents)}</p>
+                  <p className="text-xs text-gray-400">{formatDate(order.created_at)}</p>
                 </div>
-              </Link>
-            ))
-          )}
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
     </div>

@@ -50,6 +50,7 @@ interface ProductFormData {
   weight_oz: number;
   published: boolean;
   featured: boolean;
+  allow_pickup: boolean;
   meta_title: string;
   meta_description: string;
   inventory_level: 'none' | 'product' | 'variant';
@@ -71,6 +72,7 @@ interface ProductDetailsResponse {
     weight_oz?: number;
     published?: boolean;
     featured?: boolean;
+    allow_pickup?: boolean;
     meta_title?: string;
     meta_description?: string;
     inventory_level?: 'none' | 'product' | 'variant';
@@ -124,6 +126,7 @@ export default function ProductFormPage() {
     weight_oz: 0,
     published: false,
     featured: false,
+    allow_pickup: true,
     meta_title: '',
     meta_description: '',
     inventory_level: 'none',
@@ -178,6 +181,7 @@ export default function ProductFormPage() {
         weight_oz: product.weight_oz || 0,
         published: product.published || false,
         featured: product.featured || false,
+        allow_pickup: product.allow_pickup !== false,
         meta_title: product.meta_title || '',
         meta_description: product.meta_description || '',
         inventory_level: product.inventory_level || 'none',
@@ -307,6 +311,7 @@ export default function ProductFormPage() {
           weight_oz: updatedProduct.weight_oz || 0,
           published: updatedProduct.published || false,
           featured: updatedProduct.featured || false,
+          allow_pickup: updatedProduct.allow_pickup !== false,
           meta_title: updatedProduct.meta_title || '',
           meta_description: updatedProduct.meta_description || '',
           inventory_level: updatedProduct.inventory_level || 'none',
@@ -623,6 +628,14 @@ export default function ProductFormPage() {
                 />
                 <label htmlFor="featured" className="ml-2 text-sm font-medium text-gray-700">
                   Featured (show on homepage)
+                </label>
+              </div>
+
+              <div className="flex items-center">
+                <input type="checkbox" id="allow_pickup" name="allow_pickup" checked={formData.allow_pickup} onChange={handleChange}
+                  className="w-4 h-4 text-hafalohaRed border-gray-300 rounded focus:ring-hafalohaRed" />
+                <label htmlFor="allow_pickup" className="ml-2 text-sm font-medium text-gray-700">
+                  Allow pickup (available for in-store pickup)
                 </label>
               </div>
             </div>

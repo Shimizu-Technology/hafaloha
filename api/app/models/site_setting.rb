@@ -1,5 +1,6 @@
 class SiteSetting < ApplicationRecord
   # Singleton pattern - only one record should ever exist
+  validates :announcement_style, inclusion: { in: %w[gold blue red green] }, allow_nil: true
   validates :payment_processor, presence: true, inclusion: { in: %w[stripe paypal] }
   validates :payment_test_mode, inclusion: { in: [ true, false ] }
   validate :validate_shipping_origin_address
