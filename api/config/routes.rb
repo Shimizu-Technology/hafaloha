@@ -172,7 +172,7 @@ Rails.application.routes.draw do
       end
 
       # Public routes (no authentication required)
-      resources :locations, only: [ :index ]
+      resources :locations, only: [ :index, :show ]
       resources :products, only: [ :index, :show ]
       resources :collections, only: [ :index, :show ]
 
