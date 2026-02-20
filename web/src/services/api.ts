@@ -496,6 +496,14 @@ export const locationsApi = {
     const response = await api.get('/locations');
     return response.data;
   },
+=======
+  getLocationBySlug: async (slug: string): Promise<Location> => {
+    const response = await api.get(`/locations/${slug}`);
+    return response.data;
+  },
+<<<<<<< HEAD
+>>>>>>> main
+>>>>>>> main
 };
 
 export default api;

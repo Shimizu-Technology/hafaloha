@@ -50,7 +50,7 @@ module Api
         per_page = (params[:per_page] || 25).to_i
 
         # Base query
-        orders_query = Order.includes(:order_items, :user).order(created_at: :desc)
+        orders_query = Order.includes(:order_items, :user, :location).order(created_at: :desc)
 
         # Filters
         if params[:status].present?
@@ -63,6 +63,10 @@ module Api
 
         if params[:order_type].present?
           orders_query = orders_query.where(order_type: params[:order_type])
+        end
+
+        if params[:location_id].present?
+          orders_query = orders_query.where(location_id: params[:location_id])
         end
 
         # Search by order number, email, or name
@@ -109,8 +113,11 @@ module Api
           return render json: { error: "Cart is empty" }, status: :unprocessable_entity
         end
 
+        # Resolve location for validation
+        order_location_id = order_params[:location_id].present? ? order_params[:location_id].to_i : nil
+
         # Validate cart items are still available
-        validation_errors = validate_cart_items(cart_items)
+        validation_errors = validate_cart_items(cart_items, location_id: order_location_id)
         if validation_errors.any?
           return render json: { error: "Cart validation failed", issues: validation_errors }, status: :unprocessable_entity
         end
@@ -285,12 +292,26 @@ module Api
         Time.zone.parse(value) rescue nil
       end
 
-      def validate_cart_items(cart_items)
+      def validate_cart_items(cart_items, location_id: nil)
         issues = []
 
         cart_items.each do |item|
           variant = item.product_variant
           product = variant.product
+
+          # Check if product is available at the selected location
+          if location_id.present?
+            product_location = ProductLocation.find_by(product_id: product.id, location_id: location_id)
+            unless product_location&.available?
+              issues << {
+                item_id: item.id,
+                product_name: product.name,
+                variant_name: variant.display_name,
+                message: "#{product.name} is not available at the selected location"
+              }
+              next
+            end
+          end
 
           # Check if product is actually available (respects published + inventory)
           unless product.actually_available?
@@ -350,8 +371,15 @@ module Api
         shipping_address = order_params[:shipping_address] || {}
         shipping_method_params = order_params[:shipping_method] || {}
 
+        # Resolve location if provided
+        location = nil
+        if order_params[:location_id].present?
+          location = Location.active.find_by(id: order_params[:location_id])
+        end
+
         order = Order.new(
           user: current_user,
+          location: location,
           order_type: "retail",
           status: "pending",
           email: order_params[:customer_email] || order_params[:email],  # HAF-13: prefer canonical name
@@ -471,6 +499,8 @@ module Api
           tax_cents: order.tax_cents,
           total_cents: order.total_cents,
           shipping_method: order.shipping_method,
+          location_id: order.location_id,
+          location: order.location ? { id: order.location.id, name: order.location.name, slug: order.location.slug, address: order.location.address } : nil,
           created_at: order.created_at.iso8601,
           item_count: order.order_items.count,
           order_items: order.order_items.map do |item|
@@ -530,6 +560,8 @@ module Api
           total_formatted: "$#{'%.2f' % ((order.total_cents || 0) / 100.0)}",
           created_at: order.created_at.iso8601,
           shipping_method: order.shipping_method,
+          location_id: order.location_id,
+          location: order.location ? { id: order.location.id, name: order.location.name, slug: order.location.slug, address: order.location.address, phone: order.location.phone, hours_json: order.location.hours_json } : nil,
           order_items: order.order_items.map do |item|
             {
               id: item.id,
@@ -577,7 +609,7 @@ module Api
 
       def order_params
         params.require(:order).permit(
-          :email, :phone, :payment_intent_id,
+          :email, :phone, :payment_intent_id, :location_id,
           :customer_name, :customer_email, :customer_phone,
           :shipping_address_line1, :shipping_address_line2,
           :shipping_city, :shipping_state, :shipping_zip, :shipping_country,
