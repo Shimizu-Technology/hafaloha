@@ -77,54 +77,6 @@ module Api
           end
         end
 
-        # POST /api/v1/admin/locations/:id/toggle_active
-        def toggle_active
-          if @location.active?
-            @location.deactivate!
-          else
-            @location.activate!
-          end
-
-          render json: { location: location_json(@location) }
-        end
-
-        private
-
-        def set_location
-          @location = Location.find(params[:id])
-        end
-
-        def location_params
-          params.require(:location).permit(
-            :name, :slug, :address, :phone, :description,
-            :location_type, :active, :admin_email,
-            :starts_at, :ends_at, :auto_deactivate,
-            :menu_collection_id,
-            hours_json: {},
-            admin_sms_phones: []
-          )
-        end
-
-        def location_json(location)
-          {
-            id: location.id,
-            name: location.name,
-            slug: location.slug,
-            address: location.address,
-            phone: location.phone,
-            description: location.description,
-            location_type: location.location_type,
-            active: location.active,
-            hours_json: location.hours_json,
-            admin_email: location.admin_email,
-            admin_sms_phones: location.admin_sms_phones,
-            starts_at: location.starts_at,
-            ends_at: location.ends_at,
-            auto_deactivate: location.auto_deactivate,
-            menu_collection_id: location.menu_collection_id,
-            qr_code_url: location.qr_code_url,
-            product_count: location.products.count,
-            menu_collection_name: location.menu_collection&.name,
             created_at: location.created_at,
             updated_at: location.updated_at
           }
