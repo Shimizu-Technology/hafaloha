@@ -18,8 +18,8 @@ class Collection < ApplicationRecord
 
   # Scopes
   scope :published, -> { where(published: true) }
-  scope :featured, -> { where(featured: true) }
-  scope :is_featured, -> { where(is_featured: true) }
+  scope :featured, -> { where(featured: true) }           # legacy: featured in product listings
+  scope :is_featured, -> { where(is_featured: true) }     # seasonal: featured on homepage specials
   scope :by_position, -> { order(sort_order: :asc, name: :asc) }
 
   # Collection type scopes
