@@ -160,10 +160,9 @@ Rails.application.routes.draw do
         resources :locations, except: [ :new, :edit ] do
           member do
             post :toggle_active
+=======
 <<<<<<< HEAD
             get :qr_code
-=======
->>>>>>> main
           end
         end
 
@@ -176,7 +175,7 @@ Rails.application.routes.draw do
       end
 
       # Public routes (no authentication required)
-      resources :locations, only: [ :index, :show ]
+      resources :locations, only: [ :index ]
       resources :products, only: [ :index, :show ]
       resources :collections, only: [ :index, :show ]
 

@@ -14,8 +14,6 @@ module Api
       end
 
 =======
-<<<<<<< HEAD
->>>>>>> main
       # GET /api/v1/locations/:slug
       # Public endpoint — lookup by slug
       def show
@@ -26,6 +24,7 @@ module Api
       end
 
 <<<<<<< HEAD
+>>>>>>> main
 >>>>>>> main
       private
 
