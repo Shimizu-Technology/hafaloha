@@ -44,9 +44,20 @@ module Api
 
         # PATCH /api/v1/admin/users/:id
         def update
-          # Prevent demoting yourself below your current role
-          if @user.id == current_user.id && User::ROLE_HIERARCHY.fetch(params[:user][:role], 0) < @user.role_level
-            return render json: { error: "You cannot demote your own role" }, status: :unprocessable_entity
+          requested_role = params.dig(:user, :role)
+
+          if requested_role.present?
+            requested_level = User::ROLE_HIERARCHY.fetch(requested_role, 0)
+
+            # Cannot assign a role higher than your own
+            if requested_level > current_user.role_level
+              return render json: { error: "You cannot assign a role above your own level" }, status: :forbidden
+            end
+
+            # Cannot demote yourself
+            if @user.id == current_user.id && requested_level < current_user.role_level
+              return render json: { error: "You cannot demote your own role" }, status: :unprocessable_entity
+            end
           end
 
           if @user.update(user_params)

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { Clock } from 'lucide-react';
 import { collectionsApi } from '../services/api';
 import type { Collection as ApiCollection, Product } from '../services/api';
 import ProductCard from '../components/ProductCard';
@@ -13,6 +14,37 @@ interface Meta {
   page: number;
   per_page: number;
   total: number;
+}
+
+function CountdownBadge({ endDate }: { endDate: string }) {
+  const [timeLeft, setTimeLeft] = useState('');
+
+  useEffect(() => {
+    const update = () => {
+      const now = new Date().getTime();
+      const end = new Date(endDate).getTime();
+      const diff = end - now;
+      if (diff <= 0) { setTimeLeft(''); return; }
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      if (days > 0) setTimeLeft(`${days}d ${hours}h remaining`);
+      else if (hours > 0) setTimeLeft(`${hours}h ${minutes}m remaining`);
+      else setTimeLeft(`${minutes}m remaining`);
+    };
+    update();
+    const interval = setInterval(update, 60000);
+    return () => clearInterval(interval);
+  }, [endDate]);
+
+  if (!timeLeft) return null;
+
+  return (
+    <span className="inline-flex items-center gap-1.5 bg-white/20 text-white px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm">
+      <Clock className="w-3.5 h-3.5" />
+      {timeLeft}
+    </span>
+  );
 }
 
 export default function CollectionDetailPage() {
@@ -133,6 +165,13 @@ export default function CollectionDetailPage() {
         </div>
       </div>
 
+      {/* Banner text */}
+      {collection.banner_text && (
+        <div className="bg-hafalohaGold text-gray-900 text-center py-2.5 px-4 text-sm font-semibold">
+          {collection.banner_text}
+        </div>
+      )}
+
       {/* Hero Banner - Clean design with Hafaloha branding */}
       <div className="relative overflow-hidden bg-hafalohaRed">
         {/* Subtle pattern overlay */}
@@ -146,9 +185,14 @@ export default function CollectionDetailPage() {
             {collection.description && (
               <p className="text-lg text-white/90 max-w-2xl mb-3">{collection.description}</p>
             )}
-            <p className="text-sm text-white/70">
-              {meta?.total || 0} {meta?.total === 1 ? 'product' : 'products'}
-            </p>
+            <div className="flex items-center gap-4">
+              <p className="text-sm text-white/70">
+                {meta?.total || 0} {meta?.total === 1 ? 'product' : 'products'}
+              </p>
+              {collection.ends_at && (
+                <CountdownBadge endDate={collection.ends_at} />
+              )}
+            </div>
           </FadeIn>
         </div>
       </div>

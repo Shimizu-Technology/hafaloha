@@ -9,6 +9,14 @@ module Api
         def index
           @collections = Collection.order(sort_order: :asc, name: :asc)
 
+          if params[:collection_type].present?
+            @collections = @collections.by_collection_type(params[:collection_type])
+          end
+
+          if params[:is_featured].present?
+            @collections = @collections.is_featured
+          end
+
           render_success(
             @collections.map { |c| serialize_collection(c) }
           )
@@ -65,7 +73,13 @@ module Api
             :featured,
             :sort_order,
             :meta_title,
-            :meta_description
+            :meta_description,
+            :collection_type,
+            :starts_at,
+            :ends_at,
+            :is_featured,
+            :auto_hide,
+            :banner_text
           )
         end
 
@@ -82,6 +96,15 @@ module Api
             product_count: collection.products.count,
             meta_title: collection.meta_title,
             meta_description: collection.meta_description,
+            collection_type: collection.collection_type,
+            starts_at: collection.starts_at,
+            ends_at: collection.ends_at,
+            is_featured: collection.is_featured,
+            auto_hide: collection.auto_hide,
+            banner_text: collection.banner_text,
+            active_now: collection.active_now?,
+            expired: collection.expired?,
+            upcoming: collection.upcoming?,
             created_at: collection.created_at,
             updated_at: collection.updated_at
           }
