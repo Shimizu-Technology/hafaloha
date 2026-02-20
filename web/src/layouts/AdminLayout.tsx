@@ -29,6 +29,7 @@ const ROUTE_META: Record<string, RouteMeta> = {
   '/admin/inventory':                { title: 'Inventory',        parent: '/admin' },
   '/admin/analytics':                { title: 'Analytics',        parent: '/admin' },
   '/admin/fundraisers':              { title: 'Fundraisers',      parent: '/admin' },
+  '/admin/pos':                       { title: 'POS',              parent: '/admin' },
   '/admin/acai':                     { title: 'Acai Cakes',       parent: '/admin' },
   '/admin/pickup-queue':              { title: 'Pickup Queue',    parent: '/admin' },
   '/admin/shipping-queue':            { title: 'Shipping Queue',  parent: '/admin' },

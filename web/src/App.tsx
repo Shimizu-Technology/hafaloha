@@ -27,6 +27,7 @@ import AdminFundraiserProductFormPage from './pages/admin/AdminFundraiserProduct
 import AdminPOSPage from './pages/admin/AdminPOSPage';
 import AdminPickupQueuePage from './pages/admin/AdminPickupQueuePage';
 import AdminShippingQueuePage from './pages/admin/AdminShippingQueuePage';
+>>>>>>> main
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
@@ -492,6 +493,9 @@ function AppContent() {
           <Route path="/returns" element={<ReturnsPage />} />
           <Route path="/privacy" element={<PrivacyPolicyPage />} />
           
+          {/* POS — standalone full-screen (no sidebar) */}
+          <Route path="/admin/pos" element={<AdminPOSPage />} />
+
           {/* Admin Routes with Layout */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<AdminDashboardPage />} />

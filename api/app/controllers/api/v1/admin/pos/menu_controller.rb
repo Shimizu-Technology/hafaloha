@@ -1,0 +1,71 @@
+# frozen_string_literal: true
+
+module Api
+  module V1
+    module Admin
+      module Pos
+        class MenuController < BaseController
+          # GET /api/v1/admin/pos/menu
+          def show
+            products = Product.published
+              .includes(:product_variants, :product_images, :collections)
+
+            effective_location_id = if current_user.location_scoped?
+              current_user.assigned_location_id
+            elsif params[:location_id].present?
+              params[:location_id].to_i
+            end
+
+            if effective_location_id
+              products = products.joins(:product_locations)
+                .where(product_locations: { location_id: effective_location_id, available: true })
+                .distinct
+            end
+
+            categories = {}
+            products.order(:name).each do |product|
+              collection_names = product.collections.map(&:name)
+              category = collection_names.first || "Uncategorized"
+              categories[category] ||= []
+              categories[category] << pos_product_json(product)
+            end
+
+            locations = Location.active.order(:name).map { |l| { id: l.id, name: l.name, address: l.address } }
+
+            render json: {
+              categories: categories.map { |name, items| { name: name, items: items } },
+              locations: locations,
+              total_products: products.count
+            }
+          end
+
+          private
+
+          def pos_product_json(product)
+            primary_image = product.product_images.find_by(primary: true) || product.product_images.first
+            variants = product.product_variants.where(available: true).order(:variant_name)
+
+            {
+              id: product.id,
+              name: product.name,
+              slug: product.slug,
+              product_type: product.product_type,
+              image_url: primary_image&.url,
+              variants: variants.map do |v|
+                {
+                  id: v.id,
+                  name: v.display_name,
+                  price_cents: v.price_cents,
+                  price_formatted: "$#{'%.2f' % (v.price_cents / 100.0)}",
+                  sku: v.sku,
+                  in_stock: v.in_stock?,
+                  stock_quantity: v.stock_quantity
+                }
+              end
+            }
+          end
+        end
+      end
+    end
+  end
+end

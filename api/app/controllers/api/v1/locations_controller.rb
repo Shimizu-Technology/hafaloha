@@ -15,7 +15,6 @@ module Api
 
 =======
 >>>>>>> main
->>>>>>> main
       private
 
       def location_json(location)

@@ -498,7 +498,6 @@ export const locationsApi = {
   },
 =======
 >>>>>>> main
->>>>>>> main
 };
 
 export default api;
