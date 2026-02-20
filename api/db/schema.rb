@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_20_031407) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_20_032043) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -344,6 +344,31 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_031407) do
     t.index ["user_id"], name: "index_inventory_audits_on_user_id"
   end
 
+  create_table "locations", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.string "address"
+    t.string "admin_email"
+    t.jsonb "admin_sms_phones", default: [], null: false
+    t.boolean "auto_deactivate", default: false, null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.datetime "ends_at"
+    t.jsonb "hours_json", default: {}, null: false
+    t.string "location_type", default: "permanent", null: false
+    t.bigint "menu_collection_id"
+    t.string "name", null: false
+    t.string "phone"
+    t.string "qr_code_url"
+    t.string "slug", null: false
+    t.datetime "starts_at"
+    t.datetime "updated_at", null: false
+    t.index ["active", "location_type"], name: "index_locations_on_active_and_location_type"
+    t.index ["active"], name: "index_locations_on_active"
+    t.index ["location_type"], name: "index_locations_on_location_type"
+    t.index ["menu_collection_id"], name: "index_locations_on_menu_collection_id"
+    t.index ["slug"], name: "index_locations_on_slug", unique: true
+  end
+
   create_table "order_items", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.bigint "order_id", null: false
@@ -374,6 +399,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_031407) do
     t.string "customer_phone"
     t.string "easypost_shipment_id"
     t.bigint "fundraiser_id"
+    t.bigint "location_id"
     t.text "notes"
     t.string "order_number"
     t.string "order_type"
@@ -398,6 +424,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_031407) do
     t.index ["created_at"], name: "index_orders_on_created_at"
     t.index ["customer_email"], name: "index_orders_on_customer_email"
     t.index ["fundraiser_id"], name: "index_orders_on_fundraiser_id"
+    t.index ["location_id"], name: "index_orders_on_location_id"
     t.index ["order_number"], name: "index_orders_on_order_number", unique: true
     t.index ["order_type"], name: "index_orders_on_order_type"
     t.index ["participant_id"], name: "index_orders_on_participant_id"
@@ -597,10 +624,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_031407) do
   add_foreign_key "inventory_audits", "product_variants"
   add_foreign_key "inventory_audits", "products"
   add_foreign_key "inventory_audits", "users"
+  add_foreign_key "locations", "collections", column: "menu_collection_id"
   add_foreign_key "order_items", "orders"
   add_foreign_key "order_items", "product_variants"
   add_foreign_key "order_items", "products"
   add_foreign_key "orders", "fundraisers"
+  add_foreign_key "orders", "locations"
   add_foreign_key "orders", "participants"
   add_foreign_key "orders", "users"
   add_foreign_key "participants", "fundraisers"
@@ -610,4 +639,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_031407) do
   add_foreign_key "product_variants", "products"
   add_foreign_key "refunds", "orders"
   add_foreign_key "refunds", "users"
+  add_foreign_key "users", "locations", column: "assigned_location_id"
 end
