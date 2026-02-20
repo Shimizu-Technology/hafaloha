@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_20_032043) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_20_032503) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -484,6 +484,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_032043) do
     t.index ["product_id"], name: "index_product_images_on_product_id"
   end
 
+  create_table "product_locations", force: :cascade do |t|
+    t.boolean "available", default: true, null: false
+    t.datetime "created_at", null: false
+    t.bigint "location_id", null: false
+    t.integer "price_override_cents"
+    t.bigint "product_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["available"], name: "index_product_locations_on_available"
+    t.index ["location_id"], name: "index_product_locations_on_location_id"
+    t.index ["product_id", "location_id"], name: "index_product_locations_on_product_id_and_location_id", unique: true
+    t.index ["product_id"], name: "index_product_locations_on_product_id"
+  end
+
   create_table "product_variants", force: :cascade do |t|
     t.boolean "available"
     t.string "barcode"
@@ -636,6 +649,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_032043) do
   add_foreign_key "product_collections", "collections"
   add_foreign_key "product_collections", "products"
   add_foreign_key "product_images", "products"
+  add_foreign_key "product_locations", "locations"
+  add_foreign_key "product_locations", "products"
   add_foreign_key "product_variants", "products"
   add_foreign_key "refunds", "orders"
   add_foreign_key "refunds", "users"

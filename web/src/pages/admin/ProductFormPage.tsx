@@ -106,6 +106,8 @@ export default function ProductFormPage() {
   const [images, setImages] = useState<ProductImage[]>([]);
   const deleteModalContentRef = useRef<HTMLDivElement | null>(null);
   const [allCollections, setAllCollections] = useState<Collection[]>([]);
+  const [allLocations, setAllLocations] = useState<{ id: number; name: string; slug: string; location_type: string }[]>([]);
+  const [selectedLocationIds, setSelectedLocationIds] = useState<number[]>([]);
   
   // Inventory History Modal state
   const [showInventoryModal, setShowInventoryModal] = useState(false);
@@ -132,6 +134,7 @@ export default function ProductFormPage() {
 
   useEffect(() => {
     fetchCollections();
+    fetchLocations();
     if (isEditMode) {
       fetchProduct();
     }
@@ -144,6 +147,15 @@ export default function ProductFormPage() {
       setAllCollections(response.data.data || []);
     } catch (err) {
       console.error('Failed to fetch collections:', err);
+    }
+  };
+
+  const fetchLocations = async () => {
+    try {
+      const response = await authGet<{ data: { id: number; name: string; slug: string; location_type: string }[] }>('/admin/locations', getToken);
+      setAllLocations(response.data.data || []);
+    } catch (err) {
+      console.error('Failed to fetch locations:', err);
     }
   };
 
@@ -175,6 +187,9 @@ export default function ProductFormPage() {
         needs_attention: product.needs_attention || false,
         import_notes: product.import_notes || '',
       });
+      
+      // Load locations
+      setSelectedLocationIds(product.location_ids || product.available_location_ids || []);
       
       // Load images
       setImages(product.images || []);
@@ -239,6 +254,14 @@ export default function ProductFormPage() {
     fetchInventoryAudits();
   };
 
+  const handleLocationToggle = (locationId: number) => {
+    setSelectedLocationIds(prev =>
+      prev.includes(locationId)
+        ? prev.filter(id => id !== locationId)
+        : [...prev, locationId]
+    );
+  };
+
   const handleCollectionToggle = (collectionId: number) => {
     setFormData(prev => {
       const currentIds = prev.collection_ids || [];
@@ -267,6 +290,7 @@ export default function ProductFormPage() {
       
       const payload = {
         product: formData,
+        location_ids: selectedLocationIds,
       };
 
       if (isEditMode) {
@@ -292,6 +316,7 @@ export default function ProductFormPage() {
           needs_attention: updatedProduct.needs_attention || false,
           import_notes: updatedProduct.import_notes || '',
         });
+        setSelectedLocationIds(updatedProduct.location_ids || updatedProduct.available_location_ids || []);
         
         toast.success('Product updated successfully!', {
           duration: 3000,
@@ -780,6 +805,36 @@ export default function ProductFormPage() {
             </div>
           )}
         </div>
+
+        {/* Location Availability */}
+        {allLocations.length > 0 && (
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Location Availability</h2>
+            <p className="text-sm text-gray-600 mb-4">
+              Select which locations carry this product
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 border border-gray-300 rounded-lg p-4 bg-gray-50">
+              {allLocations.map((location) => (
+                <div key={location.id} className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id={`location_${location.id}`}
+                    checked={selectedLocationIds.includes(location.id)}
+                    onChange={() => handleLocationToggle(location.id)}
+                    className="w-4 h-4 text-hafalohaRed border-gray-300 rounded focus:ring-hafalohaRed"
+                  />
+                  <label htmlFor={`location_${location.id}`} className="ml-2 text-sm text-gray-700 cursor-pointer select-none">
+                    {location.name}
+                    <span className="text-xs text-gray-500 ml-1 capitalize">({location.location_type})</span>
+                  </label>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-gray-600 mt-3 font-medium">
+              {selectedLocationIds.length} location{selectedLocationIds.length !== 1 ? 's' : ''} selected
+            </p>
+          </div>
+        )}
 
         {/* Images & Variants - Only available after product creation */}
         {!isEditMode && (
