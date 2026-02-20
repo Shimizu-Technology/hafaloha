@@ -6,7 +6,7 @@ module Api
       class DashboardController < ApplicationController
         include Authenticatable
         before_action :authenticate_request
-        before_action :require_admin!
+        before_action :require_staff!
 
         # GET /api/v1/admin/dashboard/stats
         def stats

@@ -4,7 +4,7 @@ module Api
       class BaseController < ApplicationController
         include Authenticatable
 
-        before_action :require_admin!
+        before_action :require_staff!
 
         private
 

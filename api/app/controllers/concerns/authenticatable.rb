@@ -95,9 +95,17 @@ module Authenticatable
     render json: { error: message }, status: :unauthorized
   end
 
-  # Helper to check if user is admin
+  # Authorization helpers — role hierarchy: customer < staff < manager < admin
   def require_admin!
     render json: { error: "Forbidden" }, status: :forbidden unless current_user&.admin?
+  end
+
+  def require_manager!
+    render json: { error: "Forbidden" }, status: :forbidden unless current_user&.manager_or_above?
+  end
+
+  def require_staff!
+    render json: { error: "Forbidden" }, status: :forbidden unless current_user&.staff_or_above?
   end
 
   # Helper to make authentication optional

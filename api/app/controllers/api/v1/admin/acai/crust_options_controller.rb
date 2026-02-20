@@ -5,6 +5,7 @@ module Api
     module Admin
       module Acai
         class CrustOptionsController < Admin::BaseController
+          before_action :require_manager!
           before_action :set_crust_option, only: [ :show, :update, :destroy ]
 
           # GET /api/v1/admin/acai/crust_options
