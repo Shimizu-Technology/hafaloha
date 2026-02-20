@@ -5,6 +5,7 @@ module Api
     module Admin
       module Acai
         class BlockedSlotsController < Admin::BaseController
+          before_action :require_manager!
           before_action :set_blocked_slot, only: [ :show, :update, :destroy ]
 
           # GET /api/v1/admin/acai/blocked_slots

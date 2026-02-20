@@ -719,6 +719,19 @@ function CheckoutForm() {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 sticky top-24">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
+
+              {/* Location info */}
+              {selectedLocation && (
+                <div className="mb-4 p-3 bg-warm-50 rounded-lg border border-warm-200">
+                  <div className="flex items-center gap-2 mb-1">
+                    <MapPin className="w-4 h-4 text-hafalohaRed flex-shrink-0" />
+                    <span className="text-sm font-semibold text-warm-900">{selectedLocation.name}</span>
+                  </div>
+                  {selectedLocation.address && (
+                    <p className="text-xs text-warm-600 ml-6">{selectedLocation.address}</p>
+                  )}
+                </div>
+              )}
               
               {/* Items */}
               <div className="space-y-4 mb-4 max-h-64 overflow-y-auto">

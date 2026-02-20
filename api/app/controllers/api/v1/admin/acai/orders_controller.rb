@@ -5,6 +5,7 @@ module Api
     module Admin
       module Acai
         class OrdersController < Admin::BaseController
+          before_action :require_manager!
           # GET /api/v1/admin/acai/orders
           def index
             orders = Order.acai.includes(:order_items).recent

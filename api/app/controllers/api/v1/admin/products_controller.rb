@@ -2,11 +2,12 @@ module Api
   module V1
     module Admin
       class ProductsController < BaseController
+        before_action :require_manager!
         before_action :set_product, only: [ :show, :update, :destroy ]
 
         # GET /api/v1/admin/products
         def index
-          @products = Product.includes(:product_variants, :product_images, :collections)
+          @products = Product.includes(:product_variants, :product_images, :collections, :product_locations)
                              .order(created_at: :desc)
 
           # Filters
@@ -41,6 +42,9 @@ module Api
               @product.collection_ids = params[:collection_ids]
             end
 
+            # Assign to locations if provided
+            sync_product_locations(@product) if params[:location_ids].present?
+
             render_created(serialize_product_full(@product))
           else
             render_error("Failed to create product", errors: @product.errors.full_messages)
@@ -54,6 +58,9 @@ module Api
             if params[:collection_ids].present?
               @product.collection_ids = params[:collection_ids]
             end
+
+            # Sync location assignments if provided
+            sync_product_locations(@product) if params[:location_ids].present?
 
             render_success(serialize_product_full(@product), message: "Product updated successfully")
           else
@@ -132,11 +139,26 @@ module Api
         private
 
         def set_product
-          @product = Product.includes(:product_variants, :product_images, :collections)
+          @product = Product.includes(:product_variants, :product_images, :collections, :product_locations)
                             .find_by(id: params[:id]) ||
-                     Product.includes(:product_variants, :product_images, :collections)
+                     Product.includes(:product_variants, :product_images, :collections, :product_locations)
                             .find_by(slug: params[:id])
           render_not_found("Product not found") unless @product
+        end
+
+        def sync_product_locations(product)
+          location_ids = Array(params[:location_ids]).map(&:to_i)
+          existing_ids = product.product_locations.pluck(:location_id)
+
+          # Remove locations no longer selected
+          product.product_locations.where.not(location_id: location_ids).destroy_all
+
+          # Add new locations
+          (location_ids - existing_ids).each do |loc_id|
+            product.product_locations.create!(location_id: loc_id, available: true)
+          end
+
+          product.reload
         end
 
         def product_params
@@ -196,6 +218,7 @@ module Api
             in_stock: product.in_stock?,
             actually_available: product.actually_available?,
             collections: product.collections.map { |c| { id: c.id, name: c.name, slug: c.slug } },
+            available_location_ids: product.product_locations.available.pluck(:location_id),
             needs_attention: product.needs_attention,
             import_notes: product.import_notes,
             created_at: product.created_at,
@@ -212,6 +235,15 @@ module Api
             meta_description: product.meta_description,
             shopify_product_id: product.shopify_product_id,
             collection_ids: product.collections.pluck(:id),
+            location_ids: product.product_locations.available.pluck(:location_id),
+            product_locations: product.product_locations.map { |pl|
+              {
+                id: pl.id,
+                location_id: pl.location_id,
+                available: pl.available,
+                price_override_cents: pl.price_override_cents
+              }
+            },
             variants: product.product_variants.map { |v| serialize_variant(v) },
             images: product.product_images.by_position.map { |i| serialize_image(i) }
           )

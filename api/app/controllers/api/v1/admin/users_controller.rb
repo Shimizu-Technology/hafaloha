@@ -30,6 +30,8 @@ module Api
             stats: {
               total: User.count,
               admins: User.admins.count,
+              managers: User.where(role: "manager").count,
+              staff: User.where(role: "staff").count,
               customers: User.customers.count
             }
           }
@@ -42,9 +44,9 @@ module Api
 
         # PATCH /api/v1/admin/users/:id
         def update
-          # Prevent removing your own admin access
-          if @user.id == current_user.id && params[:user][:role] == "customer"
-            return render json: { error: "You cannot remove your own admin access" }, status: :unprocessable_entity
+          # Prevent demoting yourself below your current role
+          if @user.id == current_user.id && User::ROLE_HIERARCHY.fetch(params[:user][:role], 0) < @user.role_level
+            return render json: { error: "You cannot demote your own role" }, status: :unprocessable_entity
           end
 
           if @user.update(user_params)
@@ -66,7 +68,7 @@ module Api
         end
 
         def user_params
-          params.require(:user).permit(:role)
+          params.require(:user).permit(:role, :assigned_location_id)
         end
 
         def user_json(user)
@@ -76,7 +78,9 @@ module Api
             name: user.name,
             phone: user.phone,
             role: user.role,
+            role_level: user.role_level,
             is_admin: user.admin?,
+            assigned_location_id: user.assigned_location_id,
             clerk_id: user.clerk_id,
             created_at: user.created_at.iso8601,
             updated_at: user.updated_at.iso8601

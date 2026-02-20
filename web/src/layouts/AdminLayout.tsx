@@ -89,6 +89,7 @@ export default function AdminLayout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [userRole, setUserRole] = useState<string>('customer');
   const [checkingAdmin, setCheckingAdmin] = useState(true);
   const navScrollRef = useRef<HTMLDivElement | null>(null);
 
@@ -109,7 +110,9 @@ export default function AdminLayout() {
         const response = await axios.get(`${API_BASE_URL}/api/v1/me`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        setIsAdmin(response.data.admin || false);
+        const data = response.data;
+        setIsAdmin(data.staff_or_above || data.admin || false);
+        setUserRole(data.role || 'customer');
       } catch (error) {
         console.error('Error checking admin status:', error);
         setIsAdmin(false);
@@ -137,7 +140,13 @@ export default function AdminLayout() {
 
   if (!isAdmin) return null;
 
-  // --- Navigation groups ---
+  // Role-level helpers
+  const ROLE_LEVELS: Record<string, number> = { customer: 0, staff: 1, manager: 2, admin: 3 };
+  const roleLevel = ROLE_LEVELS[userRole] ?? 0;
+  const isManager = roleLevel >= 2;
+  const isAdminRole = roleLevel >= 3;
+
+  // --- Navigation groups (filtered by role) ---
   const mainNavigation: NavItem[] = [
     { name: 'Dashboard', path: '/admin', icon: 'dashboard' },
     { name: 'Orders',    path: '/admin/orders', icon: 'orders' },
@@ -150,14 +159,17 @@ export default function AdminLayout() {
   ];
   const specialNavigation: NavItem[] = [
     { name: 'POS',          path: '/admin/pos', icon: 'pos' },
+>>>>>>> main
     { name: 'Fundraisers', path: '/admin/fundraisers', icon: 'fundraisers' },
     { name: 'Acai Cakes',  path: '/admin/acai', icon: 'acai' },
-  ];
+  ] : [];
   const systemNavigation: NavItem[] = [
-    { name: 'Users',    path: '/admin/users', icon: 'users' },
-    { name: 'Import',   path: '/admin/import', icon: 'import' },
-    { name: 'Settings', path: '/admin/settings', icon: 'settings' },
-    { name: 'Variant Presets', path: '/admin/settings/variant-presets', icon: 'presets' },
+    ...(isAdminRole ? [{ name: 'Users', path: '/admin/users', icon: 'users' }] : []),
+    ...(isManager ? [
+      { name: 'Import',   path: '/admin/import', icon: 'import' },
+      { name: 'Variant Presets', path: '/admin/settings/variant-presets', icon: 'presets' },
+    ] : []),
+    ...(isAdminRole ? [{ name: 'Settings', path: '/admin/settings', icon: 'settings' }] : []),
   ];
 
   const NavSection = ({ title, items }: { title: string; items: NavItem[] }) => (
@@ -252,7 +264,7 @@ export default function AdminLayout() {
               <p className="text-sm font-semibold text-gray-900 truncate">
                 {user?.firstName || 'Admin'}
               </p>
-              <p className="text-xs text-gray-500 truncate">Administrator</p>
+              <p className="text-xs text-gray-500 truncate capitalize">{userRole}</p>
             </div>
           </div>
         </div>

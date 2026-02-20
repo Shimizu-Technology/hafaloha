@@ -32,6 +32,7 @@ export interface CreateOrderRequest {
   shipping_method: ShippingMethod;
   payment_method: PaymentMethod;
   payment_intent_id?: string;
+  location_id?: number;
 }
 
 export interface OrderItem {

@@ -6,7 +6,7 @@ module Api
       # GET /api/v1/products
       def index
         @products = Product.published.active  # Only show active (non-archived) products
-                          .includes(:product_variants, :product_images, :collections)
+                          .includes(:product_variants, :product_images, :collections, :product_locations)
 
         # Base ordering (will be overridden by sort param if present)
         @products = @products.order(featured: :desc, created_at: :desc) unless params[:sort].present?
@@ -22,6 +22,13 @@ module Api
         end
 
         @products = @products.where(featured: true) if params[:featured] == "true"
+
+        # Location filter
+        if params[:location_id].present?
+          @products = @products
+            .joins(:product_locations)
+            .where(product_locations: { location_id: params[:location_id].to_i, available: true })
+        end
 
         # Search
         if params[:search].present?
@@ -84,10 +91,10 @@ module Api
 
       def set_product
         @product = Product.published
-                         .includes(:product_variants, :product_images, :collections)
+                         .includes(:product_variants, :product_images, :collections, :product_locations)
                          .find_by(id: params[:id]) ||
                    Product.published
-                         .includes(:product_variants, :product_images, :collections)
+                         .includes(:product_variants, :product_images, :collections, :product_locations)
                          .find_by(slug: params[:id])
 
         render json: { error: "Product not found" }, status: :not_found unless @product
@@ -109,6 +116,7 @@ module Api
           actually_available: product.actually_available?,
           primary_image_url: product.primary_image&.signed_url,
           collections: product.collections.map { |c| { id: c.id, name: c.name, slug: c.slug } },
+          available_location_ids: product.product_locations.available.pluck(:location_id),
           variant_count: product.product_variants.available.count,
           total_stock: product.product_variants.sum(:stock_quantity),
           created_at: product.created_at
@@ -144,6 +152,7 @@ module Api
           },
           variants: product.product_variants.map { |v| serialize_variant(v) },
           images: product.product_images.primary_first.map { |i| serialize_image(i) },
+          available_location_ids: product.product_locations.available.pluck(:location_id),
           meta_title: product.meta_title,
           meta_description: product.meta_description,
           created_at: product.created_at,

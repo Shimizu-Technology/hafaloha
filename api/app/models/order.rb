@@ -2,6 +2,7 @@ class Order < ApplicationRecord
   belongs_to :user, optional: true  # Allow guest checkout
   belongs_to :fundraiser, optional: true
   belongs_to :participant, optional: true
+  belongs_to :location, optional: true
   has_many :order_items, dependent: :destroy
   has_many :refunds, dependent: :destroy
 

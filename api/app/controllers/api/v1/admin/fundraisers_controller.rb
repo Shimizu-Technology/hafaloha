@@ -2,6 +2,7 @@ module Api
   module V1
     module Admin
       class FundraisersController < BaseController
+        before_action :require_manager!
         before_action :set_fundraiser, only: [ :show, :update, :destroy, :stats ]
 
         # GET /api/v1/admin/fundraisers

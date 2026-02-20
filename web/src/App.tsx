@@ -55,6 +55,7 @@ import { AnimatePresence } from 'framer-motion'; // Page transitions
 import NavDropdown from './components/NavDropdown'; // Import NavDropdown
 import MobileNavDropdown from './components/MobileNavDropdown'; // Import MobileNavDropdown
 import { useCartStore } from './store/cartStore'; // Import cart store
+import LocationPicker from './components/LocationPicker'; // Import LocationPicker
 import { API_BASE_URL } from './config';
 import { configApi } from './services/api';
 import type { AppConfig } from './types/order';
@@ -178,7 +179,7 @@ function AppContent() {
           },
         });
         
-        setIsAdmin(response.data.admin || false);
+        setIsAdmin(response.data.staff_or_above || response.data.admin || false);
       } catch (error) {
         console.error('Error checking admin status:', error);
         if (axios.isAxiosError(error)) {
@@ -455,6 +456,9 @@ function AppContent() {
         </nav>
         )}
 
+        {/* Location Picker - shown on ordering pages */}
+        {!isAdminPage && <LocationPicker />}
+
         {/* Routes with page transitions */}
         <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
@@ -503,6 +507,7 @@ function AppContent() {
             <Route path="fundraisers/:id" element={<AdminFundraiserDetailPage />} />
             <Route path="fundraisers/:id/edit" element={<AdminFundraiserFormPage />} />
             <Route path="fundraisers/:fundraiserId/products/new" element={<AdminFundraiserProductFormPage />} />
+            <Route path="locations" element={<AdminLocationsPage />} />
             <Route path="acai" element={<AdminAcaiPage />} />
             <Route path="pickup-queue" element={<AdminPickupQueuePage />} />
             <Route path="shipping-queue" element={<AdminShippingQueuePage />} />

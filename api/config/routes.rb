@@ -160,6 +160,14 @@ Rails.application.routes.draw do
           resources :inventory_audits, only: [ :index ], controller: "inventory_audits", action: :for_order
         end
 
+        # Locations
+        resources :locations, except: [ :new, :edit ] do
+          member do
+            post :toggle_active
+=======
+          end
+        end
+
         # Inventory Audits (standalone)
         resources :inventory_audits, only: [ :index, :show ] do
           collection do
@@ -169,6 +177,7 @@ Rails.application.routes.draw do
       end
 
       # Public routes (no authentication required)
+      resources :locations, only: [ :index ]
       resources :products, only: [ :index, :show ]
       resources :collections, only: [ :index, :show ]
 

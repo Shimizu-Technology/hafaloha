@@ -5,6 +5,7 @@ module Api
     module Admin
       module Acai
         class SettingsController < Admin::BaseController
+          before_action :require_manager!
           # GET /api/v1/admin/acai/settings
           def show
             settings = AcaiSetting.instance

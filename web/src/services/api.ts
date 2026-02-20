@@ -54,6 +54,7 @@ export interface Product {
   product_low_stock?: boolean;
   in_stock: boolean;
   actually_available?: boolean; // Computed: respects published + inventory
+  available_location_ids?: number[];
   primary_image_url: string | null;  // Changed from image_url to match backend
   collections: Collection[];
   variant_count: number;
@@ -149,6 +150,7 @@ export const productsApi = {
     min_price?: number;
     max_price?: number;
     sort?: string; // Added sort parameter
+    location_id?: number;
   }): Promise<ProductsResponse> => {
     const response = await api.get('/products', { params });
     return response.data;
@@ -472,6 +474,31 @@ export const acaiApi = {
 // Helper to format price
 export const formatPrice = (cents: number): string => {
   return `$${(cents / 100).toFixed(2)}`;
+};
+
+// Locations API
+export interface Location {
+  id: number;
+  name: string;
+  slug: string;
+  address?: string;
+  phone?: string;
+  description?: string;
+  location_type: string;
+  hours_json?: Record<string, unknown>;
+  starts_at?: string;
+  ends_at?: string;
+  qr_code_url?: string;
+}
+
+export const locationsApi = {
+  getLocations: async (): Promise<{ locations: Location[] }> => {
+    const response = await api.get('/locations');
+    return response.data;
+  },
+=======
+>>>>>>> main
+>>>>>>> main
 };
 
 export default api;
