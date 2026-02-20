@@ -161,8 +161,6 @@ Rails.application.routes.draw do
           member do
             post :toggle_active
 =======
-<<<<<<< HEAD
-            get :qr_code
           end
         end
 

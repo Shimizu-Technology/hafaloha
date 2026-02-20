@@ -81,27 +81,26 @@ module Api
           if @order.saved_change_to_status?
             case @order.status
             when "confirmed"
+              # Send order confirmed notification
               SendOrderConfirmedEmailJob.perform_later(@order.id)
-              SendOrderSmsJob.perform_later(@order.id, "confirmed")
             when "preparing"
+              # Send order processing notification
               SendOrderProcessingEmailJob.perform_later(@order.id)
-              SendOrderSmsJob.perform_later(@order.id, "preparing")
             when "shipped"
               SendOrderShippedEmailJob.perform_later(@order.id) if @order.tracking_number.present?
               SendOrderSmsJob.perform_later(@order.id, "shipped")
             when "ready"
               SendOrderReadyEmailJob.perform_later(@order.id)
-              SendOrderSmsJob.perform_later(@order.id, "ready")
             when "picked_up"
+              # Send picked up confirmation
               SendOrderPickedUpEmailJob.perform_later(@order.id)
-              SendOrderSmsJob.perform_later(@order.id, "picked_up")
             when "delivered"
+              # Send delivered confirmation
               SendOrderDeliveredEmailJob.perform_later(@order.id)
-              SendOrderSmsJob.perform_later(@order.id, "delivered")
             when "cancelled"
+              # Restore inventory and send cancellation email
               restore_inventory(@order, current_user)
               SendOrderCancelledEmailJob.perform_later(@order.id)
-              SendOrderSmsJob.perform_later(@order.id, "cancelled")
             end
           end
 
