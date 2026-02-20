@@ -22,6 +22,10 @@ Rails.application.routes.draw do
 
         # Orders (admin management)
         resources :orders, only: [ :index, :show, :update ] do
+          collection do
+            get :pickup_queue
+            get :shipping_queue
+          end
           member do
             post :notify  # Resend notification email
             post :refund  # Process refund
