@@ -104,9 +104,18 @@ export interface Collection {
   slug: string;
   description: string;
   image_url: string | null;
-  thumbnail_url: string | null; // Added for collections landing page
+  thumbnail_url: string | null;
   featured: boolean;
   product_count: number;
+  collection_type?: string;
+  starts_at?: string | null;
+  ends_at?: string | null;
+  is_featured?: boolean;
+  auto_hide?: boolean;
+  banner_text?: string | null;
+  active_now?: boolean;
+  expired?: boolean;
+  upcoming?: boolean;
 }
 
 export interface ProductsResponse {
@@ -172,6 +181,12 @@ export const collectionsApi = {
     search?: string;
   }): Promise<CollectionsResponse> => {
     const response = await api.get('/collections', { params });
+    return response.data;
+  },
+
+  // Get featured collections
+  getFeaturedCollections: async (limit?: number): Promise<{ collections: Collection[] }> => {
+    const response = await api.get('/collections/featured', { params: { limit } });
     return response.data;
   },
 

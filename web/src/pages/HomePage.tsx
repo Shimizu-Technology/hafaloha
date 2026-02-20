@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import FeaturedProducts from '../components/FeaturedProducts';
+import FeaturedCollections from '../components/FeaturedCollections';
 import FadeIn from '../components/animations/FadeIn';
 import { StaggerContainer, StaggerItem } from '../components/animations/StaggerContainer';
 import { homepageApi, type HomepageSection } from '../services/api';
@@ -271,6 +272,11 @@ export default function HomePage() {
       <section className="bg-white">
         <FeaturedProducts />
       </section>
+
+      {/* ============================================================ */}
+      {/* FEATURED COLLECTIONS                                         */}
+      {/* ============================================================ */}
+      <FeaturedCollections />
 
       {/* ============================================================ */}
       {/* FOUNDER / STORY SECTION — asymmetric editorial split         */}
