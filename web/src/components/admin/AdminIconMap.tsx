@@ -17,6 +17,7 @@ import {
   ShoppingBag,
   TrendingUp,
   BarChart3,
+  MapPin,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -41,6 +42,7 @@ export const ADMIN_ICONS: Record<string, LucideIcon> = {
   'shopping-bag': ShoppingBag,
   trending: TrendingUp,
   analytics: BarChart3,
+  locations: MapPin,
 };
 
 interface AdminIconProps {

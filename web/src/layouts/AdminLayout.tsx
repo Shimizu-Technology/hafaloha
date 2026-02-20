@@ -30,6 +30,7 @@ const ROUTE_META: Record<string, RouteMeta> = {
   '/admin/analytics':                { title: 'Analytics',        parent: '/admin' },
   '/admin/fundraisers':              { title: 'Fundraisers',      parent: '/admin' },
   '/admin/acai':                     { title: 'Acai Cakes',       parent: '/admin' },
+  '/admin/locations':                 { title: 'Locations',        parent: '/admin' },
   '/admin/users':                    { title: 'Users',            parent: '/admin' },
   '/admin/import':                   { title: 'CSV Import',       parent: '/admin' },
   '/admin/settings':                 { title: 'Settings',         parent: '/admin' },
@@ -156,6 +157,10 @@ export default function AdminLayout() {
     ] : []),
   ];
   const specialNavigation: NavItem[] = isManager ? [
+<<<<<<< HEAD
+    { name: 'Locations',    path: '/admin/locations', icon: 'locations' },
+=======
+>>>>>>> main
     { name: 'Fundraisers', path: '/admin/fundraisers', icon: 'fundraisers' },
     { name: 'Acai Cakes',  path: '/admin/acai', icon: 'acai' },
   ] : [];
