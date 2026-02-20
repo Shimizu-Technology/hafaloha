@@ -80,15 +80,27 @@ module Api
           # Handle status changes
           if @order.saved_change_to_status?
             case @order.status
+            when "confirmed"
+              # Send order confirmed notification
+              SendOrderConfirmedEmailJob.perform_later(@order.id)
+            when "preparing"
+              # Send order processing notification
+              SendOrderProcessingEmailJob.perform_later(@order.id)
             when "shipped"
-              # Send shipping notification with tracking
               SendOrderShippedEmailJob.perform_later(@order.id) if @order.tracking_number.present?
+              SendOrderSmsJob.perform_later(@order.id, "shipped")
             when "ready"
-              # Send ready for pickup notification
               SendOrderReadyEmailJob.perform_later(@order.id)
+            when "picked_up"
+              # Send picked up confirmation
+              SendOrderPickedUpEmailJob.perform_later(@order.id)
+            when "delivered"
+              # Send delivered confirmation
+              SendOrderDeliveredEmailJob.perform_later(@order.id)
             when "cancelled"
-              # Restore inventory when order is cancelled
+              # Restore inventory and send cancellation email
               restore_inventory(@order, current_user)
+              SendOrderCancelledEmailJob.perform_later(@order.id)
             end
           end
 
@@ -105,6 +117,12 @@ module Api
       # Resend notification email to customer
       def notify
         case @order.status
+        when "confirmed"
+          SendOrderConfirmedEmailJob.perform_later(@order.id)
+          render json: { message: "Order confirmed notification sent to customer" }
+        when "preparing"
+          SendOrderProcessingEmailJob.perform_later(@order.id)
+          render json: { message: "Order processing notification sent to customer" }
         when "shipped"
           if @order.tracking_number.present?
             SendOrderShippedEmailJob.perform_later(@order.id)
@@ -115,6 +133,15 @@ module Api
         when "ready"
           SendOrderReadyEmailJob.perform_later(@order.id)
           render json: { message: "Ready for pickup notification sent to customer" }
+        when "picked_up"
+          SendOrderPickedUpEmailJob.perform_later(@order.id)
+          render json: { message: "Picked up notification sent to customer" }
+        when "delivered"
+          SendOrderDeliveredEmailJob.perform_later(@order.id)
+          render json: { message: "Delivered notification sent to customer" }
+        when "cancelled"
+          SendOrderCancelledEmailJob.perform_later(@order.id)
+          render json: { message: "Cancellation notification sent to customer" }
         else
           render json: { error: "Cannot send notification for orders with status '#{@order.status}'" }, status: :unprocessable_entity
         end

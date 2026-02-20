@@ -178,6 +178,9 @@ export default function AdminLocationsPage() {
   const generateSlug = (name: string) =>
     name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
+=======
+<<<<<<< HEAD
+>>>>>>> main
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">

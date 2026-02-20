@@ -25,7 +25,10 @@ import AdminFundraiserDetailPage from './pages/admin/AdminFundraiserDetailPage';
 import AdminFundraiserFormPage from './pages/admin/AdminFundraiserFormPage';
 import AdminFundraiserProductFormPage from './pages/admin/AdminFundraiserProductFormPage';
 import AdminLocationsPage from './pages/admin/AdminLocationsPage';
+<<<<<<< HEAD
 import AdminPOSPage from './pages/admin/AdminPOSPage';
+=======
+>>>>>>> main
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
@@ -54,6 +57,7 @@ import { AnimatePresence } from 'framer-motion'; // Page transitions
 import NavDropdown from './components/NavDropdown'; // Import NavDropdown
 import MobileNavDropdown from './components/MobileNavDropdown'; // Import MobileNavDropdown
 import { useCartStore } from './store/cartStore'; // Import cart store
+import LocationPicker from './components/LocationPicker'; // Import LocationPicker
 import { API_BASE_URL } from './config';
 import { configApi } from './services/api';
 import type { AppConfig } from './types/order';
@@ -453,6 +457,9 @@ function AppContent() {
           )}
         </nav>
         )}
+
+        {/* Location Picker - shown on ordering pages */}
+        {!isAdminPage && <LocationPicker />}
 
         {/* Routes with page transitions */}
         <AnimatePresence mode="wait">

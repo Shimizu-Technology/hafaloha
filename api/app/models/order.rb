@@ -3,7 +3,10 @@ class Order < ApplicationRecord
   belongs_to :fundraiser, optional: true
   belongs_to :participant, optional: true
   belongs_to :location, optional: true
+<<<<<<< HEAD
   belongs_to :created_by_user, class_name: "User", optional: true
+=======
+>>>>>>> main
   has_many :order_items, dependent: :destroy
   has_many :refunds, dependent: :destroy
 

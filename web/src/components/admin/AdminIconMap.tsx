@@ -19,32 +19,6 @@ import {
   BarChart3,
   MapPin,
   Monitor,
-  type LucideIcon,
-} from 'lucide-react';
-
-// Central icon registry for all admin navigation and UI elements.
-// Add new icons here instead of scattering emoji/strings across pages.
-export const ADMIN_ICONS: Record<string, LucideIcon> = {
-  dashboard: LayoutDashboard,
-  orders: ShoppingCart,
-  products: Package,
-  collections: FolderOpen,
-  inventory: Warehouse,
-  fundraisers: Heart,
-  acai: IceCreamCone,
-  users: Users,
-  import: Upload,
-  settings: Settings,
-  presets: Sliders,
-  add: Plus,
-  'clipboard-list': ClipboardList,
-  revenue: DollarSign,
-  pending: Clock,
-  'shopping-bag': ShoppingBag,
-  trending: TrendingUp,
-  analytics: BarChart3,
-  locations: MapPin,
-  pos: Monitor,
 };
 
 interface AdminIconProps {
