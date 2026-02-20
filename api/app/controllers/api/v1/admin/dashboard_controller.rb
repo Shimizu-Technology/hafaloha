@@ -87,7 +87,7 @@ module Api
         def top_products_data(today_start)
           OrderItem.joins(:order).where("orders.created_at >= ?", today_start)
             .group(:product_id)
-            .select("product_id, SUM(quantity) as total_qty, SUM(price_cents * quantity) as total_revenue")
+            .select("product_id, COALESCE(SUM(quantity), 0) as total_qty, COALESCE(SUM(price_cents * quantity), 0) as total_revenue")
             .order("total_qty DESC").limit(5)
             .map do |item|
               product = Product.find_by(id: item.product_id)
