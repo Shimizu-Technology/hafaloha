@@ -30,6 +30,8 @@ const ROUTE_META: Record<string, RouteMeta> = {
   '/admin/analytics':                { title: 'Analytics',        parent: '/admin' },
   '/admin/fundraisers':              { title: 'Fundraisers',      parent: '/admin' },
   '/admin/acai':                     { title: 'Acai Cakes',       parent: '/admin' },
+  '/admin/pickup-queue':              { title: 'Pickup Queue',    parent: '/admin' },
+  '/admin/shipping-queue':            { title: 'Shipping Queue',  parent: '/admin' },
   '/admin/users':                    { title: 'Users',            parent: '/admin' },
   '/admin/import':                   { title: 'CSV Import',       parent: '/admin' },
   '/admin/settings':                 { title: 'Settings',         parent: '/admin' },
@@ -139,12 +141,15 @@ export default function AdminLayout() {
   const mainNavigation: NavItem[] = [
     { name: 'Dashboard', path: '/admin', icon: 'dashboard' },
     { name: 'Orders',    path: '/admin/orders', icon: 'orders' },
+    { name: 'Pickup Queue', path: '/admin/pickup-queue', icon: 'shopping-bag' },
+    { name: 'Shipping Queue', path: '/admin/shipping-queue', icon: 'truck' },
     { name: 'Products',  path: '/admin/products', icon: 'products' },
     { name: 'Collections', path: '/admin/collections', icon: 'collections' },
     { name: 'Inventory', path: '/admin/inventory', icon: 'inventory' },
     { name: 'Analytics', path: '/admin/analytics', icon: 'analytics' },
   ];
   const specialNavigation: NavItem[] = [
+    { name: 'POS',          path: '/admin/pos', icon: 'pos' },
     { name: 'Fundraisers', path: '/admin/fundraisers', icon: 'fundraisers' },
     { name: 'Acai Cakes',  path: '/admin/acai', icon: 'acai' },
   ];

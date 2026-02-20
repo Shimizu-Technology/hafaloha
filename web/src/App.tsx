@@ -24,6 +24,9 @@ import AdminFundraisersPage from './pages/admin/AdminFundraisersPage';
 import AdminFundraiserDetailPage from './pages/admin/AdminFundraiserDetailPage';
 import AdminFundraiserFormPage from './pages/admin/AdminFundraiserFormPage';
 import AdminFundraiserProductFormPage from './pages/admin/AdminFundraiserProductFormPage';
+import AdminPOSPage from './pages/admin/AdminPOSPage';
+import AdminPickupQueuePage from './pages/admin/AdminPickupQueuePage';
+import AdminShippingQueuePage from './pages/admin/AdminShippingQueuePage';
 import CheckoutPage from './pages/CheckoutPage';
 import OrderConfirmationPage from './pages/OrderConfirmationPage';
 import OrderHistoryPage from './pages/OrderHistoryPage';
@@ -501,6 +504,8 @@ function AppContent() {
             <Route path="fundraisers/:id/edit" element={<AdminFundraiserFormPage />} />
             <Route path="fundraisers/:fundraiserId/products/new" element={<AdminFundraiserProductFormPage />} />
             <Route path="acai" element={<AdminAcaiPage />} />
+            <Route path="pickup-queue" element={<AdminPickupQueuePage />} />
+            <Route path="shipping-queue" element={<AdminShippingQueuePage />} />
             <Route path="inventory" element={<AdminInventoryPage />} />
             <Route path="users" element={<AdminUsersPage />} />
             <Route path="settings" element={<AdminSettingsPage />} />

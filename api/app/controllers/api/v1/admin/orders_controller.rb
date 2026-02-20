@@ -71,10 +71,54 @@ module Api
         render json: { order: detailed_order_json(@order) }
       end
 
+      # GET /api/v1/admin/orders/pickup_queue
+      def pickup_queue
+        orders = Order.includes(:order_items, :user)
+                      .where(order_type: %w[acai wholesale])
+                      .where.not(status: %w[delivered cancelled picked_up])
+                      .order(created_at: :asc)
+        orders = orders.where(status: params[:status]) if params[:status].present?
+
+        render json: {
+          orders: orders.map { |o| order_json(o) },
+          counts: {
+            pending: Order.where(order_type: %w[acai wholesale], status: "pending").count,
+            confirmed: Order.where(order_type: %w[acai wholesale], status: "confirmed").count,
+            ready: Order.where(order_type: %w[acai wholesale], status: "ready").count
+          }
+        }
+      end
+
+      # GET /api/v1/admin/orders/shipping_queue
+      def shipping_queue
+        orders = Order.includes(:order_items, :user)
+                      .where(order_type: "retail")
+                      .where.not(status: %w[delivered cancelled picked_up])
+                      .order(created_at: :asc)
+        orders = orders.where(status: params[:status]) if params[:status].present?
+
+        render json: {
+          orders: orders.map { |o| order_json(o) },
+          counts: {
+            pending: Order.retail.where(status: "pending").count,
+            processing: Order.retail.where(status: "processing").count,
+            shipped: Order.retail.where(status: "shipped").count
+          }
+        }
+      end
+
       # PATCH/PUT /api/v1/admin/orders/:id
       # Update order (status, tracking, notes)
       def update
         old_status = @order.status
+
+        # Validate status transition
+        if order_update_params[:status].present? && order_update_params[:status] != old_status
+          error = FulfillmentValidator.transition_error(old_status, order_update_params[:status])
+          if error
+            return render json: { error: error }, status: :unprocessable_entity
+          end
+        end
 
         if @order.update(order_update_params)
           # Handle status changes
