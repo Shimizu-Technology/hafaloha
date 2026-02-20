@@ -160,7 +160,6 @@ export default function AdminLayout() {
   ];
   const specialNavigation: NavItem[] = [
     { name: 'POS',          path: '/admin/pos', icon: 'pos' },
->>>>>>> main
     { name: 'Fundraisers', path: '/admin/fundraisers', icon: 'fundraisers' },
     { name: 'Acai Cakes',  path: '/admin/acai', icon: 'acai' },
   ] : [];

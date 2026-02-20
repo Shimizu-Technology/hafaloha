@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_20_035855) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_20_063000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -117,18 +117,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_035855) do
   end
 
   create_table "collections", force: :cascade do |t|
+    t.boolean "auto_hide", default: true, null: false
+    t.string "banner_text"
+    t.string "collection_type", default: "standard", null: false
     t.datetime "created_at", null: false
     t.text "description"
+    t.datetime "ends_at"
     t.boolean "featured"
     t.string "image_url"
+    t.boolean "is_featured", default: false, null: false
     t.text "meta_description"
     t.string "meta_title"
     t.string "name"
     t.boolean "published", default: false
     t.string "slug"
     t.integer "sort_order"
+    t.datetime "starts_at"
     t.datetime "updated_at", null: false
+    t.index ["collection_type"], name: "index_collections_on_collection_type"
+    t.index ["is_featured"], name: "index_collections_on_is_featured"
     t.index ["slug"], name: "index_collections_on_slug", unique: true
+    t.index ["starts_at", "ends_at"], name: "index_collections_on_starts_at_and_ends_at"
   end
 
   create_table "contact_submissions", force: :cascade do |t|
@@ -534,6 +543,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_035855) do
   end
 
   create_table "products", force: :cascade do |t|
+    t.boolean "allow_pickup", default: true, null: false
     t.boolean "archived", default: false, null: false
     t.integer "base_price_cents"
     t.datetime "created_at", null: false
@@ -558,6 +568,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_035855) do
     t.datetime "updated_at", null: false
     t.string "vendor"
     t.decimal "weight_oz"
+    t.index ["allow_pickup"], name: "index_products_on_allow_pickup"
     t.index ["archived"], name: "index_products_on_archived"
     t.index ["slug"], name: "index_products_on_slug", unique: true
   end
@@ -587,6 +598,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_035855) do
     t.boolean "acai_gallery_show_image_b", default: true, null: false
     t.string "acai_gallery_subtext"
     t.jsonb "admin_sms_phones", default: [], null: false
+    t.boolean "announcement_enabled", default: false, null: false
+    t.string "announcement_style", default: "gold", null: false
+    t.string "announcement_text"
     t.datetime "created_at", null: false
     t.jsonb "fallback_shipping_rates", default: {"domestic"=>[{"rate_cents"=>800, "max_weight_oz"=>16}, {"rate_cents"=>1500, "max_weight_oz"=>48}, {"rate_cents"=>2000, "max_weight_oz"=>80}, {"rate_cents"=>3000, "max_weight_oz"=>160}, {"rate_cents"=>5000, "max_weight_oz"=>nil}], "international"=>[{"rate_cents"=>2500, "max_weight_oz"=>16}, {"rate_cents"=>4000, "max_weight_oz"=>48}, {"rate_cents"=>6000, "max_weight_oz"=>80}, {"rate_cents"=>9000, "max_weight_oz"=>160}, {"rate_cents"=>15000, "max_weight_oz"=>nil}]}, null: false
     t.text "order_notification_emails", default: [], array: true

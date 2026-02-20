@@ -23,6 +23,8 @@ class Product < ApplicationRecord
   validate :check_variants_not_in_carts_before_level_change, on: :update
 
   # Scopes
+  validates :allow_pickup, inclusion: { in: [ true, false ] }
+
   scope :published, -> { where(published: true) }
   scope :featured, -> { where(featured: true) }
   scope :active, -> { where(archived: false) }

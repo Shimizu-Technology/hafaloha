@@ -58,7 +58,10 @@ module Api
             sms_new_order_alert: settings.sms_new_order_alert,
             admin_sms_phones: settings.admin_sms_phones,
             sms_configured: ENV["CLICKSEND_USERNAME"].present? && ENV["CLICKSEND_API_KEY"].present?,
-            email_configured: ENV["RESEND_API_KEY"].present?
+            email_configured: ENV["RESEND_API_KEY"].present?,
+            announcement_enabled: settings.announcement_enabled,
+            announcement_text: settings.announcement_text,
+            announcement_style: settings.announcement_style
           }
         end
 
@@ -77,6 +80,9 @@ module Api
             :store_email,
             :store_phone,
             :placeholder_image_url,
+            :announcement_enabled,
+            :announcement_text,
+            :announcement_style,
             order_notification_emails: [],
             admin_sms_phones: [],
             shipping_origin_address: [

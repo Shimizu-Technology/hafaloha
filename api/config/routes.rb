@@ -184,10 +184,7 @@ Rails.application.routes.draw do
         resources :locations, except: [ :new, :edit ] do
           member do
             post :toggle_active
-<<<<<<< HEAD
 =======
-=======
->>>>>>> main
           end
         end
 
