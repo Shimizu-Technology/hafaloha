@@ -13,6 +13,15 @@ module Api
         }
       end
 
+      # GET /api/v1/locations/:slug
+      # Public endpoint — lookup by slug
+      def show
+        location = Location.customer_visible.find_by!(slug: params[:id])
+        render json: location_json(location)
+      rescue ActiveRecord::RecordNotFound
+        render json: { error: "Location not found" }, status: :not_found
+      end
+
       private
 
       def location_json(location)
