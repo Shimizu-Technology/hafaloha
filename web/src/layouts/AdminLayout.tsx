@@ -29,6 +29,7 @@ const ROUTE_META: Record<string, RouteMeta> = {
   '/admin/inventory':                { title: 'Inventory',        parent: '/admin' },
   '/admin/analytics':                { title: 'Analytics',        parent: '/admin' },
   '/admin/fundraisers':              { title: 'Fundraisers',      parent: '/admin' },
+  '/admin/pos':                       { title: 'POS',              parent: '/admin' },
   '/admin/acai':                     { title: 'Acai Cakes',       parent: '/admin' },
   '/admin/locations':                 { title: 'Locations',        parent: '/admin' },
   '/admin/users':                    { title: 'Users',            parent: '/admin' },
@@ -157,6 +158,7 @@ export default function AdminLayout() {
     ] : []),
   ];
   const specialNavigation: NavItem[] = isManager ? [
+    { name: 'POS',          path: '/admin/pos', icon: 'pos' },
     { name: 'Locations',    path: '/admin/locations', icon: 'locations' },
     { name: 'Fundraisers', path: '/admin/fundraisers', icon: 'fundraisers' },
     { name: 'Acai Cakes',  path: '/admin/acai', icon: 'acai' },

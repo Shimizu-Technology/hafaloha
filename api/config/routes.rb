@@ -61,6 +61,23 @@ Rails.application.routes.draw do
           get "orders", to: "orders#index"
         end
 
+        # POS (Point of Sale)
+        namespace :pos do
+          get "menu", to: "menu#show"
+          resources :orders, only: [ :create ] do
+            member do
+              post :confirm_terminal_payment
+              post :confirm_manual_payment
+            end
+          end
+        end
+
+        # Stripe Terminal
+        resource :stripe_terminal, only: [], controller: "stripe_terminal" do
+          post :connection_token
+          get :readers
+        end
+
         # Fundraiser Management
         resources :fundraisers, except: [ :new, :edit ] do
           member do

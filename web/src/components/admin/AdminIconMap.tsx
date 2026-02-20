@@ -18,6 +18,7 @@ import {
   TrendingUp,
   BarChart3,
   MapPin,
+  Monitor,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -43,6 +44,7 @@ export const ADMIN_ICONS: Record<string, LucideIcon> = {
   trending: TrendingUp,
   analytics: BarChart3,
   locations: MapPin,
+  pos: Monitor,
 };
 
 interface AdminIconProps {

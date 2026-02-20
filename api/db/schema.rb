@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_20_032503) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_20_035855) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -393,11 +393,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_032503) do
     t.string "acai_pickup_time"
     t.string "acai_placard_text"
     t.text "admin_notes"
+    t.integer "cash_change_cents"
+    t.integer "cash_received_cents"
     t.datetime "created_at", null: false
+    t.bigint "created_by_user_id"
     t.string "customer_email"
     t.string "customer_name"
     t.string "customer_phone"
     t.string "easypost_shipment_id"
+    t.string "fulfillment_type"
     t.bigint "fundraiser_id"
     t.bigint "location_id"
     t.text "notes"
@@ -405,6 +409,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_032503) do
     t.string "order_type"
     t.bigint "participant_id"
     t.string "payment_intent_id"
+    t.string "payment_method", default: "stripe"
     t.string "payment_status"
     t.string "shipping_address_line1"
     t.string "shipping_address_line2"
@@ -414,6 +419,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_032503) do
     t.string "shipping_method"
     t.string "shipping_state"
     t.string "shipping_zip"
+    t.string "source", default: "web"
+    t.boolean "staff_created", default: false
     t.string "status"
     t.integer "subtotal_cents"
     t.integer "tax_cents"
@@ -422,6 +429,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_032503) do
     t.datetime "updated_at", null: false
     t.bigint "user_id"
     t.index ["created_at"], name: "index_orders_on_created_at"
+    t.index ["created_by_user_id"], name: "index_orders_on_created_by_user_id"
     t.index ["customer_email"], name: "index_orders_on_customer_email"
     t.index ["fundraiser_id"], name: "index_orders_on_fundraiser_id"
     t.index ["location_id"], name: "index_orders_on_location_id"
@@ -429,6 +437,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_032503) do
     t.index ["order_type"], name: "index_orders_on_order_type"
     t.index ["participant_id"], name: "index_orders_on_participant_id"
     t.index ["payment_status"], name: "index_orders_on_payment_status"
+    t.index ["source"], name: "index_orders_on_source"
     t.index ["status"], name: "index_orders_on_status"
     t.index ["user_id"], name: "index_orders_on_user_id"
   end
@@ -577,6 +586,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_032503) do
     t.boolean "acai_gallery_show_image_a", default: true, null: false
     t.boolean "acai_gallery_show_image_b", default: true, null: false
     t.string "acai_gallery_subtext"
+    t.jsonb "admin_sms_phones", default: [], null: false
     t.datetime "created_at", null: false
     t.jsonb "fallback_shipping_rates", default: {"domestic"=>[{"rate_cents"=>800, "max_weight_oz"=>16}, {"rate_cents"=>1500, "max_weight_oz"=>48}, {"rate_cents"=>2000, "max_weight_oz"=>80}, {"rate_cents"=>3000, "max_weight_oz"=>160}, {"rate_cents"=>5000, "max_weight_oz"=>nil}], "international"=>[{"rate_cents"=>2500, "max_weight_oz"=>16}, {"rate_cents"=>4000, "max_weight_oz"=>48}, {"rate_cents"=>6000, "max_weight_oz"=>80}, {"rate_cents"=>9000, "max_weight_oz"=>160}, {"rate_cents"=>15000, "max_weight_oz"=>nil}]}, null: false
     t.text "order_notification_emails", default: [], array: true
@@ -586,8 +596,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_032503) do
     t.boolean "send_acai_emails", default: false, null: false
     t.boolean "send_customer_emails", default: false, null: false
     t.boolean "send_retail_emails", default: false, null: false
+    t.boolean "send_sms_notifications", default: false, null: false
     t.boolean "send_wholesale_emails", default: false, null: false
     t.jsonb "shipping_origin_address", default: {}
+    t.boolean "sms_new_order_alert", default: true, null: false
+    t.boolean "sms_order_updates", default: false, null: false
     t.string "store_email"
     t.string "store_name", default: "Hafaloha"
     t.string "store_phone"
