@@ -61,8 +61,9 @@ class User < ApplicationRecord
   end
 
   def staff_requires_location
-    if staff? && assigned_location_id.blank?
-      errors.add(:assigned_location_id, "is required for staff members")
-    end
+    return unless staff? && assigned_location_id.blank?
+    return unless ActiveRecord::Base.connection.table_exists?("locations")
+
+    errors.add(:assigned_location_id, "is required for staff members")
   end
 end
