@@ -13,6 +13,7 @@ module Api
         }
       end
 
+<<<<<<< HEAD
       # GET /api/v1/locations/:slug
       # Public endpoint — lookup by slug
       def show
@@ -22,6 +23,8 @@ module Api
         render json: { error: "Location not found" }, status: :not_found
       end
 
+=======
+>>>>>>> main
       private
 
       def location_json(location)
