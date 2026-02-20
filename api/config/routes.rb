@@ -181,10 +181,6 @@ Rails.application.routes.draw do
         resources :locations, except: [ :new, :edit ] do
           member do
             post :toggle_active
-<<<<<<< HEAD
-=======
-=======
->>>>>>> main
           end
         end
 
@@ -199,7 +195,11 @@ Rails.application.routes.draw do
       # Public routes (no authentication required)
       resources :locations, only: [ :index ]
       resources :products, only: [ :index, :show ]
-      resources :collections, only: [ :index, :show ]
+      resources :collections, only: [ :index, :show ] do
+        collection do
+          get :featured
+        end
+      end
 
       # Public fundraiser routes (by slug)
       resources :fundraisers, only: [ :index, :show ], param: :slug do
