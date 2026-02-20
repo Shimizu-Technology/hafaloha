@@ -6,7 +6,7 @@ module Api
     class OrdersController < ApplicationController
       include Authenticatable
         before_action :authenticate_request
-        before_action :require_admin!
+        before_action :require_staff!
         before_action :set_order, only: [ :show, :update, :notify, :refund ]
 
       # GET /api/v1/admin/orders

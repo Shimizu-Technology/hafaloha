@@ -5,6 +5,7 @@ module Api
     module Admin
       module Acai
         class PickupWindowsController < Admin::BaseController
+          before_action :require_manager!
           before_action :set_pickup_window, only: [ :show, :update, :destroy ]
 
           # GET /api/v1/admin/acai/pickup_windows

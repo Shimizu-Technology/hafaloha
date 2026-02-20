@@ -3,6 +3,7 @@ module Api
     module Admin
       module Fundraisers
         class ProductImagesController < BaseController
+          before_action :require_manager!
           before_action :set_fundraiser
           before_action :set_product
           before_action :set_image, only: [ :show, :update, :destroy, :set_primary ]

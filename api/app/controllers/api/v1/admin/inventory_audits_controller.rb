@@ -2,6 +2,7 @@ module Api
   module V1
     module Admin
       class InventoryAuditsController < BaseController
+        before_action :require_manager!
         # GET /api/v1/admin/inventory_audits
         # List all inventory audits with filters
         def index

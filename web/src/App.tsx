@@ -175,7 +175,7 @@ function AppContent() {
           },
         });
         
-        setIsAdmin(response.data.admin || false);
+        setIsAdmin(response.data.staff_or_above || response.data.admin || false);
       } catch (error) {
         console.error('Error checking admin status:', error);
         if (axios.isAxiosError(error)) {
