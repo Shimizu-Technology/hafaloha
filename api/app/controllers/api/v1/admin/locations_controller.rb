@@ -7,7 +7,7 @@ module Api
         include Authenticatable
         before_action :authenticate_request
         before_action :require_manager!
-        before_action :set_location, only: [ :show, :update, :destroy, :toggle_active ]
+        before_action :set_location, only: [ :show, :update, :destroy, :toggle_active, :qr_code ]
 
         # GET /api/v1/admin/locations
         def index
@@ -57,52 +57,26 @@ module Api
           head :no_content
         end
 
-        # POST /api/v1/admin/locations/:id/toggle_active
-        def toggle_active
-          if @location.active?
-            @location.deactivate!
-          else
-            @location.activate!
+        # GET /api/v1/admin/locations/:id/qr_code
+        def qr_code
+          base_url = ENV.fetch("FRONTEND_URL", "https://hafaloha.com")
+          size = (params[:size] || 600).to_i
+          format = params[:format] || "png"
+          service = QrCodeService.new(@location, base_url: base_url)
+
+          case format
+          when "svg"
+            render plain: service.to_svg, content_type: "image/svg+xml"
+          when "base64"
+            render json: { data_uri: service.to_data_uri(size: size), menu_url: service.menu_url }
+          else # png
+            send_data service.to_png(size: size),
+                      type: "image/png",
+                      disposition: "inline",
+                      filename: "#{@location.slug}-qr.png"
           end
-
-          render json: { location: location_json(@location) }
         end
 
-        private
-
-        def set_location
-          @location = Location.find(params[:id])
-        end
-
-        def location_params
-          params.require(:location).permit(
-            :name, :slug, :address, :phone, :description,
-            :location_type, :active, :admin_email,
-            :starts_at, :ends_at, :auto_deactivate,
-            :menu_collection_id,
-            hours_json: {},
-            admin_sms_phones: []
-          )
-        end
-
-        def location_json(location)
-          {
-            id: location.id,
-            name: location.name,
-            slug: location.slug,
-            address: location.address,
-            phone: location.phone,
-            description: location.description,
-            location_type: location.location_type,
-            active: location.active,
-            hours_json: location.hours_json,
-            admin_email: location.admin_email,
-            admin_sms_phones: location.admin_sms_phones,
-            starts_at: location.starts_at,
-            ends_at: location.ends_at,
-            auto_deactivate: location.auto_deactivate,
-            menu_collection_id: location.menu_collection_id,
-            qr_code_url: location.qr_code_url,
             created_at: location.created_at,
             updated_at: location.updated_at
           }
