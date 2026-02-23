@@ -18,7 +18,8 @@ class Order < ApplicationRecord
   # Validations
   validates :order_number, presence: true, uniqueness: true
   VALID_ORDER_TYPES = %w[retail wholesale acai pickup dine_in].freeze
-  VALID_SOURCES = %w[web pos api].freeze
+  VALID_SOURCES = %w[online pos phone].freeze
+  VALID_FULFILLMENT_TYPES = %w[pickup shipping].freeze
   VALID_PAYMENT_METHODS = %w[stripe cash card_present card_manual].freeze
 
   validates :order_type, inclusion: { in: VALID_ORDER_TYPES }
@@ -27,6 +28,7 @@ class Order < ApplicationRecord
   validates :total_cents, numericality: { greater_than_or_equal_to: 0 }
 
   validates :source, inclusion: { in: VALID_SOURCES }, allow_nil: true
+  validates :fulfillment_type, inclusion: { in: VALID_FULFILLMENT_TYPES }
   validates :payment_method, inclusion: { in: VALID_PAYMENT_METHODS }, allow_nil: true
 
   # Guest orders (no user_id) must have contact email — unless POS walk-in
@@ -136,7 +138,7 @@ class Order < ApplicationRecord
   end
 
   def is_pickup_order?
-    acai? || wholesale?
+    fulfillment_type == "pickup"
   end
 
   # Get valid next statuses based on order type and current status
@@ -180,7 +182,7 @@ class Order < ApplicationRecord
   end
 
   def requires_shipping?
-    retail? || wholesale?
+    fulfillment_type == "shipping"
   end
 
   # Shipping address helper
