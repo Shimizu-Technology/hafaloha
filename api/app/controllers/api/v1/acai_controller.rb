@@ -263,6 +263,7 @@ module Api
         ActiveRecord::Base.transaction do
           @order = Order.new(
             order_type: "acai",
+            fulfillment_type: "pickup",
             customer_name: resolved_name,
             customer_email: resolved_email,
             customer_phone: resolved_phone,

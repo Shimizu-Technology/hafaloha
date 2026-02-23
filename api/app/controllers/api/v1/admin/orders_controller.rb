@@ -349,9 +349,12 @@ module Api
         shipping_address = order_params[:shipping_address] || {}
         shipping_method_params = order_params[:shipping_method] || {}
 
+        has_shipping = shipping_address.values.any?(&:present?)
+
         order = Order.new(
           user: current_user,
           order_type: "retail",
+          fulfillment_type: has_shipping ? "shipping" : "pickup",
           status: "pending",
           email: order_params[:email] || order_params[:customer_email],
           phone: order_params[:phone] || order_params[:customer_phone],

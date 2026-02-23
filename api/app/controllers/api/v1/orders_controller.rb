@@ -377,10 +377,15 @@ module Api
           location = Location.active.find_by(id: order_params[:location_id])
         end
 
+        # Determine fulfillment type based on order context
+        has_shipping = shipping_address.values.any?(&:present?)
+        fulfillment = has_shipping ? "shipping" : "pickup"
+
         order = Order.new(
           user: current_user,
           location: location,
           order_type: "retail",
+          fulfillment_type: fulfillment,
           status: "pending",
           email: order_params[:customer_email] || order_params[:email],  # HAF-13: prefer canonical name
           phone: order_params[:customer_phone] || order_params[:phone],  # HAF-13: prefer canonical name
