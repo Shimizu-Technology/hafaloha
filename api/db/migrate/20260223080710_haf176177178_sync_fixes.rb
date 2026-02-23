@@ -21,9 +21,23 @@ class Haf176177178SyncFixes < ActiveRecord::Migration[8.0]
       end
     end
 
-    # HAF-178: Add NOT NULL constraint and default for fulfillment_type
+    # HAF-178: Backfill fulfillment_type based on order context, then add NOT NULL
+    reversible do |dir|
+      dir.up do
+        # Smart backfill: orders with shipping addresses get "shipping", rest get "pickup"
+        execute <<~SQL
+          UPDATE orders
+          SET fulfillment_type = CASE
+            WHEN order_type = 'retail' AND shipping_address_line1 IS NOT NULL AND shipping_address_line1 != '' THEN 'shipping'
+            ELSE 'pickup'
+          END
+          WHERE fulfillment_type IS NULL;
+        SQL
+      end
+    end
+
     change_column_default :orders, :fulfillment_type, "pickup"
-    change_column_null :orders, :fulfillment_type, false, "pickup"
+    change_column_null :orders, :fulfillment_type, false
 
     # HAF-177: Add missing indexes for query performance
     add_index :orders, :fulfillment_type, name: "index_orders_on_fulfillment_type"
