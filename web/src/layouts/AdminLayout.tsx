@@ -158,8 +158,8 @@ export default function AdminLayout() {
     { name: 'Inventory', path: '/admin/inventory', icon: 'inventory' },
     { name: 'Analytics', path: '/admin/analytics', icon: 'analytics' },
   ];
-  const specialNavigation: NavItem[] = [
-    { name: 'POS',          path: '/admin/pos', icon: 'pos' },
+  const specialNavigation: NavItem[] = isManager ? [
+    { name: 'POS',         path: '/admin/pos', icon: 'pos' },
     { name: 'Fundraisers', path: '/admin/fundraisers', icon: 'fundraisers' },
     { name: 'Acai Cakes',  path: '/admin/acai', icon: 'acai' },
   ] : [];

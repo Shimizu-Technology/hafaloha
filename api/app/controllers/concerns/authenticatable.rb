@@ -60,16 +60,20 @@ module Authenticatable
     [ payload.with_indifferent_access, clerk_client ]
   end
 
-  DEFAULT_ADMIN_EMAILS = %w[
+  DEFAULT_NON_PROD_ADMIN_EMAILS = %w[
     shimizutechnology@gmail.com
     jerry.shimizutechnology@gmail.com
   ].freeze
 
-  ADMIN_EMAILS = ENV.fetch("ADMIN_EMAILS", DEFAULT_ADMIN_EMAILS.join(","))
-                    .split(",")
-                    .map(&:strip)
-                    .reject(&:blank?)
-                    .freeze
+  ADMIN_EMAILS = if Rails.env.production?
+                   ENV.fetch("ADMIN_EMAILS")
+                 else
+                   ENV.fetch("ADMIN_EMAILS", DEFAULT_NON_PROD_ADMIN_EMAILS.join(","))
+                 end
+                  .split(",")
+                  .map(&:strip)
+                  .reject(&:blank?)
+                  .freeze
 
   def extract_token
     auth_header = request.headers["Authorization"]

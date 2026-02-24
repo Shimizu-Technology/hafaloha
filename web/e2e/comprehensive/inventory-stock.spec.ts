@@ -15,6 +15,7 @@ test.describe('Inventory - Stock Display', () => {
     await page.goto('/products');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
+    await expect(page.locator('a[href^="/products/"]').first()).toBeVisible({ timeout: 10000 });
 
     // Screenshot: Products with stock indicators
     await page.screenshot({ path: 'test-results/comprehensive/inventory-01-products-list.png', fullPage: true });
@@ -41,6 +42,7 @@ test.describe('Inventory - Stock Display', () => {
     await productLink.click();
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
+    await expect(page).toHaveURL(/\/products\//);
 
     // Screenshot: Product detail with stock info
     await page.screenshot({ path: 'test-results/comprehensive/inventory-02-product-detail.png', fullPage: true });
@@ -128,6 +130,7 @@ test.describe('Inventory - Cart Stock Validation', () => {
     await page.goto('/products');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
+    await expect(page.locator('a[href^="/products/"]').first()).toBeVisible({ timeout: 10000 });
 
     await page.locator('a[href^="/products/"]').first().click();
     await page.waitForLoadState('networkidle');
@@ -150,6 +153,7 @@ test.describe('Inventory - Cart Stock Validation', () => {
       await page.goto('/checkout');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(2000);
+      await expect(page).toHaveURL(/\/checkout/);
 
       // Screenshot: Checkout with stock validation
       await page.screenshot({ path: 'test-results/comprehensive/inventory-05-checkout-validation.png', fullPage: true });

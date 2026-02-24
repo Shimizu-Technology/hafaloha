@@ -266,10 +266,11 @@ class Order < ApplicationRecord
   private
 
   def generate_order_number
-    # Format: HAF-{TYPE}-YYYYMMDD-XXXX
-    # - Retail:    HAF-R-20251210-0001
-    # - Acai:      HAF-A-20251210-0001
-    # - Wholesale: HAF-W-20251210-0001
+    # Format: HAF-{TYPE}-XXXXXX
+    # - Retail:    HAF-R-123456
+    # - Acai:      HAF-A-123456
+    # - Wholesale: HAF-W-123456
+    # Randomized suffix avoids sequence races under concurrent checkouts.
     type_prefix = case order_type
     when "acai" then "A"
     when "wholesale" then "W"
@@ -277,19 +278,16 @@ class Order < ApplicationRecord
     else "R" # retail is default
     end
 
-    date_str = Time.current.strftime("%Y%m%d")
-    prefix = "HAF-#{type_prefix}-#{date_str}"
-
-    # Find the last order number with this prefix for today
-    last_order = Order.where("order_number LIKE ?", "#{prefix}-%").order(:order_number).last
-
-    if last_order
-      # Extract the sequence number and increment
-      sequence = last_order.order_number.split("-").last.to_i + 1
-    else
-      sequence = 1
+    prefix = "HAF-#{type_prefix}"
+    10.times do
+      suffix = SecureRandom.random_number(1_000_000).to_s.rjust(6, "0")
+      candidate = "#{prefix}-#{suffix}"
+      unless Order.exists?(order_number: candidate)
+        self.order_number = candidate
+        return
+      end
     end
 
-    self.order_number = "#{prefix}-#{sequence.to_s.rjust(4, '0')}"
+    raise "Unable to generate unique order number for prefix #{prefix}"
   end
 end
