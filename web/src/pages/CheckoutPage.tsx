@@ -62,6 +62,11 @@ function CheckoutForm() {
   }> | null>(null);
   
   const isTestMode = appConfig?.app_mode === 'test';
+  const pickupLocation = {
+    name: appConfig?.store_info?.name || 'Hafaloha',
+    address: '121 E. Marine Corps Dr, Suite 1-103 & Suite 1-104, Hagåtña, Guam 96910',
+    phone: appConfig?.store_info?.phone || '671-777-1234',
+  };
 
   // Load app config
   useEffect(() => {
@@ -463,9 +468,8 @@ function CheckoutForm() {
                       <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                         <p className="text-sm text-blue-800">
                           <strong>Pickup Location:</strong><br />
-                          121 E. Marine Corps Dr, Suite 1-103 & Suite 1-104<br />
-                          Hagåtña, Guam 96910<br />
-                          {appConfig?.store_info?.phone || '671-777-1234'}
+                          {pickupLocation.address}<br />
+                          {pickupLocation.phone}
                         </p>
                         <p className="text-sm text-blue-700 mt-2">
                           You'll receive an email when your order is ready for pickup.
@@ -720,16 +724,11 @@ function CheckoutForm() {
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 sm:p-8 sticky top-24">
               <h2 className="text-xl font-bold text-gray-900 mb-4">Order Summary</h2>
 
-              {/* Location info */}
-              {selectedLocation && (
+              {/* Pickup location info */}
+              {deliveryMethod === 'pickup' && (
                 <div className="mb-4 p-3 bg-warm-50 rounded-lg border border-warm-200">
-                  <div className="flex items-center gap-2 mb-1">
-                    <MapPin className="w-4 h-4 text-hafalohaRed flex-shrink-0" />
-                    <span className="text-sm font-semibold text-warm-900">{selectedLocation.name}</span>
-                  </div>
-                  {selectedLocation.address && (
-                    <p className="text-xs text-warm-600 ml-6">{selectedLocation.address}</p>
-                  )}
+                  <p className="text-sm font-semibold text-warm-900 mb-1">{pickupLocation.name}</p>
+                  <p className="text-xs text-warm-600">{pickupLocation.address}</p>
                 </div>
               )}
               

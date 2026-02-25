@@ -242,11 +242,17 @@ export default function AdminLayout() {
           ref={navScrollRef}
           className="p-4 overflow-y-auto flex-1 min-h-0 admin-sidebar-scroll overscroll-contain"
           onWheel={(event) => {
-            if (navScrollRef.current) {
-              navScrollRef.current.scrollTop += event.deltaY;
+            const el = navScrollRef.current;
+            if (!el) return;
+
+            const canScrollUp = event.deltaY < 0 && el.scrollTop > 0;
+            const canScrollDown = event.deltaY > 0 && el.scrollTop + el.clientHeight < el.scrollHeight;
+
+            // Allow native sidebar scroll, but stop wheel bubbling to page
+            // when this container can still scroll in the wheel direction.
+            if (canScrollUp || canScrollDown) {
+              event.stopPropagation();
             }
-            event.stopPropagation();
-            event.preventDefault();
           }}
         >
           <NavSection title="Main" items={mainNavigation} />

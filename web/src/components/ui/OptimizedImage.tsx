@@ -57,7 +57,7 @@ const OptimizedImage = memo(({
       alt={alt}
       loading={loading}
       decoding="async"
-      {...(fetchPriority ? { fetchpriority: fetchPriority } : {})}
+      fetchPriority={fetchPriority}
       onError={(event) => {
         if (fallbackSrc && (event.currentTarget.src || '') !== fallbackSrc) {
           event.currentTarget.src = fallbackSrc;

@@ -556,7 +556,28 @@ class EmailService
     settings = SiteSetting.instance
     contact_email = store_contact_email
     contact_phone = store_contact_phone
-    test_mode_badge = settings.test_mode? ? '<span style="background: #FEF3C7; color: #92400E; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; display: inline-block; margin-top: 12px;">⚙️ TEST ORDER</span>' : ""
+    test_mode_badge = settings.test_mode? ? '<span style="background: #FEF3C7; color: #92400E; padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; display: inline-block; margin-top: 12px;">TEST ORDER</span>' : ""
+    order_number = CGI.escapeHTML(order.order_number.presence || order.id.to_s.rjust(6, "0"))
+    customer_name = CGI.escapeHTML(order.name.presence || "Guest")
+    customer_email = CGI.escapeHTML(order.email.to_s)
+    customer_phone = CGI.escapeHTML(order.phone.presence || "N/A")
+    payment_status = CGI.escapeHTML(order.payment_status.to_s.titleize)
+    payment_status_color = order.payment_status.to_s == "paid" ? "#16A34A" : "#B45309"
+
+    delivery_heading = order.shipping_method.to_s.upcase.include?("PICKUP") ? "Pickup Details" : "Shipping Details"
+    address_line_2 = order.shipping_address_line2.present? ? "#{CGI.escapeHTML(order.shipping_address_line2)}<br>" : ""
+    delivery_block = <<~HTML
+      <p style="color: #111827; margin: 0 0 10px 0; font-size: 14px; font-weight: 700;">#{customer_name}</p>
+      <p style="color: #4B5563; margin: 0; font-size: 14px; line-height: 1.6;">
+        #{CGI.escapeHTML(order.shipping_address_line1.to_s)}<br>
+        #{address_line_2}
+        #{CGI.escapeHTML(order.shipping_city.to_s)}, #{CGI.escapeHTML(order.shipping_state.to_s)} #{CGI.escapeHTML(order.shipping_zip.to_s)}<br>
+        #{CGI.escapeHTML(order.shipping_country.to_s)}
+      </p>
+      <p style="color: #4B5563; margin: 15px 0 0 0; font-size: 14px;">
+        <strong>Method:</strong> #{CGI.escapeHTML(order.shipping_method.to_s)}
+      </p>
+    HTML
 
     <<~HTML
       <!DOCTYPE html>
@@ -566,36 +587,47 @@ class EmailService
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>New Order</title>
       </head>
-      <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
-        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 20px 0;">
+      <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #F3F4F6;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F3F4F6; padding: 20px 0;">
           <tr>
             <td align="center">
-              <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-      #{'          '}
+              <table width="600" cellpadding="0" cellspacing="0" style="background-color: #FFFFFF; border-radius: 12px; overflow: hidden; border: 1px solid #E5E7EB;">
+
                 <!-- Header -->
                 <tr>
-                  <td style="background-color: #111827; background: #111827; padding: 32px 24px; text-align: center;">
-                    <h1 style="color: #ffffff; margin: 0; font-size: 26px; font-weight: 800; line-height: 1.2; text-shadow: 0 2px 6px rgba(0,0,0,0.35);">🛍️ New Order Received</h1>
+                  <td style="background-color: #C1191F; padding: 28px 24px; text-align: center;">
+                    <p style="margin: 0; color: #FFE08A; font-size: 13px; font-weight: 700; letter-spacing: 0.4px;">HAFALOHA</p>
+                    <h1 style="color: #FFFFFF; margin: 8px 0 0 0; font-size: 28px; font-weight: 800; line-height: 1.2;">New Order Received</h1>
+                    <p style="color: #FFE08A; margin: 10px 0 0 0; font-size: 14px; font-weight: 600;">Chamorro Pride. Island Style.</p>
                     #{test_mode_badge}
                   </td>
                 </tr>
 
-                <!-- Order Info -->
+                <!-- Order Summary -->
                 <tr>
-                  <td style="padding: 30px;">
-                    <h2 style="color: #111827; margin: 0 0 20px 0; font-size: 20px;">Order ##{order.id.to_s.rjust(6, '0')}</h2>
-      #{'              '}
-                    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
+                  <td style="padding: 30px 28px 24px 28px;">
+                    <div style="background-color: #FFF7ED; border: 1px solid #FDBA74; border-radius: 10px; padding: 16px; margin-bottom: 22px;">
+                      <p style="margin: 0; color: #9A3412; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;">Order Number</p>
+                      <p style="margin: 4px 0 0 0; color: #7C2D12; font-size: 24px; font-weight: 800;">##{order_number}</p>
+                    </div>
+
+                    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 22px;">
                       <tr>
                         <td style="padding: 10px 0; border-bottom: 1px solid #E5E7EB;">
                           <strong style="color: #6B7280; font-size: 14px;">Customer:</strong>
-                          <span style="color: #111827; font-size: 14px; float: right;">#{order.email}</span>
+                          <span style="color: #111827; font-size: 14px; float: right;">#{customer_name}</span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td style="padding: 10px 0; border-bottom: 1px solid #E5E7EB;">
+                          <strong style="color: #6B7280; font-size: 14px;">Email:</strong>
+                          <span style="font-size: 14px; float: right;"><a href="mailto:#{customer_email}" style="color: #1D4ED8; text-decoration: none;">#{customer_email}</a></span>
                         </td>
                       </tr>
                       <tr>
                         <td style="padding: 10px 0; border-bottom: 1px solid #E5E7EB;">
                           <strong style="color: #6B7280; font-size: 14px;">Phone:</strong>
-                          <span style="color: #111827; font-size: 14px; float: right;">#{order.phone || 'N/A'}</span>
+                          <span style="color: #111827; font-size: 14px; float: right;">#{customer_phone}</span>
                         </td>
                       </tr>
                       <tr>
@@ -607,46 +639,38 @@ class EmailService
                       <tr>
                         <td style="padding: 10px 0; border-bottom: 1px solid #E5E7EB;">
                           <strong style="color: #6B7280; font-size: 14px;">Payment Status:</strong>
-                          <span style="color: #10B981; font-size: 14px; float: right;">#{order.payment_status.titleize}</span>
+                          <span style="color: #{payment_status_color}; font-size: 14px; font-weight: 700; float: right;">#{payment_status}</span>
                         </td>
                       </tr>
                       <tr>
-                        <td style="padding: 10px 0;">
+                        <td style="padding: 12px 0 0 0;">
                           <strong style="color: #6B7280; font-size: 14px;">Total:</strong>
-                          <span style="color: #C1191F; font-size: 18px; font-weight: bold; float: right;">$#{format_price(order.total_cents)}</span>
+                          <span style="color: #C1191F; font-size: 22px; font-weight: 800; float: right;">$#{format_price(order.total_cents)}</span>
                         </td>
                       </tr>
                     </table>
 
-                    <!-- Items -->
-                    <h3 style="color: #111827; margin: 30px 0 15px 0; font-size: 16px;">Order Items:</h3>
-                    <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #E5E7EB; border-radius: 8px; overflow: hidden;">
+                    <h3 style="color: #111827; margin: 0 0 12px 0; font-size: 17px; font-weight: 700;">Order Items</h3>
+                    <table width="100%" cellpadding="0" cellspacing="0" style="border: 1px solid #E5E7EB; border-radius: 10px; overflow: hidden; margin-bottom: 22px;">
                       <tbody>
                         #{order_items_html(order)}
                       </tbody>
                     </table>
 
-                    <!-- Shipping Info -->
-                    <h3 style="color: #111827; margin: 30px 0 15px 0; font-size: 16px;">Shipping Details:</h3>
-                    <div style="background-color: #F9FAFB; border-radius: 8px; padding: 20px;">
-                      <p style="color: #111827; margin: 0 0 10px 0; font-size: 14px; font-weight: 600;">#{order.name}</p>
-                      <p style="color: #6B7280; margin: 0; font-size: 14px; line-height: 1.6;">
-                        #{order.shipping_address_line1}<br>
-                        #{order.shipping_address_line2.present? ? "#{order.shipping_address_line2}<br>" : ""}
-                        #{order.shipping_city}, #{order.shipping_state} #{order.shipping_zip}<br>
-                        #{order.shipping_country}
-                      </p>
-                      <p style="color: #6B7280; margin: 15px 0 0 0; font-size: 14px;">
-                        <strong>Method:</strong> #{order.shipping_method}
-                      </p>
+                    <h3 style="color: #111827; margin: 0 0 12px 0; font-size: 17px; font-weight: 700;">#{delivery_heading}</h3>
+                    <div style="background-color: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px; padding: 18px;">
+                      #{delivery_block}
                     </div>
                   </td>
                 </tr>
 
                 <!-- Footer -->
                 <tr>
-                  <td style="background-color: #F9FAFB; padding: 20px; text-align: center; border-top: 1px solid #E5E7EB;">
-                    <p style="color: #6B7280; margin: 0; font-size: 12px;">This is an automated notification from Hafaloha Order System</p>
+                  <td style="background-color: #F9FAFB; padding: 22px; text-align: center; border-top: 1px solid #E5E7EB;">
+                    <p style="color: #6B7280; margin: 0 0 8px 0; font-size: 12px;">Automated notification from Hafaloha Order System</p>
+                    <p style="margin: 0; font-size: 12px; color: #9CA3AF;">
+                      <a href="mailto:#{contact_email}" style="color: #C1191F; text-decoration: none;">#{contact_email}</a> | #{contact_phone}
+                    </p>
                   </td>
                 </tr>
 

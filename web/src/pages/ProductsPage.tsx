@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { Product, Location } from '../services/api';
 import { productsApi, collectionsApi, locationsApi } from '../services/api';
@@ -20,6 +20,7 @@ export default function ProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [meta, setMeta] = useState({ page: 1, per_page: 12, total: 0 });
+  const [searchInput, setSearchInput] = useState('');
   const didScrollRef = useRef(false);
 
   const page = parseInt(searchParams.get('page') || '1');
@@ -29,6 +30,16 @@ export default function ProductsPage() {
   const sort = searchParams.get('sort') || '';
   const locationId = searchParams.get('location') || '';
 
+  const buildParams = useCallback((overrides: Record<string, string> = {}): Record<string, string> => {
+    const params: Record<string, string> = {};
+    if (search) params.search = search;
+    if (collection) params.collection = collection;
+    if (productType) params.type = productType;
+    if (sort) params.sort = sort;
+    if (locationId) params.location = locationId;
+    return { ...params, ...overrides };
+  }, [search, collection, productType, sort, locationId]);
+
   useEffect(() => {
     fetchCollections();
     fetchLocations();
@@ -37,6 +48,26 @@ export default function ProductsPage() {
   useEffect(() => {
     fetchProducts();
   }, [page, search, collection, productType, sort, locationId]);
+
+  // Keep local search input in sync with URL changes (back/forward, external links).
+  useEffect(() => {
+    setSearchInput(search);
+  }, [search]);
+
+  // Debounce URL search param updates to avoid focus jitter while typing.
+  useEffect(() => {
+    const nextSearch = searchInput.trim();
+    if (nextSearch === search) return;
+
+    const timeout = window.setTimeout(() => {
+      const params = buildParams({ search: nextSearch });
+      if (!nextSearch) delete params.search;
+      delete params.page;
+      setSearchParams(params);
+    }, 200);
+
+    return () => window.clearTimeout(timeout);
+  }, [searchInput, search, buildParams, setSearchParams]);
 
   useEffect(() => {
     if (!didScrollRef.current) {
@@ -89,19 +120,15 @@ export default function ProductsPage() {
     }
   };
 
-  const buildParams = (overrides: Record<string, string> = {}): Record<string, string> => {
-    const params: Record<string, string> = {};
-    if (search) params.search = search;
-    if (collection) params.collection = collection;
-    if (productType) params.type = productType;
-    if (sort) params.sort = sort;
-    if (locationId) params.location = locationId;
-    return { ...params, ...overrides };
+  const handleSearch = (value: string) => {
+    setSearchInput(value);
   };
 
-  const handleSearch = (value: string) => {
-    const params = buildParams({ search: value });
-    if (!value) delete params.search;
+  const applySearchImmediately = (value: string) => {
+    const nextSearch = value.trim();
+    setSearchInput(nextSearch);
+    const params = buildParams({ search: nextSearch });
+    if (!nextSearch) delete params.search;
     delete params.page;
     setSearchParams(params);
   };
@@ -121,6 +148,7 @@ export default function ProductsPage() {
   };
 
   const clearFilters = () => {
+    setSearchInput('');
     setSearchParams({});
   };
 
@@ -209,7 +237,7 @@ export default function ProductsPage() {
               <input
                 type="text"
                 placeholder="Search products..."
-                value={search}
+                value={searchInput}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="w-full px-4 py-3 pl-11 text-sm sm:text-base bg-warm-50 border border-warm-200 rounded-full focus:ring-2 focus:ring-hafalohaRed focus:border-transparent focus:bg-white transition"
               />
@@ -328,7 +356,7 @@ export default function ProductsPage() {
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-warm-900 text-white text-sm rounded-full">
                   Search: "{search}"
                   <button
-                    onClick={() => handleSearch('')}
+                    onClick={() => applySearchImmediately('')}
                     className="hover:bg-warm-700 rounded-full p-0.5"
                   >
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -418,7 +446,7 @@ export default function ProductsPage() {
             <p className="text-warm-500 mb-6">Try adjusting your search or filters</p>
             {search && (
               <button
-                onClick={() => handleSearch('')}
+                onClick={() => applySearchImmediately('')}
                 className="btn-primary"
               >
                 Clear search
@@ -427,7 +455,7 @@ export default function ProductsPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 lg:gap-8 mb-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 lg:gap-6 mb-10">
               {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

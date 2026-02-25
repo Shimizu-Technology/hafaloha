@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_20_063000) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_23_080710) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -410,7 +410,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_063000) do
     t.string "customer_name"
     t.string "customer_phone"
     t.string "easypost_shipment_id"
-    t.string "fulfillment_type"
+    t.string "fulfillment_type", default: "pickup", null: false
     t.bigint "fundraiser_id"
     t.bigint "location_id"
     t.text "notes"
@@ -428,7 +428,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_063000) do
     t.string "shipping_method"
     t.string "shipping_state"
     t.string "shipping_zip"
-    t.string "source", default: "web"
+    t.string "source", default: "online"
     t.boolean "staff_created", default: false
     t.string "status"
     t.integer "subtotal_cents"
@@ -440,6 +440,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_063000) do
     t.index ["created_at"], name: "index_orders_on_created_at"
     t.index ["created_by_user_id"], name: "index_orders_on_created_by_user_id"
     t.index ["customer_email"], name: "index_orders_on_customer_email"
+    t.index ["fulfillment_type"], name: "index_orders_on_fulfillment_type"
     t.index ["fundraiser_id"], name: "index_orders_on_fundraiser_id"
     t.index ["location_id"], name: "index_orders_on_location_id"
     t.index ["order_number"], name: "index_orders_on_order_number", unique: true
@@ -447,6 +448,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_063000) do
     t.index ["participant_id"], name: "index_orders_on_participant_id"
     t.index ["payment_status"], name: "index_orders_on_payment_status"
     t.index ["source"], name: "index_orders_on_source"
+    t.index ["staff_created"], name: "index_orders_on_staff_created"
     t.index ["status"], name: "index_orders_on_status"
     t.index ["user_id"], name: "index_orders_on_user_id"
   end
@@ -597,7 +599,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_063000) do
     t.boolean "acai_gallery_show_image_a", default: true, null: false
     t.boolean "acai_gallery_show_image_b", default: true, null: false
     t.string "acai_gallery_subtext"
-    t.jsonb "admin_sms_phones", default: [], null: false
     t.boolean "announcement_enabled", default: false, null: false
     t.string "announcement_style", default: "gold", null: false
     t.string "announcement_text"
@@ -610,11 +611,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_063000) do
     t.boolean "send_acai_emails", default: false, null: false
     t.boolean "send_customer_emails", default: false, null: false
     t.boolean "send_retail_emails", default: false, null: false
-    t.boolean "send_sms_notifications", default: false, null: false
     t.boolean "send_wholesale_emails", default: false, null: false
     t.jsonb "shipping_origin_address", default: {}
     t.boolean "sms_new_order_alert", default: true, null: false
-    t.boolean "sms_order_updates", default: false, null: false
     t.string "store_email"
     t.string "store_name", default: "Hafaloha"
     t.string "store_phone"
@@ -630,6 +629,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_20_063000) do
     t.string "phone"
     t.string "role"
     t.datetime "updated_at", null: false
+    t.index ["assigned_location_id"], name: "index_users_on_assigned_location_id"
     t.index ["clerk_id"], name: "index_users_on_clerk_id", unique: true
     t.index ["email"], name: "index_users_on_email"
     t.index ["role"], name: "index_users_on_role"

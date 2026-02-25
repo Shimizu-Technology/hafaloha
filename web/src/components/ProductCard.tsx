@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import type { Product } from '../services/api';
 import { formatPrice } from '../services/api';
 import ProductBadge from './ProductBadge';
@@ -14,28 +13,24 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <Link
       to={`/products/${product.slug}`}
-      className="group bg-white overflow-hidden flex flex-col h-full border border-warm-200 rounded-lg shadow-sm hover:shadow-md transition-shadow"
+      className="group bg-[#f8f8f8] overflow-hidden flex flex-col h-full border border-gray-200 rounded-lg transition-colors hover:border-gray-300"
     >
-      <motion.div
-        className="flex flex-col h-full rounded-lg"
-        whileHover={{ y: -4, boxShadow: '0 12px 24px -8px rgba(0, 0, 0, 0.1)' }}
-        transition={{ duration: 0.2 }}
-      >
+      <div className="p-2.5 flex flex-col h-full">
         {/* Image */}
-        <div className="relative bg-warm-50 overflow-hidden rounded-lg" style={{ aspectRatio: '1/1' }}>
+        <div className="relative bg-white border border-gray-200 rounded-md overflow-hidden" style={{ aspectRatio: '1/1' }}>
           {product.primary_image_url ? (
             <OptimizedImage
               src={product.primary_image_url}
               alt={product.name}
               context="card"
-              className="w-full h-full object-contain bg-warm-50 group-hover:scale-105 transition-transform duration-500"
+              className="w-full h-full object-contain p-1 transition-transform duration-300 group-hover:scale-[1.01]"
             />
           ) : (
             <PlaceholderImage variant="card" />
           )}
           
           {/* Badges - Only essential ones */}
-          <div className="absolute top-3 left-3 flex flex-col gap-2">
+          <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5">
             {/* Sold Out Badge (highest priority) */}
             {!product.actually_available && (
               <ProductBadge type="sold-out" />
@@ -52,31 +47,31 @@ export default function ProductCard({ product }: ProductCardProps) {
         </div>
 
         {/* Content - minimal and clean */}
-        <div className="pt-4 flex flex-col grow">
+        <div className="pt-2 px-1 flex flex-col grow">
           {/* Product Name */}
-          <h3 className="font-medium text-base text-warm-900 group-hover:text-hafalohaRed transition-colors line-clamp-2 mb-2">
+          <h3 className="text-[15px] leading-5 font-semibold text-gray-900 truncate">
             {product.name}
           </h3>
 
           {/* Price */}
-          <div className="mt-auto">
+          <div className="mt-1">
             {product.sale_price_cents && product.sale_price_cents < product.base_price_cents ? (
-              <div className="flex items-center gap-2">
-                <span className="text-base font-medium text-warm-900">
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <span className="text-[15px] font-medium text-gray-900">
                   {formatPrice(product.sale_price_cents)}
                 </span>
-                <span className="text-sm text-warm-400 line-through">
+                <span className="text-[13px] text-gray-400 line-through">
                   {formatPrice(product.base_price_cents)}
                 </span>
               </div>
             ) : (
-              <span className="text-base font-medium text-warm-900">
+              <span className="text-[15px] font-medium text-gray-900">
                 {formatPrice(product.base_price_cents)}
               </span>
             )}
           </div>
         </div>
-      </motion.div>
+      </div>
     </Link>
   );
 }
