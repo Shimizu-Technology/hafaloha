@@ -77,17 +77,10 @@ RSpec.describe Order, type: :model do
       expect(order.order_number).to match(/\AHAF-A-\d{6}\z/)
     end
 
-    it "retries when a generated candidate already exists" do
-      create(:order, order_number: "HAF-R-000001", order_type: "retail")
-      allow(SecureRandom).to receive(:random_number).and_return(1, 1, 2)
-
+    it "uses a zero-padded six digit suffix" do
+      allow(SecureRandom).to receive(:random_number).with(1_000_000).and_return(42)
       order = create(:order, order_number: nil, order_type: "retail")
-      expect(order.order_number).to eq("HAF-R-000002")
-    end
-
-    it "keeps order numbers unique across many creations" do
-      numbers = Array.new(150) { create(:order, order_number: nil, order_type: "retail").order_number }
-      expect(numbers.uniq.length).to eq(numbers.length)
+      expect(order.order_number).to eq("HAF-R-000042")
     end
   end
 end

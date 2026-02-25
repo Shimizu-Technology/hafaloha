@@ -279,15 +279,9 @@ class Order < ApplicationRecord
     end
 
     prefix = "HAF-#{type_prefix}"
-    10.times do
-      suffix = SecureRandom.random_number(1_000_000).to_s.rjust(6, "0")
-      candidate = "#{prefix}-#{suffix}"
-      unless Order.exists?(order_number: candidate)
-        self.order_number = candidate
-        return
-      end
-    end
 
-    raise "Unable to generate unique order number for prefix #{prefix}"
+    # Generate a random candidate and rely on the DB unique index as the source of truth.
+    # Any collision is retried by the order save path.
+    self.order_number = "#{prefix}-#{SecureRandom.random_number(1_000_000).to_s.rjust(6, '0')}"
   end
 end
