@@ -197,6 +197,185 @@ class ShippingService
     } ]
   end
 
+  # Purchase a shipping label for an order
+  # Creates a shipment with customs info (for off-island), buys the selected rate,
+  # and returns the label URL for printing.
+  # @param order [Order] - The order to ship
+  # @param rate_id [String] - The EasyPost rate ID selected by admin
+  # @return [Hash] - { label_url:, tracking_number:, tracking_url:, shipment_id: }
+  def self.purchase_label(order, rate_id)
+    raise ShippingError, "EasyPost API key not configured" unless ENV["EASYPOST_API_KEY"].present?
+    raise ShippingError, "Order has no shipping address" unless order.requires_shipping?
+
+    client = easypost_client
+
+    # Build customs info for off-island / international shipments
+    customs = build_customs_info(order)
+
+    # Build shipment with customs
+    shipment_params = {
+      from_address: origin_address,
+      to_address: {
+        name: order.customer_name,
+        street1: order.shipping_address_line1,
+        street2: order.shipping_address_line2,
+        city: order.shipping_city,
+        state: order.shipping_state,
+        zip: order.shipping_zip,
+        country: order.shipping_country || "US",
+        phone: order.customer_phone,
+        email: order.customer_email
+      },
+      parcel: {
+        weight: calculate_order_weight_oz(order),
+        length: 12,
+        width: 10,
+        height: 8
+      }
+    }
+
+    # Add customs info if needed (off-island or international)
+    shipment_params[:customs_info] = customs if customs.present?
+
+    shipment = client.shipment.create(shipment_params)
+
+    # Buy the selected rate
+    purchased = client.shipment.buy(shipment.id, rate: { id: rate_id })
+
+    # Extract label and tracking info
+    {
+      label_url: purchased.postage_label&.label_url,
+      label_format: purchased.postage_label&.label_file_type || "PDF",
+      tracking_number: purchased.tracking_code,
+      tracking_url: purchased.tracker&.public_url,
+      shipment_id: purchased.id,
+      carrier: purchased.selected_rate&.carrier,
+      service: purchased.selected_rate&.service,
+      rate_cents: (purchased.selected_rate&.rate.to_f * 100).to_i
+    }
+  rescue EasyPost::Errors::EasyPostError => e
+    Rails.logger.error "EasyPost label purchase failed: #{e.message}"
+    raise ShippingError, "Failed to purchase shipping label: #{e.message}"
+  end
+
+  # Get rates for an existing order (admin re-rating)
+  # @param order [Order] - The order to get rates for
+  # @return [Array<Hash>] - Shipping rate options
+  def self.get_order_rates(order)
+    raise ShippingError, "EasyPost API key not configured" unless ENV["EASYPOST_API_KEY"].present?
+    raise ShippingError, "Order has no shipping address" unless order.requires_shipping?
+
+    client = easypost_client
+    customs = build_customs_info(order)
+
+    shipment_params = {
+      from_address: origin_address,
+      to_address: {
+        name: order.customer_name,
+        street1: order.shipping_address_line1,
+        street2: order.shipping_address_line2,
+        city: order.shipping_city,
+        state: order.shipping_state,
+        zip: order.shipping_zip,
+        country: order.shipping_country || "US",
+        phone: order.customer_phone
+      },
+      parcel: {
+        weight: calculate_order_weight_oz(order),
+        length: 12,
+        width: 10,
+        height: 8
+      }
+    }
+    shipment_params[:customs_info] = customs if customs.present?
+
+    shipment = client.shipment.create(shipment_params)
+    formatted = format_rates(shipment.rates)
+
+    { rates: formatted, shipment_id: shipment.id }
+  end
+
+  # Build customs info for an order (required for off-island / international shipments)
+  def self.build_customs_info(order)
+    # Determine if customs are needed
+    destination_state = order.shipping_state&.upcase
+    destination_country = (order.shipping_country || "US").upcase
+
+    # Customs required for: non-US countries, or US territories shipping via USPS
+    # (Guam → mainland is domestic USPS, but Guam → international needs customs)
+    needs_customs = destination_country != "US"
+
+    # Also include customs for territory-to-territory shipments as some carriers require it
+    us_territories = %w[GU AS VI MP PR]
+    origin_is_territory = us_territories.include?(origin_address[:state]&.upcase)
+    dest_is_territory = us_territories.include?(destination_state)
+
+    return nil unless needs_customs || (origin_is_territory && !dest_is_territory)
+
+    customs_items = order.order_items.map do |item|
+      # Default HS codes by category (fallback when not set on product)
+      default_hs = case item.product&.category
+                   when "apparel", "clothing" then "6109.10"  # Cotton t-shirts
+                   when "accessories" then "7117.90"         # Imitation jewelry
+                   when "home", "housewares" then "3924.90"   # Household plastic articles
+                   else "6109.10"                             # Default: cotton apparel
+                   end
+
+      {
+        description: item.product_name.truncate(50),
+        quantity: item.quantity,
+        weight: (item.product_variant&.weight_oz || DEFAULT_WEIGHT_OZ) * item.quantity,
+        value: (item.unit_price_cents / 100.0) * item.quantity,
+        origin_country: "US",
+        hs_tariff_number: item.product&.hs_tariff_number.presence || default_hs
+      }
+    end
+
+    {
+      customs_certify: true,
+      customs_signer: "Hafaloha",
+      contents_type: "merchandise",
+      restriction_type: "none",
+      non_delivery_option: "return",
+      customs_items: customs_items
+    }
+  end
+
+  # Calculate total weight for an order
+  def self.calculate_order_weight_oz(order)
+    total = order.order_items.sum do |item|
+      weight = item.product_variant&.weight_oz.presence || DEFAULT_WEIGHT_OZ
+      weight * item.quantity
+    end
+    [total, DEFAULT_WEIGHT_OZ].max
+  end
+
+  # Create a shared EasyPost client instance
+  def self.easypost_client
+    custom_http_exec = lambda do |method, uri, headers, open_timeout, read_timeout, body = nil|
+      require "net/http"
+      request = Net::HTTP.const_get(method.to_s.capitalize).new(uri)
+      headers.each { |k, v| request[k] = v }
+      request.body = body if body
+      Net::HTTP.start(
+        uri.host, uri.port,
+        use_ssl: true,
+        read_timeout: read_timeout,
+        open_timeout: open_timeout,
+        verify_mode: OpenSSL::SSL::VERIFY_PEER,
+        ca_file: ENV["SSL_CERT_FILE"],
+        verify_callback: proc { |preverify_ok, _| preverify_ok }
+      ) { |http| http.request(request) }
+    end
+
+    EasyPost::Client.new(
+      api_key: ENV["EASYPOST_API_KEY"],
+      read_timeout: 60,
+      open_timeout: 30,
+      custom_client_exec: custom_http_exec
+    )
+  end
+
   # Validate a shipping address
   # @param address [Hash] - Address to validate
   # @return [Hash] - Validated/corrected address

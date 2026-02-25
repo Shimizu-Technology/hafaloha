@@ -939,13 +939,20 @@ class EmailService
   def self.order_shipped_html(order)
     contact_email = store_contact_email
     contact_phone = store_contact_phone
+    tracking_link = if order.tracking_url.present?
+      %(<a href="#{order.tracking_url}" style="display: inline-block; margin-top: 15px; padding: 10px 24px; background: rgba(255,255,255,0.2); color: #ffffff; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 600;">Track Your Package</a>)
+    else
+      ""
+    end
+
     tracking_section = if order.tracking_number.present?
       <<~HTML
         <tr>
           <td style="padding: 0 30px 30px 30px;">
             <div style="background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 8px; padding: 25px; text-align: center;">
-              <p style="color: #ffffff; margin: 0 0 15px 0; font-size: 16px; font-weight: 600;">📦 Tracking Number</p>
+              <p style="color: #ffffff; margin: 0 0 15px 0; font-size: 16px; font-weight: 600;">Tracking Number</p>
               <p style="color: #ffffff; margin: 0; font-size: 24px; font-weight: bold; letter-spacing: 2px;">#{order.tracking_number}</p>
+              #{tracking_link}
             </div>
           </td>
         </tr>
