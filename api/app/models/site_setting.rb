@@ -1,4 +1,6 @@
 class SiteSetting < ApplicationRecord
+  attr_writer :admin_sms_phones
+
   # Singleton pattern - only one record should ever exist
   validates :announcement_style, inclusion: { in: %w[gold blue red green] }, allow_nil: true
   validates :payment_processor, presence: true, inclusion: { in: %w[stripe paypal] }
@@ -25,9 +27,7 @@ class SiteSetting < ApplicationRecord
       acai_gallery_subtext: "Seasonal & special requests",
       acai_gallery_show_image_a: true,
       acai_gallery_show_image_b: true,
-      send_sms_notifications: false,
-      sms_order_updates: false,
-      admin_sms_phones: [],
+      sms_new_order_alert: false,
       order_notification_emails: [ "shimizutechnology@gmail.com" ],
       shipping_origin_address: {
         company: "Hafaloha",
@@ -44,7 +44,30 @@ class SiteSetting < ApplicationRecord
 
   # Check if SMS notifications are fully enabled
   def sms_enabled?
-    send_sms_notifications
+    sms_new_order_alert
+  end
+
+  # Legacy compatibility: these keys used to exist as columns.
+  # Keep aliases so older controller/service payloads don't break.
+  def send_sms_notifications
+    sms_new_order_alert
+  end
+
+  def send_sms_notifications=(value)
+    self.sms_new_order_alert = ActiveModel::Type::Boolean.new.cast(value)
+  end
+
+  def sms_order_updates
+    sms_new_order_alert
+  end
+
+  def sms_order_updates=(value)
+    self.sms_new_order_alert = ActiveModel::Type::Boolean.new.cast(value)
+  end
+
+  # Backward-compatible virtual setting when DB column is absent.
+  def admin_sms_phones
+    @admin_sms_phones || []
   end
 
   # Check if customer emails are enabled for a specific order type
