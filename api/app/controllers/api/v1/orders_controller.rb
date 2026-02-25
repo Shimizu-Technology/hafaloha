@@ -131,6 +131,13 @@ module Api
 
         # Create order
         order = build_order(cart_items)
+        order.payment_status ||= "pending"
+
+        # Validate before authorizing payment so we do not charge invalid orders.
+        unless order.valid?
+          message = "Order validation failed"
+          return render json: { success: false, error: message, message: message, errors: order.errors.full_messages }, status: :unprocessable_entity
+        end
 
         authorize_payment!(order, settings)
 

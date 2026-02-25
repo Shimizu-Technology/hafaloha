@@ -68,4 +68,25 @@ RSpec.describe "Orders atomicity", type: :request do
     expect(CartItem.where(session_id: session_id).count).to eq(0)
     expect(variant.reload.stock_quantity).to eq(4)
   end
+
+  it "does not authorize payment when order payload is invalid" do
+    CartItem.create!(session_id: session_id, product_variant: variant, quantity: 1)
+
+    allow(PaymentService).to receive(:process_payment)
+
+    invalid_payload = {
+      order: {
+        customer_name: "Guest Test",
+        customer_email: nil,
+        customer_phone: "6715551234",
+        payment_method: { type: "test" }
+      }
+    }
+
+    post "/api/v1/orders", params: invalid_payload, headers: { "X-Session-ID" => session_id }
+
+    expect(response).to have_http_status(:unprocessable_entity)
+    expect(response.parsed_body["error"]).to eq("Order validation failed")
+    expect(PaymentService).not_to have_received(:process_payment)
+  end
 end
