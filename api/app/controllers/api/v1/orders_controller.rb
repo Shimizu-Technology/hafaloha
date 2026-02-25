@@ -158,18 +158,22 @@ module Api
         render json: { success: false, error: e.message, message: e.message }, status: :unprocessable_entity
       rescue InventoryCommitError => e
         log_payment_reconciliation_required(order, e)
+        attempt_payment_reversal(order)
         message = "One or more items are no longer available. Your payment will be reconciled automatically."
         render json: { success: false, error: message, message: message, details: e.message }, status: :unprocessable_entity
       rescue ActiveRecord::RecordInvalid => e
         log_payment_reconciliation_required(order, e)
+        attempt_payment_reversal(order)
         message = "Failed to create order"
         render json: { success: false, error: message, message: message, errors: e.record.errors.full_messages }, status: :unprocessable_entity
       rescue ActiveRecord::RecordNotUnique => e
         log_payment_reconciliation_required(order, e)
+        attempt_payment_reversal(order)
         message = "Could not finalize order due to a temporary conflict. Please try again."
         render json: { success: false, error: message, message: message }, status: :conflict
       rescue StandardError => e
         log_payment_reconciliation_required(order, e)
+        attempt_payment_reversal(order)
         Rails.logger.error "Order creation error: #{e.class} - #{e.message}"
         Rails.logger.error e.backtrace.first(5).join("\n")
         message = "Failed to create order. Please try again."
@@ -516,7 +520,7 @@ module Api
         end
       end
 
-      def save_order_with_retry!(order, max_attempts: 3)
+      def save_order_with_retry!(order, max_attempts: 10)
         attempts = 0
 
         begin
@@ -547,6 +551,33 @@ module Api
           "PAYMENT_RECONCILIATION_REQUIRED order_finalize_failed payment_intent_id=#{order.payment_intent_id} " \
           "order_number=#{order.order_number || 'pending'} error_class=#{error.class} error_message=#{error.message}"
         )
+      end
+
+      def attempt_payment_reversal(order)
+        return if order.blank? || order.payment_status != "paid" || order.payment_intent_id.blank?
+
+        payment_reference = order.payment_intent_id
+        # Skip synthetic non-Stripe IDs (e.g., test_charge_... from local test mode).
+        return unless payment_reference.start_with?("pi_", "ch_")
+
+        refund_args = if payment_reference.start_with?("pi_")
+                        { payment_intent: payment_reference }
+                      else
+                        { charge: payment_reference }
+                      end
+
+        Stripe::Refund.create(
+          refund_args.merge(
+            reason: "requested_by_customer",
+            metadata: {
+              reconciliation_reason: "order_finalize_failed",
+              order_number: order.order_number || "pending"
+            }
+          )
+        )
+        Rails.logger.info "PAYMENT_REVERSAL_ATTEMPTED reference=#{payment_reference} order_number=#{order.order_number || 'pending'}"
+      rescue Stripe::StripeError => e
+        Rails.logger.error "PAYMENT_REVERSAL_FAILED reference=#{payment_reference} error=#{e.class}: #{e.message}"
       end
 
       def clear_cart(cart_items)
