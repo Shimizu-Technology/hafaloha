@@ -183,6 +183,7 @@ module Api
             :meta_description,
             :shopify_product_id,
             :allow_pickup,
+            :allow_shipping,
             collection_ids: []
           )
         end
@@ -221,6 +222,7 @@ module Api
             collections: product.collections.map { |c| { id: c.id, name: c.name, slug: c.slug } },
             available_location_ids: product.product_locations.available.pluck(:location_id),
             allow_pickup: product.allow_pickup,
+            allow_shipping: product.allow_shipping,
             needs_attention: product.needs_attention,
             import_notes: product.import_notes,
             created_at: product.created_at,

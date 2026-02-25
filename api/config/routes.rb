@@ -269,7 +269,7 @@ Rails.application.routes.draw do
     post "stripe", to: "stripe#create"
 
     # EasyPost webhook
-    # post 'easypost', to: 'easypost#create'
+    post "easypost", to: "easypost#create"
   end
 
   # Defines the root path route ("/")

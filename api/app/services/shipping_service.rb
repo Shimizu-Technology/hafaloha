@@ -242,12 +242,26 @@ class ShippingService
     # Buy the selected rate
     purchased = client.shipment.buy(shipment.id, rate: { id: rate_id })
 
+    # Create a tracker so EasyPost sends webhook updates for this shipment
+    tracker = nil
+    if purchased.tracking_code.present?
+      begin
+        tracker = client.tracker.create(
+          tracking_code: purchased.tracking_code,
+          carrier: purchased.selected_rate&.carrier
+        )
+        Rails.logger.info "📡 EasyPost tracker created for #{purchased.tracking_code} (tracker: #{tracker.id})"
+      rescue StandardError => e
+        Rails.logger.error "⚠️  Failed to create EasyPost tracker: #{e.message} (label still purchased successfully)"
+      end
+    end
+
     # Extract label and tracking info
     {
       label_url: purchased.postage_label&.label_url,
       label_format: purchased.postage_label&.label_file_type || "PDF",
       tracking_number: purchased.tracking_code,
-      tracking_url: purchased.tracker&.public_url,
+      tracking_url: tracker&.public_url || purchased.tracker&.public_url,
       shipment_id: purchased.id,
       carrier: purchased.selected_rate&.carrier,
       service: purchased.selected_rate&.service,

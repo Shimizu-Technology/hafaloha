@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@clerk/clerk-react';
 import toast from 'react-hot-toast';
 import type { Order } from '../../components/admin/orders';
@@ -308,9 +309,9 @@ export default function AdminOrdersPage() {
             <p className="text-sm font-medium text-blue-800">Fundraiser orders are managed separately</p>
             <p className="text-sm text-blue-600 mt-1">
               To view and manage fundraiser orders, go to{' '}
-              <a href="/admin/fundraisers" className="font-medium underline hover:text-blue-800">
+              <Link to="/admin/fundraisers" className="font-medium underline hover:text-blue-800">
                 Fundraisers
-              </a>{' '}
+              </Link>{' '}
               → select a fundraiser → Orders tab.
             </p>
           </div>

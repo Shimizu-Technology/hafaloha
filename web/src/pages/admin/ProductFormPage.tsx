@@ -51,6 +51,7 @@ interface ProductFormData {
   published: boolean;
   featured: boolean;
   allow_pickup: boolean;
+  allow_shipping: boolean;
   meta_title: string;
   meta_description: string;
   inventory_level: 'none' | 'product' | 'variant';
@@ -73,6 +74,7 @@ interface ProductDetailsResponse {
     published?: boolean;
     featured?: boolean;
     allow_pickup?: boolean;
+    allow_shipping?: boolean;
     meta_title?: string;
     meta_description?: string;
     inventory_level?: 'none' | 'product' | 'variant';
@@ -129,6 +131,7 @@ export default function ProductFormPage() {
     published: false,
     featured: false,
     allow_pickup: true,
+    allow_shipping: true,
     meta_title: '',
     meta_description: '',
     inventory_level: 'none',
@@ -184,6 +187,7 @@ export default function ProductFormPage() {
         published: product.published || false,
         featured: product.featured || false,
         allow_pickup: product.allow_pickup !== false,
+        allow_shipping: product.allow_shipping !== false,
         meta_title: product.meta_title || '',
         meta_description: product.meta_description || '',
         inventory_level: product.inventory_level || 'none',
@@ -314,6 +318,7 @@ export default function ProductFormPage() {
           published: updatedProduct.published || false,
           featured: updatedProduct.featured || false,
           allow_pickup: updatedProduct.allow_pickup !== false,
+          allow_shipping: updatedProduct.allow_shipping !== false,
           meta_title: updatedProduct.meta_title || '',
           meta_description: updatedProduct.meta_description || '',
           inventory_level: updatedProduct.inventory_level || 'none',
@@ -638,6 +643,14 @@ export default function ProductFormPage() {
                   className="w-4 h-4 text-hafalohaRed border-gray-300 rounded focus:ring-hafalohaRed" />
                 <label htmlFor="allow_pickup" className="ml-2 text-sm font-medium text-gray-700">
                   Allow pickup (available for in-store pickup)
+                </label>
+              </div>
+
+              <div className="flex items-center">
+                <input type="checkbox" id="allow_shipping" name="allow_shipping" checked={formData.allow_shipping} onChange={handleChange}
+                  className="w-4 h-4 text-hafalohaRed border-gray-300 rounded focus:ring-hafalohaRed" />
+                <label htmlFor="allow_shipping" className="ml-2 text-sm font-medium text-gray-700">
+                  Allow shipping (available for delivery)
                 </label>
               </div>
             </div>
