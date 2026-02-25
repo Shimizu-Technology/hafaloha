@@ -685,6 +685,7 @@ export default function AdminSettingsPage() {
             isSiteSettingsDirty={isSiteSettingsDirty}
             onToggleTestMode={handleToggleTestMode}
             onToggleEmailSetting={handleToggleEmailSetting}
+            onToggleSmsSetting={handleToggleSmsSetting}
             onUpdateSettings={updateSettings}
             onUpdateShippingAddress={updateShippingAddress}
             onPlaceholderFileChange={handlePlaceholderFileChange}

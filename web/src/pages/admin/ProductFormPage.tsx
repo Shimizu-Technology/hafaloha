@@ -83,6 +83,8 @@ interface ProductDetailsResponse {
     import_notes?: string;
     archived?: boolean;
     images?: ProductImage[];
+    location_ids?: number[];
+    available_location_ids?: number[];
   };
 }
 

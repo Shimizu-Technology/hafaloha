@@ -499,8 +499,8 @@ export interface Location {
   address?: string;
   phone?: string;
   description?: string;
-  location_type: string;
-  hours_json?: Record<string, unknown>;
+  location_type: 'permanent' | 'popup' | 'event';
+  hours_json?: Record<string, string>;
   starts_at?: string;
   ends_at?: string;
   qr_code_url?: string;

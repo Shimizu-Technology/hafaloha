@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import {
-  TrendingUp, TrendingDown, Minus, BarChart3, DollarSign, Download,
+  TrendingUp, BarChart3, DollarSign, Download,
   ShoppingCart, Users, MapPin,
 } from 'lucide-react';
 import { SkeletonBar, SkeletonStatCard } from '../../components/admin';
