@@ -27,8 +27,9 @@ module Api
             active: settings.active,
             placard_enabled: settings.placard_enabled,
             placard_price_cents: settings.placard_price_cents,
-            toppings_info: settings.toppings_info
+            toppings_info: parsed_toppings_display_text(settings)
           },
+          add_on_options: parsed_add_on_options(settings),
           crust_options: AcaiCrustOption.for_display.map { |opt|
             {
               id: opt.id,
@@ -241,8 +242,22 @@ module Api
         quantity = (params[:quantity] || 1).to_i.clamp(1, 10)
         base_total = settings.base_price_cents * quantity
         crust_total = crust_option.price_cents * quantity
+        add_on_total = 0
+        selected_add_on = nil
         placard_total = 0
         placard_option = nil
+
+        if params[:add_on_name].present?
+          selected_add_on = parsed_add_on_options(settings).find do |opt|
+            opt[:name].to_s.casecmp?(params[:add_on_name].to_s)
+          end
+
+          unless selected_add_on
+            return render json: { error: "Invalid add-on option" }, status: :unprocessable_entity
+          end
+
+          add_on_total = selected_add_on[:price_cents].to_i * quantity
+        end
 
         placard_text = nil
         if params[:include_placard].to_s == "true" && settings.placard_enabled
@@ -256,11 +271,17 @@ module Api
           placard_text = params[:placard_text]
         end
 
-        subtotal_cents = base_total + crust_total + placard_total
+        subtotal_cents = base_total + crust_total + add_on_total + placard_total
         total_cents = subtotal_cents  # No shipping for pickup orders
 
         # Create the order
         ActiveRecord::Base.transaction do
+          normalized_notes = params[:notes].presence
+          if selected_add_on.present? && selected_add_on[:name] != "None"
+            add_on_note = "Acai add-on: #{selected_add_on[:name]}"
+            normalized_notes = [ normalized_notes, add_on_note ].compact.join("\n")
+          end
+
           @order = Order.new(
             order_type: "acai",
             fulfillment_type: "pickup",
@@ -280,7 +301,7 @@ module Api
             acai_include_placard: params[:include_placard].to_s == "true",
             acai_placard_text: placard_text,
             shipping_method: "pickup",
-            notes: params[:notes]
+            notes: normalized_notes
           )
 
           # Add order item (the acai cake)
@@ -288,11 +309,15 @@ module Api
             product_id: nil,  # No product reference for Acai cakes (special order)
             product_variant_id: nil,
             quantity: quantity,
-            unit_price_cents: settings.base_price_cents + crust_option.price_cents + (placard_total / quantity),
+            unit_price_cents: settings.base_price_cents + crust_option.price_cents + (add_on_total / quantity) + (placard_total / quantity),
             total_price_cents: subtotal_cents,
             product_name: settings.name,
             product_sku: "ACAI-CAKE",
-            variant_name: "#{crust_option.name}#{placard_text.present? ? ' + Placard' : ''}"
+            variant_name: [
+              crust_option.name,
+              (selected_add_on[:name] if selected_add_on.present? && selected_add_on[:name] != "None"),
+              ("Placard" if placard_text.present?)
+            ].compact.join(" + ")
           )
 
           # Process payment (test mode or Stripe)
@@ -347,6 +372,7 @@ module Api
               pickup_date: @order.acai_pickup_date.to_s,
               pickup_time: @order.acai_pickup_time,
               crust_type: @order.acai_crust_type,
+              add_on_name: selected_add_on&.dig(:name),
               placard_text: @order.acai_placard_text,
               pickup_location: settings.pickup_location,
               pickup_phone: settings.pickup_phone
@@ -445,6 +471,52 @@ module Api
         hour = parts[0].to_i
         min = parts[1].to_i
         format_time_12h(hour, min)
+      end
+
+      def parsed_toppings_payload(settings)
+        raw = settings.toppings_info.to_s
+        return {} if raw.blank?
+
+        JSON.parse(raw)
+      rescue JSON::ParserError
+        {}
+      end
+
+      def parsed_toppings_display_text(settings)
+        parsed = parsed_toppings_payload(settings)
+        parsed["display_copy"].presence || settings.toppings_info
+      end
+
+      def parsed_add_on_options(settings)
+        parsed = parsed_toppings_payload(settings)
+        options = parsed["add_on_options"]
+
+        normalized = if options.is_a?(Array)
+          options.filter_map do |opt|
+            next unless opt.is_a?(Hash) && opt["name"].present?
+            {
+              name: opt["name"],
+              price_cents: opt["price_cents"].to_i,
+              position: opt["position"].to_i
+            }
+          end
+        else
+          []
+        end
+
+        normalized = default_add_on_options if normalized.empty?
+        normalized.sort_by { |opt| [ opt[:position], opt[:name] ] }
+      end
+
+      def default_add_on_options
+        [
+          { name: "None", price_cents: 0, position: 1 },
+          { name: "Banana", price_cents: 300, position: 2 },
+          { name: "Blueberry", price_cents: 300, position: 3 },
+          { name: "Strawberry", price_cents: 300, position: 4 },
+          { name: "Mango", price_cents: 300, position: 5 },
+          { name: "Coconut", price_cents: 300, position: 6 }
+        ]
       end
     end
   end

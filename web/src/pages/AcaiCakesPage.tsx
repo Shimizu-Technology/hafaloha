@@ -20,7 +20,7 @@ const DEFAULT_ACAI_GALLERY_HEADING = 'Featured Sets';
 const DEFAULT_ACAI_GALLERY_SUBTEXT = 'Seasonal & special requests';
 
 // Step configuration
-type StepId = 'date' | 'time' | 'crust' | 'quantity' | 'placard' | 'contact';
+type StepId = 'date' | 'time' | 'crust' | 'addon' | 'quantity' | 'placard' | 'contact';
 
 interface Step {
   id: StepId;
@@ -143,6 +143,7 @@ export default function AcaiCakesPage() {
   const [selectedDate, setSelectedDate] = useState<string>('');
   const [selectedSlot, setSelectedSlot] = useState<string>('');
   const [selectedCrust, setSelectedCrust] = useState<number | null>(null);
+  const [selectedAddOnName, setSelectedAddOnName] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [includePlacard, setIncludePlacard] = useState(false);
   const [selectedPlacardOption, setSelectedPlacardOption] = useState<number | null>(null);
@@ -171,11 +172,12 @@ export default function AcaiCakesPage() {
     { id: 'date', number: 1, title: 'Pickup Date' },
     { id: 'time', number: 2, title: 'Pickup Time' },
     { id: 'crust', number: 3, title: 'Choose Crust' },
-    { id: 'quantity', number: 4, title: 'Quantity' },
+    ...(config.add_on_options.length > 0 ? [{ id: 'addon' as StepId, number: 4, title: 'Add-on' }] : []),
+    { id: 'quantity', number: config.add_on_options.length > 0 ? 5 : 4, title: 'Quantity' },
     ...(config.settings.placard_enabled && config.placard_options.length > 0 
-      ? [{ id: 'placard' as StepId, number: 5, title: 'Message Placard', optional: true }] 
+      ? [{ id: 'placard' as StepId, number: config.add_on_options.length > 0 ? 6 : 5, title: 'Message Placard', optional: true }] 
       : []),
-    { id: 'contact', number: config.settings.placard_enabled && config.placard_options.length > 0 ? 6 : 5, title: 'Contact Info' },
+    { id: 'contact', number: config.settings.placard_enabled && config.placard_options.length > 0 ? (config.add_on_options.length > 0 ? 7 : 6) : (config.add_on_options.length > 0 ? 6 : 5), title: 'Contact Info' },
   ] : [];
 
   // Check if a step has valid data (for form validation)
@@ -187,6 +189,8 @@ export default function AcaiCakesPage() {
         return !!selectedSlot;
       case 'crust':
         return selectedCrust !== null;
+      case 'addon':
+        return config?.add_on_options.length ? selectedAddOnName !== null : true;
       case 'quantity':
         return quantity >= 1;
       case 'placard':
@@ -202,7 +206,7 @@ export default function AcaiCakesPage() {
       default:
         return false;
     }
-  }, [selectedDate, selectedSlot, selectedCrust, quantity, includePlacard, selectedPlacardOption, placardText, name, email, phone, config]);
+  }, [selectedDate, selectedSlot, selectedCrust, selectedAddOnName, quantity, includePlacard, selectedPlacardOption, placardText, name, email, phone, config]);
 
   // Check if a step is complete (visited AND has valid data)
   const isStepComplete = useCallback((stepId: StepId): boolean => {
@@ -230,6 +234,8 @@ export default function AcaiCakesPage() {
         return crust ? crust.name : '';
       case 'quantity':
         return `${quantity} cake${quantity > 1 ? 's' : ''}`;
+      case 'addon':
+        return selectedAddOnName || 'None';
       case 'placard':
         if (!includePlacard) return 'None';
         const placard = config?.placard_options.find(p => p.id === selectedPlacardOption);
@@ -273,6 +279,10 @@ export default function AcaiCakesPage() {
         // Auto-select first crust option
         if (acaiConfig.crust_options.length > 0) {
           setSelectedCrust(acaiConfig.crust_options[0].id);
+        }
+        if (acaiConfig.add_on_options.length > 0) {
+          const noneOption = acaiConfig.add_on_options.find((opt) => opt.name.toLowerCase() === 'none');
+          setSelectedAddOnName((noneOption || acaiConfig.add_on_options[0]).name);
         }
         
         // Load available dates
@@ -325,6 +335,11 @@ export default function AcaiCakesPage() {
     if (crust) {
       total += crust.price_cents * quantity;
     }
+
+    const addOn = config.add_on_options.find((opt) => opt.name === selectedAddOnName);
+    if (addOn) {
+      total += addOn.price_cents * quantity;
+    }
     
     // Add placard price
     if (includePlacard && selectedPlacardOption) {
@@ -366,6 +381,7 @@ export default function AcaiCakesPage() {
         pickup_date: selectedDate,
         pickup_time: selectedSlot,
         crust_option_id: selectedCrust!,
+        add_on_name: selectedAddOnName || undefined,
         name,
         email,
         phone,
@@ -413,10 +429,20 @@ export default function AcaiCakesPage() {
   const handleCrustSelect = (crustId: number) => {
     setSelectedCrust(crustId);
     setTimeout(() => {
+      const nextStep = config?.add_on_options.length ? 'addon' : 'quantity';
+      setCurrentStep(nextStep);
+      markStepVisited(nextStep);
+    }, 300);
+  };
+  // Handle add-on selection with auto-advance
+  const handleAddOnSelect = (addOnName: string) => {
+    setSelectedAddOnName(addOnName);
+    setTimeout(() => {
       setCurrentStep('quantity');
       markStepVisited('quantity');
     }, 300);
   };
+
 
   // Handler for step card clicks - memoized to prevent re-renders
   // NOTE: Must be before any early returns to satisfy Rules of Hooks
@@ -732,6 +758,36 @@ export default function AcaiCakesPage() {
           </StepCard>
 
           {/* Step 4: Quantity */}
+          {config.add_on_options.length > 0 && (
+            <StepCard {...getStepCardProps(steps.find(s => s.id === 'addon')!)}>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {config.add_on_options.map((addOn) => {
+                  const isSelected = selectedAddOnName === addOn.name;
+                  return (
+                    <button
+                      key={addOn.name}
+                      type="button"
+                      onClick={() => handleAddOnSelect(addOn.name)}
+                      className={`p-3 rounded-xl border-2 transition text-left ${
+                        isSelected
+                          ? 'border-hafalohaRed bg-red-50 shadow-sm'
+                          : 'border-warm-200 hover:border-warm-300 hover:bg-warm-50'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-medium text-warm-900">{addOn.name}</span>
+                        <span className={`text-sm font-medium ${addOn.price_cents > 0 ? 'text-hafalohaRed' : 'text-green-600'}`}>
+                          {addOn.price_cents > 0 ? `+$${(addOn.price_cents / 100).toFixed(2)}` : 'Included'}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </StepCard>
+          )}
+
+          {/* Step 5: Quantity */}
           <StepCard {...getStepCardProps(steps.find(s => s.id === 'quantity')!)}>
             <div className="flex items-center justify-center gap-6 py-4">
               <button
@@ -928,6 +984,17 @@ export default function AcaiCakesPage() {
                   <span className="text-warm-900 font-medium">{formatPrice(selectedCrustOption.price_cents * quantity)}</span>
                 </div>
               )}
+
+              {(() => {
+                const selectedAddOn = config.add_on_options.find((opt) => opt.name === selectedAddOnName);
+                if (!selectedAddOn || selectedAddOn.price_cents <= 0) return null;
+                return (
+                  <div className="flex justify-between">
+                    <span className="text-warm-600">{selectedAddOn.name} × {quantity}</span>
+                    <span className="text-warm-900 font-medium">{formatPrice(selectedAddOn.price_cents * quantity)}</span>
+                  </div>
+                );
+              })()}
               
               {includePlacard && selectedPlacardOptionDetails && selectedPlacardOptionDetails.price_cents > 0 && (
                 <div className="flex justify-between">

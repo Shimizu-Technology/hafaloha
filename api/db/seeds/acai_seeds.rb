@@ -7,6 +7,22 @@ puts "🍰 Seeding Acai Cakes data..."
 
 # Create default settings (singleton will create with defaults if not exists)
 settings = AcaiSetting.instance
+settings.update!(
+  name: 'Acai Cake (10" )',
+  description: "Choose Set A or Set B and customize with crust and add-ons.\n\nPick-up available: Monday - Saturday (9:00am - 4:00pm)\nPick-up time slots are limited and subject to availability.",
+  pickup_instructions: "Reservations made on this site are not final and may be subject to cancellation. Acai Cake reservations made within 48 hours notice cannot be guaranteed.",
+  toppings_info: {
+    display_copy: "Set A: Blueberry, Banana, Strawberry | Set B: Coconut, Mango, Strawberry",
+    add_on_options: [
+      { name: "None", price_cents: 0, position: 1 },
+      { name: "Banana", price_cents: 300, position: 2 },
+      { name: "Blueberry", price_cents: 300, position: 3 },
+      { name: "Strawberry", price_cents: 300, position: 4 },
+      { name: "Mango", price_cents: 300, position: 5 },
+      { name: "Coconut", price_cents: 300, position: 6 }
+    ]
+  }.to_json
+)
 puts "  ✅ AcaiSetting created/loaded: #{settings.name} - #{settings.formatted_price}"
 
 # Create crust options matching hafaloha.com pricing
@@ -17,12 +33,14 @@ crust_options = [
 ]
 
 crust_options.each do |attrs|
-  option = AcaiCrustOption.find_or_create_by!(name: attrs[:name]) do |o|
-    o.description = attrs[:description]
-    o.price_cents = attrs[:price_cents]
-    o.position = attrs[:position]
-    o.available = true
-  end
+  option = AcaiCrustOption.find_or_initialize_by(name: attrs[:name])
+  option.assign_attributes(
+    description: attrs[:description],
+    price_cents: attrs[:price_cents],
+    position: attrs[:position],
+    available: true
+  )
+  option.save!
   puts "  ✅ Crust Option: #{option.name} (#{option.formatted_price})"
 end
 
@@ -38,37 +56,36 @@ placard_options = [
 ]
 
 placard_options.each do |attrs|
-  option = AcaiPlacardOption.find_or_create_by!(name: attrs[:name]) do |o|
-    o.description = attrs[:description]
-    o.price_cents = attrs[:price_cents]
-    o.position = attrs[:position]
-    o.available = true
-  end
+  option = AcaiPlacardOption.find_or_initialize_by(name: attrs[:name])
+  option.assign_attributes(
+    description: attrs[:description],
+    price_cents: attrs[:price_cents],
+    position: attrs[:position],
+    available: true
+  )
+  option.save!
   puts "  ✅ Placard Option: #{option.name}"
 end
 
-# Create pickup windows (based on their hours of operation)
-# Monday: Closed
-# Tue-Thur: 11 AM - 9 PM
-# Fri-Sat: 11 AM - 10 PM
-# Sunday: 11 AM - 9 PM
-
 pickup_windows = [
-  { day_of_week: 1, start_time: '09:00', end_time: '16:00', active: true },  # Monday
-  { day_of_week: 2, start_time: '09:00', end_time: '16:00', active: true },  # Tuesday
-  { day_of_week: 3, start_time: '09:00', end_time: '16:00', active: true },  # Wednesday
-  { day_of_week: 4, start_time: '09:00', end_time: '16:00', active: true },  # Thursday
-  { day_of_week: 5, start_time: '09:00', end_time: '16:00', active: true },  # Friday
-  { day_of_week: 6, start_time: '09:00', end_time: '16:00', active: true }  # Saturday
+  { day_of_week: 0, start_time: '09:00', end_time: '16:00', active: false, capacity: 10 }, # Sunday
+  { day_of_week: 1, start_time: '09:00', end_time: '16:00', active: true,  capacity: 10 }, # Monday
+  { day_of_week: 2, start_time: '09:00', end_time: '16:00', active: true,  capacity: 10 }, # Tuesday
+  { day_of_week: 3, start_time: '09:00', end_time: '16:00', active: true,  capacity: 10 }, # Wednesday
+  { day_of_week: 4, start_time: '09:00', end_time: '16:00', active: true,  capacity: 10 }, # Thursday
+  { day_of_week: 5, start_time: '09:00', end_time: '16:00', active: true,  capacity: 10 }, # Friday
+  { day_of_week: 6, start_time: '09:00', end_time: '16:00', active: true,  capacity: 10 }  # Saturday
 ]
 
 pickup_windows.each do |attrs|
-  window = AcaiPickupWindow.find_or_create_by!(day_of_week: attrs[:day_of_week]) do |w|
-    w.start_time = attrs[:start_time]
-    w.end_time = attrs[:end_time]
-    w.active = attrs[:active]
-    w.capacity = 5  # Max 5 orders per 30-min slot
-  end
+  window = AcaiPickupWindow.find_or_initialize_by(day_of_week: attrs[:day_of_week])
+  window.assign_attributes(
+    start_time: attrs[:start_time],
+    end_time: attrs[:end_time],
+    active: attrs[:active],
+    capacity: attrs[:capacity]
+  )
+  window.save!
   puts "  ✅ Pickup Window: #{window.display_name}"
 end
 
@@ -76,6 +93,7 @@ puts ""
 puts "🎉 Acai Cakes seed data complete!"
 puts "   - #{AcaiCrustOption.count} crust options"
 puts "   - #{AcaiPlacardOption.count} placard options"
+puts "   - Add-ons: None, Banana, Blueberry, Strawberry, Mango, Coconut"
 puts "   - #{AcaiPickupWindow.count} pickup windows"
 puts ""
 puts "💡 To test, visit: GET /api/v1/acai/config"

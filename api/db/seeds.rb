@@ -141,6 +141,9 @@ puts ""
 # ------------------------------------------------------------------------------
 puts "4️⃣  Configuring Acai demo availability..."
 
+# Load canonical Acai options/pickup configuration first.
+load Rails.root.join("db/seeds/acai_seeds.rb")
+
 acai_setting = AcaiSetting.instance
 demo_advance_hours = Rails.env.production? ? 24 : 0
 
@@ -149,27 +152,6 @@ acai_setting.update!(
   advance_hours: demo_advance_hours,
   max_per_slot: [acai_setting.max_per_slot.to_i, 10].max
 )
-
-demo_pickup_windows = [
-  { day_of_week: 0, start_time: "09:00", end_time: "15:00", capacity: 10 }, # Sunday
-  { day_of_week: 1, start_time: "09:00", end_time: "18:00", capacity: 10 }, # Monday
-  { day_of_week: 2, start_time: "09:00", end_time: "18:00", capacity: 10 }, # Tuesday
-  { day_of_week: 3, start_time: "09:00", end_time: "18:00", capacity: 10 }, # Wednesday
-  { day_of_week: 4, start_time: "09:00", end_time: "18:00", capacity: 10 }, # Thursday
-  { day_of_week: 5, start_time: "09:00", end_time: "18:00", capacity: 10 }, # Friday
-  { day_of_week: 6, start_time: "09:00", end_time: "18:00", capacity: 10 }  # Saturday
-]
-
-demo_pickup_windows.each do |window|
-  record = AcaiPickupWindow.find_or_initialize_by(day_of_week: window[:day_of_week])
-  record.assign_attributes(
-    start_time: window[:start_time],
-    end_time: window[:end_time],
-    capacity: window[:capacity],
-    active: true
-  )
-  record.save!
-end
 
 if Rails.env.production?
   puts "   • Production mode: keeping existing blocked slots intact"
@@ -182,6 +164,8 @@ puts "   • Acai active: #{acai_setting.active}"
 puts "   • Advance hours: #{acai_setting.advance_hours}"
 puts "   • Max per slot: #{acai_setting.max_per_slot}"
 puts "   • Active pickup windows: #{AcaiPickupWindow.active.count}"
+puts "   • Crust options: #{AcaiCrustOption.available.count}"
+puts "   • Placard options: #{AcaiPlacardOption.available.count}"
 puts ""
 
 # ------------------------------------------------------------------------------

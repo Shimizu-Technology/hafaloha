@@ -372,6 +372,12 @@ export interface AcaiPlacardOption {
   formatted_price: string;
 }
 
+export interface AcaiAddOnOption {
+  name: string;
+  price_cents: number;
+  position: number;
+}
+
 export interface AcaiPickupWindow {
   id: number;
   day_of_week: number;
@@ -383,6 +389,7 @@ export interface AcaiPickupWindow {
 
 export interface AcaiConfigResponse {
   settings: AcaiSettings;
+  add_on_options: AcaiAddOnOption[];
   crust_options: AcaiCrustOption[];
   placard_options: AcaiPlacardOption[];
   pickup_windows: AcaiPickupWindow[];
@@ -430,6 +437,7 @@ export interface AcaiOrderRequest {
   email: string;
   phone: string;
   quantity?: number;
+  add_on_name?: string;
   include_placard?: boolean;
   placard_option_id?: number;
   placard_text?: string;
@@ -449,6 +457,7 @@ export interface AcaiOrderResponse {
     pickup_date: string;
     pickup_time: string;
     crust_type: string;
+    add_on_name?: string | null;
     placard_text: string | null;
     pickup_location: string;
     pickup_phone: string;
