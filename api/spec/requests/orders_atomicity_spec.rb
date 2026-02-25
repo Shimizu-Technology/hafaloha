@@ -1,6 +1,8 @@
 require "rails_helper"
 
 RSpec.describe "Orders atomicity", type: :request do
+  include ActiveJob::TestHelper
+
   let(:session_id) { "spec-session-atomicity" }
   let!(:product) { create(:product, inventory_level: "variant", track_inventory: true, published: true) }
   let!(:variant) { create(:product_variant, product: product, stock_quantity: 5, available: true, price_cents: 2500) }
@@ -28,8 +30,11 @@ RSpec.describe "Orders atomicity", type: :request do
     allow(SiteSetting).to receive(:instance).and_return(settings)
 
     allow(PaymentService).to receive(:process_payment).and_return(
-      { success: true, charge_id: "test_charge_atomicity" }
+      { success: true, charge_id: "ch_atomicity" }
     )
+
+    clear_enqueued_jobs
+    clear_performed_jobs
   end
 
   it "rolls back order persistence when inventory commit fails after payment authorization" do
@@ -39,11 +44,14 @@ RSpec.describe "Orders atomicity", type: :request do
       .to receive(:deduct_inventory)
       .and_raise(Api::V1::OrdersController::InventoryCommitError, "Not enough stock for test")
 
+    initial_order_count = Order.count
+
     expect do
       post "/api/v1/orders", params: order_payload, headers: { "X-Session-ID" => session_id }
-    end.not_to change(Order, :count)
+    end.to have_enqueued_job(ProcessPaymentReversalJob).with("ch_atomicity", kind_of(String))
 
     expect(response).to have_http_status(:unprocessable_entity)
+    expect(Order.count).to eq(initial_order_count)
     expect(response.parsed_body["error"]).to include("no longer available")
     expect(CartItem.where(session_id: session_id).count).to eq(1)
     expect(variant.reload.stock_quantity).to eq(5)

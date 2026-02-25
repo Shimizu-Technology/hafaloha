@@ -560,24 +560,10 @@ module Api
         # Skip synthetic non-Stripe IDs (e.g., test_charge_... from local test mode).
         return unless payment_reference.start_with?("pi_", "ch_")
 
-        refund_args = if payment_reference.start_with?("pi_")
-                        { payment_intent: payment_reference }
-                      else
-                        { charge: payment_reference }
-                      end
-
-        Stripe::Refund.create(
-          refund_args.merge(
-            reason: "requested_by_customer",
-            metadata: {
-              reconciliation_reason: "order_finalize_failed",
-              order_number: order.order_number || "pending"
-            }
-          )
-        )
-        Rails.logger.info "PAYMENT_REVERSAL_ATTEMPTED reference=#{payment_reference} order_number=#{order.order_number || 'pending'}"
-      rescue Stripe::StripeError => e
-        Rails.logger.error "PAYMENT_REVERSAL_FAILED reference=#{payment_reference} error=#{e.class}: #{e.message}"
+        ProcessPaymentReversalJob.perform_later(payment_reference, order.order_number || "pending")
+        Rails.logger.info "PAYMENT_REVERSAL_ENQUEUED reference=#{payment_reference} order_number=#{order.order_number || 'pending'}"
+      rescue StandardError => e
+        Rails.logger.error "PAYMENT_REVERSAL_ENQUEUE_FAILED reference=#{payment_reference} error=#{e.class}: #{e.message}"
       end
 
       def clear_cart(cart_items)
