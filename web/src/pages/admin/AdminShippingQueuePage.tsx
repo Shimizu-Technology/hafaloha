@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@clerk/clerk-react';
 import toast from 'react-hot-toast';
-import { Clock, Truck, Package, RefreshCw, Filter } from 'lucide-react';
-import { authGet, authPatch } from '../../services/authApi';
+import { Clock, Truck, Package, RefreshCw, Filter, Printer, Tag } from 'lucide-react';
+import { authGet, authPatch, authPost } from '../../services/authApi';
 import type { Order } from '../../components/admin/orders/orderUtils';
 import {
   formatCurrency,
@@ -45,6 +45,8 @@ export default function AdminShippingQueuePage() {
   const [filter, setFilter] = useState<StatusFilter>('all');
   const [updatingId, setUpdatingId] = useState<number | null>(null);
   const [trackingInputs, setTrackingInputs] = useState<Record<number, string>>({});
+  const [buyingLabelId, setBuyingLabelId] = useState<number | null>(null);
+  const [ratesForOrder, setRatesForOrder] = useState<Record<number, { rates: Array<{ id: string; carrier: string; service: string; rate_formatted: string; delivery_days?: number }>; shipment_id: string } | null>>({});
 
   const fetchOrders = useCallback(async () => {
     try {
@@ -90,6 +92,43 @@ export default function AdminShippingQueuePage() {
       toast.error(message);
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const fetchRates = async (orderId: number) => {
+    try {
+      setBuyingLabelId(orderId);
+      const res = await authGet<{ rates: Array<{ id: string; carrier: string; service: string; rate_formatted: string; delivery_days?: number }>; shipment_id: string }>(
+        `/admin/orders/${orderId}/shipping_rates`,
+        getToken
+      );
+      setRatesForOrder((prev) => ({ ...prev, [orderId]: res.data }));
+    } catch {
+      toast.error('Failed to get shipping rates');
+      setBuyingLabelId(null);
+    }
+  };
+
+  const purchaseLabel = async (orderId: number, rateId: string) => {
+    try {
+      setBuyingLabelId(orderId);
+      const res = await authPost<{ label_url: string; tracking_number: string; carrier: string; service: string }>(
+        `/admin/orders/${orderId}/purchase_label`,
+        { rate_id: rateId },
+        getToken
+      );
+      toast.success(`Label purchased! Tracking: ${res.data.tracking_number}`);
+      setRatesForOrder((prev) => {
+        const next = { ...prev };
+        delete next[orderId];
+        return next;
+      });
+      fetchOrders();
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to purchase label';
+      toast.error(message);
+    } finally {
+      setBuyingLabelId(null);
     }
   };
 
@@ -246,11 +285,66 @@ export default function AdminShippingQueuePage() {
                     </div>
                   )}
 
-                  {showTrackingInput && (
+                  {/* Shipping label section */}
+                  {order.shipping_label_url ? (
+                    <div className="mb-3">
+                      <a
+                        href={order.shipping_label_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg text-sm font-medium hover:bg-green-100 transition min-h-[44px]"
+                      >
+                        <Printer className="w-4 h-4" />
+                        Print Shipping Label
+                      </a>
+                    </div>
+                  ) : ratesForOrder[order.id] ? (
+                    <div className="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <p className="text-xs font-medium text-blue-700 mb-2">Select a shipping rate:</p>
+                      <div className="space-y-1.5">
+                        {ratesForOrder[order.id]!.rates.map((rate) => (
+                          <button
+                            key={rate.id}
+                            onClick={() => purchaseLabel(order.id, rate.id)}
+                            disabled={buyingLabelId === order.id}
+                            className="w-full flex items-center justify-between px-3 py-2 bg-white rounded-md border border-blue-100 hover:border-blue-300 hover:bg-blue-50 transition text-sm disabled:opacity-50 min-h-[40px]"
+                          >
+                            <span className="text-gray-700">
+                              {rate.carrier} {rate.service}
+                              {rate.delivery_days && <span className="text-gray-400 ml-1">({rate.delivery_days}d)</span>}
+                            </span>
+                            <span className="font-semibold text-blue-700">{rate.rate_formatted}</span>
+                          </button>
+                        ))}
+                      </div>
+                      <button
+                        onClick={() => {
+                          setRatesForOrder((prev) => { const next = { ...prev }; delete next[order.id]; return next; });
+                          setBuyingLabelId(null);
+                        }}
+                        className="mt-2 text-xs text-gray-500 hover:text-gray-700"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : ['pending', 'processing'].includes(order.status) ? (
+                    <div className="mb-3">
+                      <button
+                        onClick={() => fetchRates(order.id)}
+                        disabled={buyingLabelId === order.id}
+                        className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-lg text-sm font-medium hover:bg-blue-100 transition disabled:opacity-50 min-h-[44px]"
+                      >
+                        <Tag className="w-4 h-4" />
+                        {buyingLabelId === order.id ? 'Loading rates...' : 'Buy Shipping Label'}
+                      </button>
+                    </div>
+                  ) : null}
+
+                  {showTrackingInput && !order.shipping_label_url && (
                     <div className="mb-3">
                       <input
                         type="text"
-                        placeholder="Tracking number"
+                        placeholder="Tracking number (or buy label above)"
                         value={trackingValue}
                         onChange={(e) =>
                           setTrackingInputs((prev) => ({ ...prev, [order.id]: e.target.value }))

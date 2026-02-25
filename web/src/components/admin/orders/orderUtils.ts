@@ -42,6 +42,8 @@ export interface Order {
   shipping_zip?: string;
   shipping_country?: string;
   tracking_number?: string;
+  tracking_url?: string;
+  shipping_label_url?: string;
   acai_pickup_date?: string;
   acai_pickup_time?: string;
   acai_crust_type?: string;

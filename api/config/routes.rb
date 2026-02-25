@@ -32,6 +32,8 @@ Rails.application.routes.draw do
           member do
             post :notify  # Resend notification email
             post :refund  # Process refund
+            get :shipping_rates  # Get shipping rate options for an order
+            post :purchase_label  # Buy a shipping label via EasyPost
           end
         end
 

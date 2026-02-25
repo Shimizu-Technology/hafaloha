@@ -72,19 +72,21 @@ module Api
       end
 
       # GET /api/v1/admin/orders/pickup_queue
+      # Shows all orders with fulfillment_type=pickup regardless of order_type
+      # (retail pickup, acai pickup, wholesale pickup all show here)
       def pickup_queue
-        orders = Order.includes(:order_items, :user)
-                      .where(order_type: %w[acai wholesale])
-                      .where.not(status: %w[delivered cancelled picked_up])
-                      .order(created_at: :asc)
-        orders = orders.where(status: params[:status]) if params[:status].present?
+        base = Order.includes(:order_items, :user)
+                    .where(fulfillment_type: "pickup")
+                    .where.not(status: %w[delivered cancelled picked_up refunded])
+                    .order(created_at: :asc)
+        base = base.where(status: params[:status]) if params[:status].present?
 
-        status_counts = Order.where(order_type: %w[acai wholesale])
+        status_counts = Order.where(fulfillment_type: "pickup")
                              .where(status: %w[pending confirmed ready])
                              .group(:status).count
 
         render json: {
-          orders: orders.map { |o| order_json(o) },
+          orders: base.map { |o| order_json(o) },
           counts: {
             pending: status_counts["pending"] || 0,
             confirmed: status_counts["confirmed"] || 0,
@@ -94,19 +96,20 @@ module Api
       end
 
       # GET /api/v1/admin/orders/shipping_queue
+      # Shows all orders with fulfillment_type=shipping regardless of order_type
       def shipping_queue
-        orders = Order.includes(:order_items, :user)
-                      .where(order_type: "retail")
-                      .where.not(status: %w[delivered cancelled picked_up])
-                      .order(created_at: :asc)
-        orders = orders.where(status: params[:status]) if params[:status].present?
+        base = Order.includes(:order_items, :user)
+                    .where(fulfillment_type: "shipping")
+                    .where.not(status: %w[delivered cancelled picked_up refunded])
+                    .order(created_at: :asc)
+        base = base.where(status: params[:status]) if params[:status].present?
 
-        status_counts = Order.where(order_type: "retail")
+        status_counts = Order.where(fulfillment_type: "shipping")
                              .where(status: %w[pending processing shipped])
                              .group(:status).count
 
         render json: {
-          orders: orders.map { |o| order_json(o) },
+          orders: base.map { |o| order_json(o) },
           counts: {
             pending: status_counts["pending"] || 0,
             processing: status_counts["processing"] || 0,
@@ -282,6 +285,59 @@ module Api
       rescue StandardError => e
         Rails.logger.error "Refund error for order ##{@order.order_number}: #{e.message}"
         render json: { error: "Refund failed: #{e.message}" }, status: :internal_server_error
+      end
+
+      # GET /api/v1/admin/orders/:id/shipping_rates
+      # Get available shipping rates for an order (admin re-rating)
+      def shipping_rates
+        unless @order.requires_shipping?
+          return render json: { error: "Order is not a shipping order" }, status: :unprocessable_entity
+        end
+
+        result = ShippingService.get_order_rates(@order)
+        render json: result
+      rescue ShippingService::ShippingError => e
+        render json: { error: e.message }, status: :unprocessable_entity
+      end
+
+      # POST /api/v1/admin/orders/:id/purchase_label
+      # Purchase a shipping label for an order via EasyPost
+      def purchase_label
+        unless @order.requires_shipping?
+          return render json: { error: "Order is not a shipping order" }, status: :unprocessable_entity
+        end
+
+        rate_id = params[:rate_id]
+        return render json: { error: "rate_id is required" }, status: :bad_request unless rate_id.present?
+
+        result = ShippingService.purchase_label(@order, rate_id)
+
+        # Update order with tracking info
+        @order.update!(
+          tracking_number: result[:tracking_number],
+          tracking_url: result[:tracking_url],
+          shipping_label_url: result[:label_url],
+          easypost_shipment_id: result[:shipment_id],
+          status: @order.status == "pending" ? "processing" : @order.status
+        )
+
+        # Send shipping confirmation email to customer
+        if SiteSetting.instance.enable_order_emails
+          SendOrderShippedEmailJob.perform_later(@order.id)
+        end
+
+        render json: {
+          success: true,
+          label_url: result[:label_url],
+          label_format: result[:label_format],
+          tracking_number: result[:tracking_number],
+          tracking_url: result[:tracking_url],
+          carrier: result[:carrier],
+          service: result[:service],
+          rate_cents: result[:rate_cents]
+        }
+      rescue ShippingService::ShippingError => e
+        render json: { error: e.message }, status: :unprocessable_entity
       end
 
 
