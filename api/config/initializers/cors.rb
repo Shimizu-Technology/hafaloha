@@ -20,6 +20,10 @@ else
                     [ "http://localhost:5173" ]
 end
 
+if Rails.env.production? && ENV["ALLOWED_ORIGINS"].blank? && ENV["FRONTEND_URL"].blank?
+  raise "CORS misconfiguration: set ALLOWED_ORIGINS or FRONTEND_URL in production"
+end
+
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
     origins *allowed_origins

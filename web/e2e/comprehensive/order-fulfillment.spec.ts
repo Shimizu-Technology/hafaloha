@@ -76,7 +76,7 @@ test.describe('Order Fulfillment - Status Workflow', () => {
       });
 
       // Check for order details
-      const orderNumber = page.locator('text=/HAF-[RWA]-\\d{8}-\\d{4}/i').first();
+      const orderNumber = page.locator('text=/HAF-[RWA]-\\d{6}/i').first();
       await expect(orderNumber).toBeVisible({ timeout: 5000 });
 
       // Check for customer info

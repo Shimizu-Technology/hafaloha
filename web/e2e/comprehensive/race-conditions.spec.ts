@@ -1,4 +1,4 @@
-import { test, expect, chromium, Browser, BrowserContext, Page } from '@playwright/test';
+import { test, expect, chromium } from '@playwright/test';
 
 /**
  * Race Condition Prevention Tests
@@ -12,14 +12,12 @@ import { test, expect, chromium, Browser, BrowserContext, Page } from '@playwrig
  * running in parallel against items with very limited stock.
  */
 
-// API base URL for direct API testing
-const API_BASE = process.env.VITE_API_BASE_URL || 'http://localhost:3000';
-
 test.describe('Race Conditions - Stock Validation', () => {
   test('out of stock items cannot be purchased', async ({ page }) => {
     await page.goto('/products');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
+    await expect(page.locator('a[href^="/products/"]').first()).toBeVisible({ timeout: 10000 });
 
     // Look for products marked as sold out
     const soldOutProduct = page.locator('[class*="product"], [class*="card"]').filter({
@@ -57,6 +55,7 @@ test.describe('Race Conditions - Stock Validation', () => {
     await page.goto('/products');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
+    await expect(page.locator('a[href^="/products/"]').first()).toBeVisible({ timeout: 10000 });
 
     // Click first available product
     const productLink = page.locator('a[href^="/products/"]').first();
@@ -83,6 +82,7 @@ test.describe('Race Conditions - Stock Validation', () => {
       await page.goto('/checkout');
       await page.waitForLoadState('networkidle');
       await page.waitForTimeout(2000);
+      await expect(page).toHaveURL(/\/checkout/);
 
       // Screenshot: Checkout page
       await page.screenshot({ 
@@ -138,6 +138,8 @@ test.describe('Race Conditions - Concurrent Access Simulation', () => {
         pageA.waitForLoadState('networkidle'),
         pageB.waitForLoadState('networkidle')
       ]);
+      await expect(pageA.locator('a[href^="/products/"]').first()).toBeVisible({ timeout: 10000 });
+      await expect(pageB.locator('a[href^="/products/"]').first()).toBeVisible({ timeout: 10000 });
 
       // Screenshot: Both users on products page
       await pageA.screenshot({ path: 'test-results/comprehensive/race-03-userA-products.png' });
@@ -223,6 +225,7 @@ test.describe('Race Conditions - Error Handling', () => {
     await page.goto('/checkout');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(2000);
+    await expect(page).toHaveURL(/\/checkout/);
 
     // Screenshot: Checkout page
     await page.screenshot({ 
@@ -257,6 +260,7 @@ test.describe('Race Conditions - Error Handling', () => {
     await page.goto('/products');
     await page.waitForLoadState('networkidle');
     await page.waitForTimeout(1000);
+    await expect(page.locator('a[href^="/products/"]').first()).toBeVisible({ timeout: 10000 });
 
     // Click first product
     const productLink = page.locator('a[href^="/products/"]').first();

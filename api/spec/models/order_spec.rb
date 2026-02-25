@@ -65,4 +65,22 @@ RSpec.describe Order, type: :model do
       expect(order.customer_name).to eq('New Name')
     end
   end
+
+  describe "order number generation" do
+    it "generates the expected retail format" do
+      order = create(:order, order_number: nil, order_type: "retail")
+      expect(order.order_number).to match(/\AHAF-R-\d{6}\z/)
+    end
+
+    it "generates the expected acai format" do
+      order = create(:order, order_number: nil, order_type: "acai")
+      expect(order.order_number).to match(/\AHAF-A-\d{6}\z/)
+    end
+
+    it "uses a zero-padded six digit suffix" do
+      allow(SecureRandom).to receive(:random_number).with(1_000_000).and_return(42)
+      order = create(:order, order_number: nil, order_type: "retail")
+      expect(order.order_number).to eq("HAF-R-000042")
+    end
+  end
 end

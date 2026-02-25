@@ -60,16 +60,25 @@ module Authenticatable
     [ payload.with_indifferent_access, clerk_client ]
   end
 
-  DEFAULT_ADMIN_EMAILS = %w[
+  DEFAULT_NON_PROD_ADMIN_EMAILS = %w[
     shimizutechnology@gmail.com
     jerry.shimizutechnology@gmail.com
   ].freeze
 
-  ADMIN_EMAILS = ENV.fetch("ADMIN_EMAILS", DEFAULT_ADMIN_EMAILS.join(","))
-                    .split(",")
-                    .map(&:strip)
-                    .reject(&:blank?)
-                    .freeze
+  ADMIN_EMAILS = begin
+    raw_admin_emails = if Rails.env.production?
+                         ENV["ADMIN_EMAILS"]
+                       else
+                         ENV.fetch("ADMIN_EMAILS", DEFAULT_NON_PROD_ADMIN_EMAILS.join(","))
+                       end
+
+    parsed_admin_emails = raw_admin_emails.to_s.split(",").map(&:strip).reject(&:blank?)
+    if Rails.env.production? && parsed_admin_emails.empty?
+      raise "Missing ADMIN_EMAILS. Set a comma-separated list in production (example: admin@hafaloha.com,ops@hafaloha.com)."
+    end
+
+    parsed_admin_emails.freeze
+  end
 
   def extract_token
     auth_header = request.headers["Authorization"]

@@ -144,7 +144,14 @@ RESEND_API_KEY=re_...
 - ✅ **Site settings:** Store info, shipping origin, payment config
 - ✅ **Homepage sections:** Hero banner, category cards
 
-**Admin users** are auto-created when signing in with Clerk. `shimizutechnology@gmail.com` is automatically set as admin.
+**Admin users** are auto-created when signing in with Clerk.
+- Development: if `ADMIN_EMAILS` is unset, local default admin emails are used.
+- Production: `ADMIN_EMAILS` **must** be set (comma-separated) or the API will fail to boot.
+
+Example:
+```bash
+ADMIN_EMAILS=admin@hafaloha.com,ops@hafaloha.com
+```
 
 **Want to import products?** Use the Admin > Import UI, or:
 ```bash
