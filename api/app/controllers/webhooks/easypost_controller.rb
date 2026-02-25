@@ -117,24 +117,28 @@ module Webhooks
     # ── Helpers ──────────────────────────────────────────────────────
 
     def transition_order(order, new_status)
-      old_status = order.status
+      # Use with_lock to prevent race conditions with concurrent admin updates
+      order.with_lock do
+        old_status = order.status
 
-      # Don't transition backwards or to the same status
-      return if old_status == new_status
-      return if old_status == "delivered" # Already in terminal state
-      return if %w[cancelled refunded].include?(old_status) # Don't touch cancelled/refunded orders
+        # Don't transition backwards or to the same status
+        return if old_status == new_status
+        return if old_status == "delivered" # Already in terminal state
+        return if %w[cancelled refunded].include?(old_status) # Don't touch cancelled/refunded orders
 
-      order.update_column(:status, new_status)
-      Rails.logger.info "[EasyPost Webhook] Order ##{order.order_number} status: #{old_status} → #{new_status}"
+        # Use update! to ensure validations and callbacks fire
+        order.update!(status: new_status)
+        Rails.logger.info "[EasyPost Webhook] Order ##{order.order_number} status: #{old_status} → #{new_status}"
 
-      # Send customer notifications
-      case new_status
-      when "shipped"
-        SendOrderShippedEmailJob.perform_later(order.id)
-        SendOrderSmsJob.perform_later(order.id, "shipped")
-      when "delivered"
-        SendOrderDeliveredEmailJob.perform_later(order.id)
-        SendOrderSmsJob.perform_later(order.id, "delivered")
+        # Send customer notifications
+        case new_status
+        when "shipped"
+          SendOrderShippedEmailJob.perform_later(order.id)
+          SendOrderSmsJob.perform_later(order.id, "shipped")
+        when "delivered"
+          SendOrderDeliveredEmailJob.perform_later(order.id)
+          SendOrderSmsJob.perform_later(order.id, "delivered")
+        end
       end
     end
   end
