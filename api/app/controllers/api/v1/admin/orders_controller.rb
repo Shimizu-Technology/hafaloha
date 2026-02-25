@@ -136,26 +136,30 @@ module Api
           if @order.saved_change_to_status?
             case @order.status
             when "confirmed"
-              # Send order confirmed notification
               SendOrderConfirmedEmailJob.perform_later(@order.id)
+              SendOrderSmsJob.perform_later(@order.id, "confirmed")
             when "preparing"
-              # Send order processing notification
               SendOrderProcessingEmailJob.perform_later(@order.id)
+              SendOrderSmsJob.perform_later(@order.id, "preparing")
+            when "processing"
+              SendOrderProcessingEmailJob.perform_later(@order.id)
+              SendOrderSmsJob.perform_later(@order.id, "processing")
             when "shipped"
               SendOrderShippedEmailJob.perform_later(@order.id) if @order.tracking_number.present?
               SendOrderSmsJob.perform_later(@order.id, "shipped")
             when "ready"
               SendOrderReadyEmailJob.perform_later(@order.id)
+              SendOrderSmsJob.perform_later(@order.id, "ready")
             when "picked_up"
-              # Send picked up confirmation
               SendOrderPickedUpEmailJob.perform_later(@order.id)
+              SendOrderSmsJob.perform_later(@order.id, "picked_up")
             when "delivered"
-              # Send delivered confirmation
               SendOrderDeliveredEmailJob.perform_later(@order.id)
+              SendOrderSmsJob.perform_later(@order.id, "delivered")
             when "cancelled"
-              # Restore inventory and send cancellation email
               restore_inventory(@order, current_user)
               SendOrderCancelledEmailJob.perform_later(@order.id)
+              SendOrderSmsJob.perform_later(@order.id, "cancelled")
             end
           end
 
@@ -267,8 +271,9 @@ module Api
             end
           end
 
-          # Send refund notification email
+          # Send refund notification email and SMS
           EmailService.send_refund_notification(@order, refund.amount_cents, refund.reason)
+          SendOrderSmsJob.perform_later(@order.id, "refunded")
 
           render json: {
             message: "Refund processed successfully",

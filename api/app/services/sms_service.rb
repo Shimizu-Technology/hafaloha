@@ -142,6 +142,11 @@ class SmsService
         phone = SiteSetting.instance.store_phone.presence || "671-777-1234"
         "#{store}: Your order ##{order.order_number} has been cancelled. " \
         "If you were charged, a refund will be processed. Questions? Call #{phone}."
+      when "refunded"
+        "#{store}: A refund has been issued for order ##{order.order_number}. " \
+        "Please allow 5-10 business days for the refund to appear."
+      when "processing"
+        "#{store}: Your order ##{order.order_number} is now being processed!"
       end
     end
 
