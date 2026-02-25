@@ -313,13 +313,21 @@ class ShippingService
     return nil unless needs_customs || (origin_is_territory && !dest_is_territory)
 
     customs_items = order.order_items.map do |item|
+      # Default HS codes by category (fallback when not set on product)
+      default_hs = case item.product&.category
+                   when "apparel", "clothing" then "6109.10"  # Cotton t-shirts
+                   when "accessories" then "7117.90"         # Imitation jewelry
+                   when "home", "housewares" then "3924.90"   # Household plastic articles
+                   else "6109.10"                             # Default: cotton apparel
+                   end
+
       {
         description: item.product_name.truncate(50),
         quantity: item.quantity,
         weight: (item.product_variant&.weight_oz || DEFAULT_WEIGHT_OZ) * item.quantity,
         value: (item.unit_price_cents / 100.0) * item.quantity,
         origin_country: "US",
-        hs_tariff_number: item.product&.hs_tariff_number.presence || "6109.10" # Default: cotton t-shirts
+        hs_tariff_number: item.product&.hs_tariff_number.presence || default_hs
       }
     end
 

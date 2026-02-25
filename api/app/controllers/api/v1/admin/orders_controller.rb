@@ -7,7 +7,7 @@ module Api
       include Authenticatable
         before_action :authenticate_request
         before_action :require_staff!
-        before_action :set_order, only: [ :show, :update, :notify, :refund ]
+        before_action :set_order, only: [ :show, :update, :notify, :refund, :shipping_rates, :purchase_label ]
 
       # GET /api/v1/admin/orders
       # List all orders (admin only)
