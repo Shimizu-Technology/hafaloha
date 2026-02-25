@@ -246,18 +246,42 @@ class ShippingService
       .select { |rate| rate.rate.present? && rate.rate.to_f > 0 }
       .sort_by { |rate| rate.rate.to_f }
       .map do |rate|
+        # Use delivery_days from EasyPost, fall back to est_delivery_days,
+        # then estimate based on service name (EasyPost often returns nil for Guam shipments)
+        days = rate.delivery_days || rate.est_delivery_days || estimate_delivery_days(rate.service, rate.carrier)
+
         {
           id: rate.id,
           carrier: rate.carrier,
           service: rate.service,
           rate_cents: (rate.rate.to_f * 100).to_i,
           rate_formatted: "$#{'%.2f' % rate.rate}",
-          delivery_days: rate.delivery_days,
+          delivery_days: days,
           delivery_date: rate.delivery_date,
           delivery_date_guaranteed: rate.delivery_date_guaranteed || false,
           est_delivery_days: rate.est_delivery_days
         }
       end
+  end
+
+  # Estimate delivery days based on service name when EasyPost doesn't provide them.
+  # These are rough estimates for shipments originating from Guam.
+  def self.estimate_delivery_days(service, carrier)
+    service_lower = service.to_s.downcase
+
+    if service_lower.include?("express") || service_lower.include?("overnight") || service_lower.include?("next day")
+      3  # Express from Guam is typically 2-4 days to mainland US
+    elsif service_lower.include?("priority") && !service_lower.include?("first")
+      5  # Priority Mail from Guam is typically 4-7 days
+    elsif service_lower.include?("first class") || service_lower.include?("firstclass")
+      7  # First Class from Guam is typically 5-10 days
+    elsif service_lower.include?("ground") || service_lower.include?("parcel")
+      10 # Ground/Parcel from Guam is typically 7-14 days
+    elsif service_lower.include?("media") || service_lower.include?("library")
+      14 # Media mail from Guam is slow
+    else
+      7  # Default estimate for unknown services
+    end
   end
 
   def self.deep_symbolize_keys(value)
