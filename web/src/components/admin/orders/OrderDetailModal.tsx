@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { Mail } from 'lucide-react';
 import useLockBodyScroll from '../../../hooks/useLockBodyScroll';
 import type { Order } from './orderUtils';
 import { formatCurrency, formatDate, getStatusBadge, formatStatus, getNextStatusAction } from './orderUtils';
@@ -432,7 +433,7 @@ export default function OrderDetailModal({
               onClick={() => window.open(`mailto:${order.customer_email}`, '_blank')}
               className="flex-1 min-w-[140px] px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
             >
-              \u2709\uFE0F Email Customer
+              <Mail className="w-4 h-4 inline-block mr-1" /> Email Customer
             </button>
             {order.payment_status === 'paid' && (
               <button
