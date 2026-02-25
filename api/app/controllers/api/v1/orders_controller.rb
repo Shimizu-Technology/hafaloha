@@ -278,9 +278,24 @@ module Api
       def validate_cart_items(cart_items, location_id: nil)
         issues = []
 
+        # Determine if this is a shipping order based on provided address
+        shipping_address = order_params[:shipping_address] || {}
+        is_shipping_order = shipping_address.values.any?(&:present?)
+
         cart_items.each do |item|
           variant = item.product_variant
           product = variant.product
+
+          # HAF-175: Check if product allows shipping for shipping orders
+          if is_shipping_order && product.respond_to?(:allow_shipping) && product.allow_shipping == false
+            issues << {
+              item_id: item.id,
+              product_name: product.name,
+              variant_name: variant.display_name,
+              message: "#{product.name} is not available for shipping"
+            }
+            next
+          end
 
           # Check if product is available at the selected location
           if location_id.present?
