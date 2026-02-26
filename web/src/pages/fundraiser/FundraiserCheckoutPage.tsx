@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useAuth, useUser } from '@clerk/clerk-react';
 import { ArrowLeft, Package, Truck, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
@@ -19,6 +20,8 @@ function FundraiserCheckoutForm() {
   const navigate = useNavigate();
   const stripe = useStripe();
   const elements = useElements();
+  const { getToken, isSignedIn, isLoaded: authLoaded } = useAuth();
+  const { user, isLoaded: userLoaded } = useUser();
 
   const [fundraiser, setFundraiser] = useState<Fundraiser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -84,6 +87,15 @@ function FundraiserCheckoutForm() {
       }
     }
   }, [fundraiser]);
+
+  // Pre-populate email and phone from user profile
+  useEffect(() => {
+    if (authLoaded && userLoaded && isSignedIn && user) {
+      setEmail(user.primaryEmailAddress?.emailAddress || '');
+      setPhone(user.primaryPhoneNumber?.phoneNumber || '');
+      setName(user.fullName || '');
+    }
+  }, [authLoaded, userLoaded, isSignedIn, user]);
 
   const loadData = async () => {
     try {

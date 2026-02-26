@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@clerk/clerk-react';
+import { useAuth, useUser } from '@clerk/clerk-react';
 import { useCartStore } from '../store/cartStore';
 import { configApi, ordersApi, shippingApi, paymentIntentsApi, formatPrice } from '../services/api';
 import { useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
@@ -14,6 +14,7 @@ import OptimizedImage from '../components/ui/OptimizedImage';
 function CheckoutForm() {
   const navigate = useNavigate();
   const { getToken, isSignedIn, isLoaded: authLoaded } = useAuth();
+  const { user, isLoaded: userLoaded } = useUser();
   const { cart, clearCart, sessionId, fetchCart, validateCart, removeItem, isLoading: cartLoading } = useCartStore();
   const stripe = useStripe();
   const elements = useElements();
@@ -95,6 +96,15 @@ function CheckoutForm() {
       navigate('/products');
     }
   }, [cartLoading, cart, items.length, navigate, configLoading]);
+  
+  // Pre-populate email and phone from user profile
+  useEffect(() => {
+    if (authLoaded && userLoaded && isSignedIn && user) {
+      setEmail(user.primaryEmailAddress?.emailAddress || '');
+      setPhone(user.primaryPhoneNumber?.phoneNumber || '');
+      setName(user.fullName || '');
+    }
+  }, [authLoaded, userLoaded, isSignedIn, user]);
   
   // Calculate shipping rates
   const handleCalculateShipping = async () => {
