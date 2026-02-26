@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_23_080710) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_25_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -546,11 +546,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_23_080710) do
 
   create_table "products", force: :cascade do |t|
     t.boolean "allow_pickup", default: true, null: false
+    t.boolean "allow_shipping", default: true, null: false
     t.boolean "archived", default: false, null: false
     t.integer "base_price_cents"
     t.datetime "created_at", null: false
     t.text "description"
     t.boolean "featured"
+    t.string "hs_tariff_number"
     t.text "import_notes"
     t.string "inventory_level", default: "none", null: false
     t.text "meta_description"
@@ -603,6 +605,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_23_080710) do
     t.string "announcement_style", default: "gold", null: false
     t.string "announcement_text"
     t.datetime "created_at", null: false
+    t.boolean "enable_order_emails", default: false, null: false
+    t.boolean "enable_order_sms", default: false, null: false
     t.jsonb "fallback_shipping_rates", default: {"domestic"=>[{"rate_cents"=>800, "max_weight_oz"=>16}, {"rate_cents"=>1500, "max_weight_oz"=>48}, {"rate_cents"=>2000, "max_weight_oz"=>80}, {"rate_cents"=>3000, "max_weight_oz"=>160}, {"rate_cents"=>5000, "max_weight_oz"=>nil}], "international"=>[{"rate_cents"=>2500, "max_weight_oz"=>16}, {"rate_cents"=>4000, "max_weight_oz"=>48}, {"rate_cents"=>6000, "max_weight_oz"=>80}, {"rate_cents"=>9000, "max_weight_oz"=>160}, {"rate_cents"=>15000, "max_weight_oz"=>nil}]}, null: false
     t.text "order_notification_emails", default: [], array: true
     t.string "payment_processor", default: "stripe", null: false

@@ -7,9 +7,8 @@ import App from './App.tsx'
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
-if (!PUBLISHABLE_KEY) {
-  throw new Error("Missing Clerk Publishable Key")
-}
+// Check if Clerk key is properly configured
+const isClerkConfigured = PUBLISHABLE_KEY && !PUBLISHABLE_KEY.includes('YOUR_KEY_HERE')
 
 // PostHog configuration
 const posthogOptions = {
@@ -18,13 +17,22 @@ const posthogOptions = {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+    {isClerkConfigured ? (
+      <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+        <PostHogProvider 
+          apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY}
+          options={posthogOptions}
+        >
+          <App />
+        </PostHogProvider>
+      </ClerkProvider>
+    ) : (
       <PostHogProvider 
         apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY}
         options={posthogOptions}
       >
         <App />
       </PostHogProvider>
-    </ClerkProvider>
+    )}
   </StrictMode>,
 )
