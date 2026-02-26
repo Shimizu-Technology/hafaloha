@@ -4,11 +4,9 @@ import { ClerkProvider } from '@clerk/clerk-react'
 import { PostHogProvider } from 'posthog-js/react'
 import './index.css'
 import App from './App.tsx'
+import ErrorBoundary from './components/ErrorBoundary'
 
-const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
-
-// Check if Clerk key is properly configured
-const isClerkConfigured = PUBLISHABLE_KEY && !PUBLISHABLE_KEY.includes('YOUR_KEY_HERE')
+const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || 'pk_test_placeholder'
 
 // PostHog configuration
 const posthogOptions = {
@@ -17,7 +15,7 @@ const posthogOptions = {
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    {isClerkConfigured ? (
+    <ErrorBoundary>
       <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
         <PostHogProvider 
           apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY}
@@ -26,13 +24,6 @@ createRoot(document.getElementById('root')!).render(
           <App />
         </PostHogProvider>
       </ClerkProvider>
-    ) : (
-      <PostHogProvider 
-        apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY}
-        options={posthogOptions}
-      >
-        <App />
-      </PostHogProvider>
-    )}
+    </ErrorBoundary>
   </StrictMode>,
 )
